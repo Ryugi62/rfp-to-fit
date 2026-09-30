@@ -182,8 +182,9 @@ def main():
                                  "fp": sum(r["new_gaps"] - r["hits"] for r in q["rows"])})
     before = run_numbers(load(f"data/runs/{RID}--original.json"))
     after = run_numbers(load(f"data/runs/{RID}--after.json"))
-    tests = sum(l.lstrip().startswith("def test_") for f in (ROOT / "tests").glob("test_*.py")
-                for l in f.read_text().splitlines())
+    # pytest가 실제로 모으는 수(parametrize 포함)
+    col = subprocess.run(["uv", "run", "pytest", "--collect-only", "-q"], cwd=ROOT, capture_output=True, text=True).stdout
+    tests = sum(1 for l in col.splitlines() if "::" in l)
     img = crop_shots()
     nums = {
         "motir": {"pages": pages["motir-industrial-cluster-rnd-2026"], "n_req": len(motir["requirements"]),

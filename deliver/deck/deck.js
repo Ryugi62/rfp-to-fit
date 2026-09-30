@@ -74,350 +74,272 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
 
 const HO = N.holdout, LK = N.links, AB = N.ablation || [];
 const pct0 = (x) => Math.round(Number(x) * 100);
-const exAvg = N.extract.map((e) => e.recall);
 const hb = HO ? Object.values(HO.blind) : [];
-const hMin = hb.length ? Math.min(...hb.map((r) => pct0(r.recall_min))) : null;
-const hMax = hb.length ? Math.max(...hb.map((r) => pct0(r.recall_max))) : null;
 const single = AB.find((a) => a.mode === "single") || {}, roles = AB.find((a) => a.mode === "roles") || {};
 const nsel = (B.stances || []).filter((x) => x.decision !== "선정");
 const pn = Object.fromEntries(B.personas.map((q) => [q.id, q.name]));
 const MAIN = N.extract[0].engine;
-const REVM = (v) => [...new Set(B.personas.filter((q) => q.vendor === v).map((q) => q.model.split(" ").pop()))].join("·");
+const REVM = (v) => [...new Set(B.personas.filter((q) => q.vendor === v).map((q) => q.model.split(" ").pop()))].join(", ");
+const exs = N.extract;
+const rmin = Math.min(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recall)));
+const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recall)));
 
-// ---------- 1. 표지 ----------
+// 1. 표지
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "2026 NAIS AI 해커톤 본선 · 팀 루미아 · RFP-to-Fit", 1.15);
-  title(s, "공고 링크 하나, 초안 하나.\n제출 전에 **빈칸**부터 짚어 드립니다.", { y: 1.8, h: 2.5, fontSize: 48 });
-  t(s, "심사 결과를 맞히는 AI가 아니라 — 공고가 요구하는데 내 초안에 근거가 없는 곳을, 원문으로 짚어 주는 에이전트", { x: X0, y: 4.55, w: W, h: 0.5, fontSize: 19, color: C.sub });
-  t(s, "김태걸 · 박세훈", { x: X0, y: 6.4, w: 5, h: 0.45, fontSize: 16, bold: true });
-  s.addNotes("[10초] 안녕하세요, 팀 루미아 김태걸입니다. 저희는 심사 결과를 맞히는 AI를 만들지 않았습니다. 공고가 요구하는데 내 초안에 근거가 없는 곳을, 제출 전에 원문으로 짚어 주는 에이전트를 만들었습니다.");
+  eyebrow(s, "2026 NAIS AI 해커톤 · 팀 루미아", 1.15);
+  title(s, "제출 전에,\n**빈칸**부터 찾아 드립니다.", { y: 1.8, h: 2.5, fontSize: 54 });
+  t(s, "공고 링크와 초안을 넣으면, 공고가 요구하는데 초안에 근거가 없는 곳을 원문으로 보여 주는 에이전트", { x: X0, y: 4.55, w: W, h: 0.5, fontSize: 19, color: C.sub });
+  t(s, "RFP-to-Fit   |   김태걸 · 박세훈", { x: X0, y: 6.4, w: 8, h: 0.45, fontSize: 16, bold: true });
+  s.addNotes("[10초] 안녕하세요, 팀 루미아 김태걸입니다. 저희는 심사 결과를 맞히는 AI가 아니라, 제출하기 전에 초안의 빈칸을 원문으로 짚어 주는 에이전트를 만들었습니다.");
 }
 
-// ---------- 2. 문제 ----------
+// 2. 문제
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "문제 — 제안서를 내는 연구자의 자리에서");
-  title(s, "떨어진 이유는 늘,\n**심사평**을 받고 나서야 압니다");
+  eyebrow(s, "문제");
+  title(s, "떨어진 이유는,\n**심사평**을 받고서야 압니다");
   const M = N.motir;
-  const rows = [
-    [`지킬 것 ${M.n_req}개가 ${M.pages}쪽에 흩어져 있습니다`, `산업통상부 R&D 공고 한 건 — 자격·서류·서식·감점 조건이 본문·주석·첨부에 나뉘어 있고 평가표도 ${M.tables}종`],
-    ["심사위원 5~7명은 저마다 다른 것을 봅니다", "기술 타당성, 사업성, 행정(예산·인력·빈칸), 사업 취지 — 그리고 항목 합산보다 몇 가지 결정 포인트로 마음속 등수를 먼저 정합니다(현장 멘토링)"],
-    ["제출 전에 그 눈으로 읽어 줄 사람이 없습니다", "동료 검토는 같은 연구자의 눈이고, 심사위원의 눈은 심사평으로만 돌아옵니다 — 이미 늦은 뒤에"],
-  ];
-  rows.forEach(([h, d], i) => numRow(s, `0${i + 1}`, h, d, X0, 2.95 + i * 1.12, W, { hSize: 18, dSize: 12.5 }));
-  hline(s, 6.3);
-  t(s, "저희 팀도 올해 공모·지원사업 공고 400여 건을 읽고 지원하면서 매번 이 자리에서 막혔습니다.", { x: X0, y: 6.45, w: W, h: 0.4, fontSize: 15, bold: true });
-  s.addNotes(`[30초] 제안서를 내 보신 분은 아실 겁니다. 떨어진 이유는 늘 심사평을 받고 나서야 압니다. 공고 한 건에 지킬 것이 ${M.n_req}개, ${M.pages}쪽에 흩어져 있고, 심사위원은 저마다 다른 것을 봅니다. 어제 멘토링에서 들은 말처럼, 심사위원은 항목 합산보다 몇 가지 결정 포인트로 등수를 먼저 정합니다. 그런데 제출 전에 그 눈으로 읽어 줄 사람은 없습니다. 저희도 올해 공고 400여 건을 읽고 지원하면서 매번 여기서 막혔습니다.`);
+  numRow(s, "01", "지킬 것이 많고, 흩어져 있습니다", `산업통상부 R&D 공고 한 건에 ${M.pages}쪽, 탈락·감점 요건 ${M.n_req}개, 평가표 ${M.tables}종`, X0, 2.95, W, { hSize: 20, dSize: 14 });
+  numRow(s, "02", "심사위원마다 보는 곳이 다릅니다", "기술, 사업성, 예산과 인력, 사업 취지. 어제 멘토링에서 들은 실제 심사 방식입니다", X0, 4.1, W, { hSize: 20, dSize: 14 });
+  numRow(s, "03", "제출 전에 그 눈으로 봐 줄 사람이 없습니다", "동료 검토는 결국 같은 연구자의 눈입니다", X0, 5.25, W, { hSize: 20, dSize: 14 });
+  s.addNotes(`[30초] 제안서를 내 보신 분은 아실 겁니다. 떨어진 이유는 심사평을 받고서야 압니다. 공고 한 건에 지킬 것이 ${M.n_req}개, ${M.pages}쪽에 흩어져 있고, 심사위원마다 보는 곳이 다릅니다. 그런데 제출 전에 그 눈으로 봐 줄 사람은 없습니다. 저희도 올해 공고 400여 건에 지원하면서 매번 여기서 막혔습니다.`);
 }
 
-// ---------- 3. 어려움 → 해결 ----------
+// 3. 해결
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "무엇이 어려웠고, 어떻게 풀었나");
-  title(s, "어려운 점 세 가지를,\n**장치 세 개**로 풀었습니다");
-  const cx = [X0, X0 + 3.1, X0 + 8.1], cw = [2.9, 4.8, W - 8.1 + X0 - X0];
-  ["어려운 점", "RFP-to-Fit이 하는 일", "실측"].forEach((h, i) => t(s, h, { x: cx[i], y: 2.8, w: cw[i], h: 0.3, fontSize: 11.5, color: C.gray, bold: true }));
-  const hbTxt = hb.length ? `처음 보는 공고 ${hMin}~${hMax}%` : "";
-  const rows = [
-    ["흩어진 요건과 심사표", "공고 링크만 넣으면 공지의 첨부 중 공고문을 찾아 내려받고(PDF·HWPX·HWP), 요건과 심사표를 쪽 번호·원문 인용과 함께 뽑습니다",
-      `링크 ${LK ? `${LK.ok}/${LK.n}` : "-"}건 성공\n요건 재현율 ${Math.min(...exAvg)}~${Math.max(...exAvg)}%·${hbTxt}\n심사표 배점 100% 일치`],
-    ["심사위원마다 다른 관점", "실제 심사 경험에서 나온 관점 6개로 나눠 서로 모른 채 근거를 찾게 하고 → 모두 못 찾은 곳(고칠 곳)과 갈리는 곳(사람이 판단할 곳)을 나눕니다",
-      `단일 LLM 오탐 ${single.fp ?? "-"} → 6역할 오탐 ${roles.fp ?? "-"}\n(일부러 지운 초안 ${P.n}개)`],
-    ["AI 심사를 믿을 수 있나", "「충족」에도 초안 원문 인용을 요구하고, 코드가 글자 단위로 대조해 없으면 무효 → 그 평가위원에게 한 번 다시 묻습니다",
-      `판정 ${B.n_verdicts}개 중 ${B.invalid}건 적발\n→ ${B.cited ?? B.fixed}건 원문 확인 · ${B.still ?? 0}건 무효 처리`],
+  eyebrow(s, "해결");
+  title(s, "그래서 세 가지를,\n**이렇게** 풀었습니다");
+  const cw = (W - 0.6) / 3;
+  const cards = [
+    ["흩어진 요건", "링크 하나로 공고문을 찾아 읽고, 요건과 심사표를 쪽 번호와 함께 정리합니다", `${LK ? LK.ok : "-"}/${LK ? LK.n : "-"}`, "실제 공지 링크에서 공고문 찾기"],
+    ["다른 관점", "관점 6개가 서로 모른 채 근거를 찾고, 모두 못 찾은 곳만 고칠 곳으로 올립니다", `${single.fp ?? "-"} → ${roles.fp ?? "-"}`, "관점 1개 대비 잘못 짚은 곳"],
+    ["믿을 수 있나", "근거로 댄 문장이 초안에 정말 있는지 코드가 확인하고, 없으면 다시 묻습니다", `${B.invalid}건`, `판정 ${B.n_verdicts}개 중 없는 인용 적발`],
   ];
-  rows.forEach(([a, b, c], i) => {
-    const y = 3.2 + i * 1.2;
-    t(s, a, { x: cx[0], y, w: cw[0], h: 0.9, fontSize: 16, bold: true });
-    t(s, b, { x: cx[1], y, w: cw[1], h: 1.0, fontSize: 12.5, color: C.sub, lineSpacingMultiple: 1.15 });
-    t(s, c, { x: cx[2], y, w: cw[2], h: 1.0, fontSize: 12.5, bold: true, color: C.blueInk, lineSpacingMultiple: 1.15 });
-    if (i < 2) hline(s, y + 1.08);
+  cards.forEach(([k, d, big, lab], i) => {
+    const x = X0 + i * (cw + 0.3);
+    box(s, x, 2.9, cw, 3.55, { fill: i === 1 ? C.blueBg : C.white, lineColor: i === 1 ? C.blue : C.line });
+    t(s, k, { x: x + 0.3, y: 3.1, w: cw - 0.6, h: 0.35, fontSize: 14, bold: true, color: C.blue });
+    t(s, d, { x: x + 0.3, y: 3.55, w: cw - 0.6, h: 1.1, fontSize: 14.5, color: C.ink, lineSpacingMultiple: 1.25 });
+    t(s, big, { x: x + 0.3, y: 4.85, w: cw - 0.6, h: 0.8, fontSize: 40, bold: true, color: C.blueInk });
+    t(s, lab, { x: x + 0.3, y: 5.7, w: cw - 0.6, h: 0.5, fontSize: 12, color: C.gray });
   });
-  src(s, "실측 출처: data/eval/(link-fetch · extract-openai-3runs · holdout-summary · planted-ablation-*) · data/runs/…original.json — 저장소 공개");
-  s.addNotes("[25초] 어려운 점은 세 가지였습니다. 요건이 흩어져 있고, 심사위원마다 보는 게 다르고, AI가 검사한 걸 믿을 수 있느냐. 그래서 링크만 넣으면 공고문을 찾아 요건과 심사표를 쪽 번호와 함께 뽑고, 실제 심사 경험에서 나온 관점 여섯 개로 나눠 근거를 찾게 하고, 칭찬에도 원문 인용을 요구해 코드가 대조합니다. 오른쪽 숫자는 오늘 밤 직접 잰 값입니다.");
+  s.addNotes("[25초] 그래서 세 가지를 풀었습니다. 링크 하나로 공고문을 찾아 요건과 심사표를 정리하고, 관점 여섯 개가 서로 모른 채 근거를 찾게 하고, 근거로 댄 문장이 초안에 정말 있는지 코드가 확인합니다. 숫자는 전부 오늘 밤 직접 잰 값입니다.");
 }
 
-// ---------- 4. 사용 흐름(연구자 시점) ----------
+// 4. 사용 흐름
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "사용 흐름 — 연구자가 하는 일");
-  title(s, "연구자가 할 일은\n**붙여넣기 두 번**입니다");
+  eyebrow(s, "사용 흐름");
+  title(s, "연구자는,\n**붙여넣기 두 번**이면 됩니다");
   const lw = 4.9;
-  numRow(s, "01", "공고 링크 붙여넣기", "IRIS·부처·기관 게시판 공지 주소 또는 PDF 주소 — 첨부 중 공고문을 알아서 고름(공고문이 여러 파일이면 합침)", X0, 2.95, lw, { hSize: 17, dSize: 11.5 });
-  numRow(s, "02", "내 초안 올리기", "HWPX·HWP·PDF·텍스트 — 서버에 저장하지 않고, 주민번호·전화·이메일·생년월일은 가린 뒤 AI에 보냄", X0, 4.1, lw, { hSize: 17, dSize: 11.5 });
-  numRow(s, "03", "고칠 곳 · 판단할 곳 → 원문으로 직접 확인", "모든 관점이 근거를 못 찾은 곳, 갈린 곳 + 「어떤 근거를 어느 절에」 — 「원문 보기」로 공고 쪽·초안 위치를 강조해 보고 ✓/✗", X0, 5.25, lw, { hSize: 17, dSize: 11.5 });
-  const ix = 6.25, iw = R - ix;
-  const put = (img, y, maxH) => {
-    let w = iw, h = iw * img.h / img.w; if (h > maxH) { h = maxH; w = h * img.w / img.h; }
-    box(s, ix, y, w, h + 0.2);
-    s.addImage({ path: img.path, x: ix + 0.1, y: y + 0.1, w: w - 0.2, h: h * (w - 0.2) / w });
-    return y + h + 0.2;
-  };
-  let y = 2.95;
-  if (N.img.input) y = put(N.img.input, y, 1.75) + 0.2;
-  if (N.img.result) put(N.img.result, y, 6.8 - y - 0.2);
-  src(s, `라이브 앱 실제 화면 · 처음 보는 19쪽 공고를 올렸을 때 파싱 20초 + 채점 25초(브라우저 실측) · 마지막 장 주소에서 직접 해 보실 수 있습니다`);
-  s.addNotes("[35초] 연구자가 할 일은 두 번의 붙여넣기입니다. 공고 링크를 넣으면 공지에 붙은 첨부 중 공고문을 알아서 골라 읽고, 내 초안을 올리면 개인정보를 가린 뒤 여섯 명에게 보냅니다. 약 45초 뒤 모든 관점이 근거를 못 찾은 곳, 의견이 갈린 곳, 관점마다 가장 걸리는 점이 나옵니다. 보완은 문장을 써 주지 않고, 어떤 근거를 어느 절에 넣을지만 알려 줍니다.");
+  numRow(s, "01", "공고 링크 붙여넣기", "공지 주소만 넣으면 첨부 중 공고문을 골라 읽습니다. PDF, HWPX, HWP", X0, 2.95, lw, { hSize: 18, dSize: 12.5 });
+  numRow(s, "02", "내 초안 올리기", "저장하지 않고, 개인정보는 가린 뒤 보냅니다", X0, 4.1, lw, { hSize: 18, dSize: 12.5 });
+  numRow(s, "03", "원문으로 확인하기", "지적마다 공고와 초안의 해당 문장을 띄워 맞음, 틀림을 누릅니다", X0, 5.25, lw, { hSize: 18, dSize: 12.5 });
+  const imgs = [N.img.input, N.img.result].filter(Boolean);
+  const top = 0.55, cap = 0.34, gap = 0.18, avail = 6.75 - top - imgs.length * cap - gap * (imgs.length - 1);
+  const w = Math.min(R - 6.15, avail / imgs.reduce((a, im) => a + im.h / im.w, 0)), x = R - w;
+  let y = top;
+  imgs.forEach((im, i) => {
+    const h = w * im.h / im.w;
+    box(s, x, y, w, h);
+    s.addImage({ path: im.path, x: x + 0.06, y: y + 0.06, w: w - 0.12, h: h - 0.12 });
+    t(s, i === 0 ? "공고 링크를 넣은 화면" : "원문 보기: 공고 근거와 초안 인용(노란 강조)", { x, y: y + h + 0.04, w, h: 0.28, fontSize: 11, color: C.gray });
+    y += h + cap + gap;
+  });
+  src(s, "실제 화면  ·  처음 보는 19쪽 공고 기준 공고 읽기 20초, 채점 25초");
+  s.addNotes("[35초] 연구자는 붙여넣기 두 번이면 됩니다. 공고 링크를 넣으면 공지에 붙은 첨부 중 공고문을 골라 읽고, 20초쯤 뒤 지켜야 할 요건 목록이 나옵니다. 요건을 고르면 공고 원문의 그 자리가 강조됩니다. 초안을 올리면 개인정보를 가린 뒤 보내고, 1분 안에 고칠 곳과 판단할 곳이 나옵니다. 지금 실제로 해 보겠습니다. 과기정통부 사업공고의 가장 최신 글입니다.");
 }
 
-// ---------- 5. 서비스 흐름도 — 역할 ----------
+// 5. 역할
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "서비스 흐름도 — AI 개입과 사람 판단 지점");
-  title(s, "누가 무엇을 하는가 —\n**사람**은 판단, AI는 생성, 규칙은 검사");
+  eyebrow(s, "서비스 흐름");
+  title(s, "사람은 판단하고, AI는 찾고,\n**코드**는 확인합니다");
   const cols = [
-    ["사람 — 판단", C.ink, [
-      ["공고·초안 넣기", "어떤 공고에 어떤 초안을 낼지 정함"],
-      ["논쟁 지점 채택", "의견이 갈린 곳은 연구 전략·사실을 아는 본인이 고칠지 결정"],
-      ["문장 작성·제출", "에이전트는 문장을 쓰지 않음 — 위치와 근거 종류만"]]],
-    ["AI — 생성(모델)", C.blue, [
-      [`공고 파싱·점검 질문·보완 위치`, `주 엔진 ${MAIN} — 3쪽씩 병렬로 요건·배점을 원문 인용과 함께`],
-      ["관점 6개의 근거 찾기", `${VENDORS.map((v) => `${v.replace("Google ", "")} ${REVM(v)}`).join(" · ")} — 질문별 충족/부족/누락 + 인용 + 선정·보류`],
-      ["선행연구 검색어", `${MAIN} → MCP 도구로 검색 후 관련 논문만 선별`]]],
-    ["규칙(코드) — 검사", C.gray, [
-      ["인용 실재 검사", "공백·문장부호를 뺀 뒤 인용이 초안에 연속 문자열로 있는지 — 없으면 무효·재질의"],
-      ["합의·논쟁 집계", "유효 판정 중 부족·누락 ≥80% 합의 결핍, 20~80% 논쟁, 유효 < 절반은 확인 불가"],
-      ["점수·개인정보", "충족1·부족0.5·누락0, 최고·최저 제외 평균 · 주민번호·전화·이메일·생년월일 정규식 가림"]]],
+    ["사람", C.ink, C.white, [["공고와 초안 고르기", "어디에 무엇을 낼지"], ["갈린 곳을 고칠지 결정", "연구 전략은 본인이 압니다"], ["문장은 직접 쓰기", "에이전트는 위치와 근거 종류만"]]],
+    ["AI", C.blueBg, C.blueInk, [["공고 정리, 점검 질문", MAIN], ["관점 6개의 판정", VENDORS.map((v) => `${v.replace("Google ", "").replace("Upstage ", "")} ${REVM(v)}`).join(" · ")], ["선행연구 찾기", "MCP 도구로 학술 DB 검색"]]],
+    ["코드", C.white, C.ink, [["인용 확인", "근거 문장이 초안에 글자 그대로 있는지"], ["합의 집계", "몇 관점이 근거를 못 찾았는지"], ["개인정보 가림", "주민번호, 전화, 이메일, 생년월일"]]],
   ];
   const cw = (W - 0.5) / 3;
-  cols.forEach(([head, color, items], ci) => {
+  cols.forEach(([head, fill, color, items], ci) => {
     const x = X0 + ci * (cw + 0.25);
-    box(s, x, 2.75, cw, 0.5, { fill: ci === 0 ? C.ink : ci === 1 ? C.blueBg : C.white, lineColor: ci === 0 ? C.ink : ci === 1 ? C.blue : C.gray, dash: ci === 2 ? "dash" : "solid" });
-    t(s, head, { x: x + 0.2, y: 2.85, w: cw - 0.4, h: 0.3, fontSize: 14, bold: true, color: ci === 0 ? C.white : ci === 1 ? C.blueInk : C.ink });
+    box(s, x, 2.8, cw, 0.55, { fill, lineColor: ci === 0 ? C.ink : ci === 1 ? C.blue : C.gray, dash: ci === 2 ? "dash" : "solid" });
+    t(s, head, { x: x + 0.22, y: 2.9, w: cw - 0.4, h: 0.35, fontSize: 15, bold: true, color });
     items.forEach(([h, d], i) => {
-      const y = 3.45 + i * 1.12;
-      t(s, h, { x: x + 0.05, y, w: cw - 0.1, h: 0.34, fontSize: 14, bold: true });
-      t(s, d, { x: x + 0.05, y: y + 0.38, w: cw - 0.1, h: 0.66, fontSize: 11, color: C.sub, lineSpacingMultiple: 1.12 });
+      const y = 3.6 + i * 1.05;
+      t(s, h, { x: x + 0.05, y, w: cw - 0.1, h: 0.36, fontSize: 16, bold: true });
+      t(s, d, { x: x + 0.05, y: y + 0.42, w: cw - 0.1, h: 0.5, fontSize: 12, color: C.sub });
     });
   });
-  hline(s, 6.85);
-  s.addNotes("[25초] 역할을 나눴습니다. 사람은 세 가지만 판단합니다. 어떤 공고에 낼지, 의견이 갈린 곳을 고칠지, 그리고 문장을 직접 씁니다. AI는 생성만 합니다. 공고 파싱과 점검 질문은 주 엔진이, 관점별 근거 찾기는 세 회사 모델에 나눈 여섯 관점이 합니다. 규칙은 코드로 검사합니다. 인용이 초안에 글자 그대로 있는지, 몇 관점이 근거를 못 찾았는지로 합의와 논쟁을 나누고, 개인정보는 보내기 전에 가립니다.");
+  s.addNotes("[25초] 역할은 이렇게 나눴습니다. 사람은 판단만 합니다. 어디에 낼지, 갈린 곳을 고칠지, 그리고 문장은 직접 씁니다. AI는 공고를 정리하고 관점별로 근거를 찾습니다. 코드는 확인합니다. 근거 문장이 초안에 정말 있는지, 몇 관점이 동의했는지, 개인정보를 가렸는지.");
 }
 
-// ---------- 6. AI 구성 — LangGraph ----------
+// 6. 구조
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "AI 구성 · 데이터 — LangGraph 상태 그래프");
-  title(s, "LLM은 판사가 아니라 **증인**입니다 —\n판정은 코드가 합니다", { fontSize: 32 });
-  const nodes = [
-    ["rubric", "점검 질문", MAIN, "A"], ["prior", "선행 탐색", "MCP → OpenAlex/Crossref", "M"], ["review", "관점 6개 채점", "3사 모델 병렬", "A"],
-    ["check", "인용 실재 검사", "코드", "R"], ["recheck", "재질의 1회", "무효 판정만", "A"], ["cross", "교차 신문", "다른 회사 모델", "A"], ["aggregate", "합의·논쟁 집계", "코드", "R"], ["remedy", "보완 위치 지정", MAIN, "A"],
-  ];
-  const bw = 1.32, gap = (W - 8 * bw) / 7, y = 3.15, bh = 1.15;
-  nodes.forEach(([id, name, sub, k], i) => {
+  eyebrow(s, "AI 구성");
+  title(s, "AI는 증거만 내고,\n**판정은 코드**가 합니다");
+  const nodes = [["점검 질문", MAIN, "A"], ["선행 탐색", "MCP", "A"], ["관점 6개 채점", "3사 모델", "A"], ["인용 확인", "코드", "R"],
+    ["다시 묻기", "없는 인용만", "A"], ["합의 집계", "코드", "R"], ["보완 위치", MAIN, "A"]];
+  const bw = 1.47, gap = (W - 7 * bw) / 6, y = 3.2, bh = 1.05;
+  nodes.forEach(([name, sub, k], i) => {
     const x = X0 + i * (bw + gap), rule = k === "R";
     box(s, x, y, bw, bh, { fill: rule ? C.white : C.blueBg, lineColor: rule ? C.gray : C.blue, dash: rule ? "dash" : "solid", lineWidth: 1.25 });
-    t(s, id, { x: x + 0.1, y: y + 0.1, w: bw - 0.2, h: 0.22, fontSize: 9, color: C.gray });
-    t(s, name, { x: x + 0.1, y: y + 0.34, w: bw - 0.2, h: 0.42, fontSize: 13, bold: true, color: rule ? C.ink : C.blueInk });
-    t(s, sub, { x: x + 0.1, y: y + 0.78, w: bw - 0.2, h: 0.32, fontSize: 9.5, color: C.sub });
-    if (i < 7 && i !== 3) arrow(s, x + bw + 0.02, y + bh / 2, x + bw + gap - 0.02, y + bh / 2);
+    t(s, name, { x: x + 0.1, y: y + 0.2, w: bw - 0.2, h: 0.36, fontSize: 13.5, bold: true, color: rule ? C.ink : C.blueInk, align: "center" });
+    t(s, sub, { x: x + 0.1, y: y + 0.6, w: bw - 0.2, h: 0.3, fontSize: 10.5, color: C.sub, align: "center" });
+    if (i < 6) arrow(s, x + bw + 0.02, y + bh / 2, x + bw + gap - 0.02, y + bh / 2);
   });
-  // 조건부 간선: check → recheck(무효 있음) / check → cross(없음)
-  const xc = X0 + 3 * (bw + gap), xr = X0 + 4 * (bw + gap), xa = X0 + 5 * (bw + gap);
-  arrow(s, xc + bw + 0.02, y + bh / 2, xr - 0.02, y + bh / 2, C.blue);
-  t(s, "무효 있음", { x: xc + bw - 0.1, y: y - 0.32, w: 1.2, h: 0.25, fontSize: 9.5, color: C.blue, bold: true });
-  s.addShape(pres.shapes.LINE, { x: xc + bw / 2, y: y + bh + 0.05, w: 0, h: 0.35, line: { color: C.gray, width: 1.25 } });
-  s.addShape(pres.shapes.LINE, { x: xc + bw / 2, y: y + bh + 0.4, w: xa + bw / 2 - (xc + bw / 2), h: 0, line: { color: C.gray, width: 1.25 } });
-  s.addShape(pres.shapes.LINE, { x: xa + bw / 2, y: y + bh + 0.05, w: 0, h: 0.35, flipV: true, line: { color: C.gray, width: 1.25, endArrowType: "triangle" } });
-  t(s, "무효 없음 → 바로 교차 신문", { x: xc + bw / 2 + 0.1, y: y + bh + 0.45, w: 3, h: 0.25, fontSize: 9.5, color: C.gray });
+  t(s, "LangGraph 상태 그래프", { x: X0, y: y - 0.45, w: 4, h: 0.3, fontSize: 12, bold: true, color: C.gray });
   const facts = [
-    ["상태", "items · prior · verdicts · stances · failed · table · remedies — 노드는 상태를 읽고 자기 칸만 씀"],
-    ["실패 처리", "평가위원 호출 실패는 순차 재시도, 그래도 실패하면 「응답 k/6」으로 화면에 표시(조용히 버리지 않음)"],
-    ["모델 대체", `주 엔진·평가위원마다 대체 모델 사슬 — 한도·장애 시 자동 전환, 실제로 판정한 모델을 기록에 남김`],
-    ["교차 신문", "엄격 모드 — 「충족」 인용을 다른 회사 모델이 반대 심문, 무관·부정·빈말이면 「부족」으로(존재 ≠ 충족). 켜면 오탐 0→2라 기본은 끔"],
+    ["실패해도 숨기지 않습니다", "관점 호출이 실패하면 다시 시도하고, 그래도 안 되면 응답 수를 화면에 띄웁니다"],
+    ["한 회사가 막혀도 돕니다", "모델마다 대체 모델이 있어 한도나 장애 때 자동으로 넘어갑니다"],
+    ["조각 검색 대신 원문 전체", "문서를 잘라 찾지 않고 통째로 넣은 뒤, 인용으로 맞춰 봅니다"],
   ];
   facts.forEach(([h, d], i) => {
-    const yy = 5.25 + i * 0.42;
-    t(s, h, { x: X0, y: yy, w: 1.4, h: 0.32, fontSize: 12.5, bold: true, color: C.blueInk });
-    t(s, d, { x: X0 + 1.5, y: yy, w: W - 1.5, h: 0.32, fontSize: 12, color: C.sub });
+    const yy = 4.85 + i * 0.62;
+    t(s, h, { x: X0, y: yy, w: 3.6, h: 0.34, fontSize: 14, bold: true });
+    t(s, d, { x: X0 + 3.8, y: yy + 0.02, w: W - 3.8, h: 0.34, fontSize: 13, color: C.sub });
+    if (i < 2) hline(s, yy + 0.5);
   });
-  s.addNotes(`[25초] 저희 구조의 핵심은 LLM을 판사로 쓰지 않는다는 겁니다. LLM은 증인처럼 증거, 즉 원문 인용만 냅니다. 인용이 원문에 있는지는 코드가 보고, 그 인용이 정말 근거가 되는지는 다른 회사 모델이 반대 심문합니다. 채택·집계·보류는 결정론 코드가 정합니다. 흐름은 LangGraph 상태 그래프 한 장입니다. 점검 질문, 선행 탐색, 여섯 명 병렬 채점까지 가고, 인용 검사에서 원문에 없는 판정이 있으면 그 평가위원에게만 한 번 되돌아가 다시 묻습니다. 없으면 바로 집계로 갑니다. 한 회사 모델이 한도에 걸리거나 멈추면 다음 모델로 자동으로 넘어가고, 실제로 판정한 모델은 기록에 남깁니다.`);
+  s.addNotes("[25초] 핵심은 AI를 판사로 쓰지 않는다는 겁니다. AI는 증인처럼 근거 문장만 냅니다. 그 문장이 초안에 정말 있는지, 몇 관점이 동의했는지는 코드가 판정합니다. 없는 문장을 댄 판정은 그 관점에게만 한 번 다시 묻습니다. 한 회사 모델이 막히면 다른 모델로 넘어가고, 실패는 숨기지 않고 화면에 띄웁니다.");
 }
 
-
-// ---------- 신뢰도 정의 ----------
+// 7. 신뢰
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "신뢰도 — 정답이 없는 영역이라, 기준을 먼저 세웠습니다");
-  title(s, "맞히는 것이 아니라,\n**확인할 수 있는 것**을 신뢰라고 정의했습니다");
-  const lx = X0, lw = 3.6;
-  box(s, lx, 2.85, lw, 3.55, { fill: C.bg2, lineColor: C.bg2 });
-  t(s, "주장하지 않는 것", { x: lx + 0.25, y: 3.0, w: lw - 0.5, h: 0.3, fontSize: 13, bold: true, color: C.gray });
-  t(s, ["심사 결과·점수를 맞힌다", "가상 관점 = 실제 심사위원", "제안서를 대신 써 준다"].map((x, i, a) => ({ text: "✕  " + x, options: { breakLine: i < a.length - 1 } })),
-    { x: lx + 0.25, y: 3.45, w: lw - 0.5, h: 1.6, fontSize: 14.5, bold: true, color: C.ink, lineSpacingMultiple: 1.6 });
-  t(s, "심사위원의 판단은 주관적이고 정답이 없습니다 — 그래서 이것들은 주장하지 않습니다.", { x: lx + 0.25, y: 5.2, w: lw - 0.5, h: 1.0, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.2 });
-  const rx = lx + lw + 0.35, rw = R - rx;
+  eyebrow(s, "신뢰");
+  title(s, "맞힌다고 하지 않고,\n**확인할 수 있게** 했습니다");
+  const lw = 3.7;
+  box(s, X0, 2.85, lw, 3.3, { fill: C.bg2, lineColor: C.bg2 });
+  t(s, "하지 않는 말", { x: X0 + 0.3, y: 3.05, w: lw - 0.6, h: 0.3, fontSize: 13, bold: true, color: C.gray });
+  t(s, ["심사 결과를 맞힙니다", "실제 심사위원과 같습니다", "제안서를 대신 씁니다"].map((x, i, a) => ({ text: x, options: { breakLine: i < a.length - 1 } })),
+    { x: X0 + 0.3, y: 3.5, w: lw - 0.6, h: 1.8, fontSize: 17, bold: true, color: C.ink, lineSpacingMultiple: 1.7, strike: "sngStrike" });
+  t(s, "심사는 사람의 판단이라 정답이 없습니다.", { x: X0 + 0.3, y: 5.45, w: lw - 0.6, h: 0.5, fontSize: 12, color: C.sub });
+  const rx = X0 + lw + 0.5, rw = R - rx;
   const rows = [
-    ["추적 가능", "모든 지적은 두 끝에 묶입니다 — 공고 원문(쪽·인용)과 초안 원문(인용). 사람이 원문을 바로 열어 확인합니다."],
-    ["날조 없음", `원문에 없는 인용은 코드가 걸러 판정에서 뺍니다 — 이번 실행 ${B.n_verdicts}개 중 ${B.invalid}건 적발 → ${B.cited ?? B.fixed}건 원문 확인 · ${B.still ?? 0}건 무효.`],
-    ["모르면 넘김", "관점이 갈리면(20~80%) 판정하지 않고 「논쟁 지점」으로 사람에게, 근거 있는 판정이 절반 미만이면 「확인 불가」."],
-    ["잴 수 있는 것만 숫자로", "요건 추출(정답표 대비)과 일부러 지운 근거 탐지(오탐)만 숫자로 말하고, 심사 예측 정확도는 말하지 않습니다."],
+    ["출처가 붙습니다", "모든 지적에 공고의 쪽과 초안의 문장이 함께 나옵니다"],
+    ["없는 문장은 버립니다", `초안에 없는 인용은 판정에서 뺍니다. 이번 실행 ${B.invalid}건 적발`],
+    ["갈리면 사람에게 넘깁니다", "관점이 엇갈리면 판정하지 않고 「판단할 곳」으로 보냅니다"],
+    ["잰 것만 숫자로 말합니다", "요건 찾기와 오탐만 숫자로 말하고, 합격 예측은 말하지 않습니다"],
   ];
   rows.forEach(([h, d], i) => {
-    const y = 2.9 + i * 0.9;
-    t(s, `0${i + 1}`, { x: rx, y, w: 0.5, h: 0.36, fontSize: 16, bold: true, color: C.blue });
-    t(s, h, { x: rx + 0.55, y, w: 2.1, h: 0.36, fontSize: 15, bold: true });
-    t(s, d, { x: rx + 2.7, y: y + 0.02, w: rw - 2.7, h: 0.8, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.15 });
-    if (i < 3) hline(s, y + 0.8, rx, rw);
+    const y = 2.95 + i * 0.82;
+    t(s, h, { x: rx, y, w: rw, h: 0.36, fontSize: 17, bold: true });
+    t(s, d, { x: rx, y: y + 0.38, w: rw, h: 0.34, fontSize: 12.5, color: C.sub });
   });
-  hline(s, 6.6);
-  t(s, [{ text: "현장 검증 — ", options: { bold: true, color: C.blueInk } }, { text: "지적마다 「원문 보기」(공고 쪽·초안 위치 강조)와 ✓/✗ → 사람이 확인한 정밀도가 화면에 쌓입니다. ", options: {} },
-    { text: "보안 모드 — ", options: { bold: true, color: C.blueInk } }, { text: "초안은 국산 모델에만, 해외 검색 끔.", options: {} }],
-    { x: X0, y: 6.68, w: W, h: 0.35, fontSize: 12, color: C.sub });
-  s.addNotes(`[25초] 심사위원의 판단엔 정답이 없습니다. 그래서 저희는 심사 결과를 맞힌다고 주장하지 않습니다. 대신 신뢰를 네 가지로 정의했습니다. 모든 지적은 공고 원문과 초안 원문 두 끝에 묶여 바로 확인할 수 있고, 원문에 없는 인용은 코드가 걸러내고, 관점이 갈리면 판정하지 않고 사람에게 넘기고, 잴 수 있는 것만 숫자로 말합니다. 그리고 확인은 여러분이 직접 하실 수 있습니다. 지적마다 원문 보기를 누르면 공고 쪽과 초안 위치가 강조되고, 맞음·틀림을 누르면 사람이 확인한 정밀도가 쌓입니다.`);
+  hline(s, 6.45);
+  t(s, "직접 확인도 됩니다. 지적마다 원문 보기와 맞음·틀림 버튼이 있고, 보안 모드를 켜면 초안은 국산 모델에만 갑니다.", { x: X0, y: 6.58, w: W, h: 0.35, fontSize: 13, color: C.blueInk, bold: true });
+  s.addNotes("[25초] 심사에는 정답이 없어서, 저희는 맞힌다고 말하지 않습니다. 대신 확인할 수 있게 했습니다. 모든 지적에 출처가 붙고, 초안에 없는 문장은 버리고, 관점이 갈리면 사람에게 넘기고, 잰 것만 숫자로 말합니다. 지적마다 원문 보기와 맞음·틀림 버튼이 있어서 여러분이 직접 확인하실 수 있습니다.");
 }
 
-// ---------- 7. MCP ----------
+// 8. MCP
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "MCP 도구 서버 — AI 도구 연결 표준");
-  title(s, "검사 도구를 MCP로 감싸,\n**다른 AI 비서**도 같은 검사를 씁니다");
-  const lw = 6.3;
-  numRow(s, "01", "search_prior_art(query, n)", "공개 학술 DB 검색 — OpenAlex 우선, 장애 시 Crossref로 자동 전환 · 결과는 혁신성 판정의 참고 자료", X0, 2.95, lw, { hSize: 16, dSize: 11.5 });
-  numRow(s, "02", "check_quote(quote, text)", "인용이 원문에 있는지 true/false — LLM 없이 같은 규칙 코드로", X0, 4.0, lw, { hSize: 16, dSize: 11.5 });
-  numRow(s, "03", "왜 OpenAlex인가, 왜 MCP인가", "무료·키 없음·메타데이터 공개 라이선스라 기관 어디서든 비용 0 — 다만 오늘 밤 실측 중 OpenAlex가 503을 냈고 도구 뒤에서 Crossref로 바뀌었습니다. 국내 DB(NTIS·KCI)도 같은 자리에 꽂으면 됩니다", X0, 5.05, lw, { hSize: 16, dSize: 11.5 });
+  eyebrow(s, "MCP 도구");
+  title(s, "같은 검사 도구를,\n**다른 AI 비서**도 씁니다");
+  const lw = 6.2;
+  numRow(s, "01", "search_prior_art", "학술 DB에서 선행연구를 찾습니다. OpenAlex가 막히면 Crossref로 넘어갑니다", X0, 2.95, lw, { hSize: 18, dSize: 12.5 });
+  numRow(s, "02", "check_quote", "인용이 원문에 있는지 참, 거짓으로 답합니다", X0, 4.05, lw, { hSize: 18, dSize: 12.5 });
+  numRow(s, "03", "왜 도구로 감쌌나", "어젯밤 실험 도중 OpenAlex가 멈췄을 때, 도구 뒤에서 자동으로 바뀌었습니다. 국내 DB도 같은 자리에 꽂으면 됩니다", X0, 5.15, lw, { hSize: 18, dSize: 12.5 });
   const rx = 7.55, rw = R - rx;
-  box(s, rx, 2.85, rw, 3.75, { fill: C.bg2, lineColor: C.bg2 });
-  t(s, "실측 — 다른 AI 비서(Codex CLI)에 서버를 붙여 호출", { x: rx + 0.25, y: 3.0, w: rw - 0.5, h: 0.3, fontSize: 12, bold: true, color: C.blue });
-  t(s, 'mcp_servers.rfp_to_fit.command = "python"\nargs = ["-m", "rfp_to_fit.infrastructure.mcp_server"]', { x: rx + 0.25, y: 3.4, w: rw - 0.5, h: 0.6, fontSize: 10.5, fontFace: "Courier New", color: C.ink });
+  box(s, rx, 2.85, rw, 3.6, { fill: C.bg2, lineColor: C.bg2 });
+  t(s, "Codex에 붙여서 실제로 호출해 봤습니다", { x: rx + 0.3, y: 3.05, w: rw - 0.6, h: 0.3, fontSize: 13, bold: true, color: C.blue });
   t(s, [
-    { text: "check_quote(「재현율 90% 이상」) → true", options: { breakLine: true } },
-    { text: "check_quote(「정밀도 95% 달성」) → false", options: { breakLine: true } },
-    { text: "search_prior_art(「multi-agent LLM grant proposal review」) → 3편(Crossref)", options: {} },
-  ], { x: rx + 0.25, y: 4.15, w: rw - 0.5, h: 1.1, fontSize: 12, bold: true, lineSpacingMultiple: 1.3 });
-  t(s, "찾은 선행연구 중 하나는 다중 에이전트로 지원서를 「생성」하는 연구 — 저희는 생성하지 않고, 이 공고의 심사표로 「검사」합니다.", { x: rx + 0.25, y: 5.4, w: rw - 0.5, h: 1.0, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.2 });
-  src(s, "증거: deliver/mcp-codex-transcript.txt(호출 기록) · Crossref 대체 전환은 tests/test_scholar.py");
-  s.addNotes("[20초] 검사 도구 두 개를 MCP 서버로 감쌌습니다. 선행연구 검색과 인용 검사입니다. 실제로 다른 AI 비서인 Codex에 이 서버를 붙여 호출해 봤고, 원문에 있는 인용은 참, 없는 인용은 거짓이 나왔습니다. OpenAlex를 쓴 이유는 무료이고 키가 필요 없어서인데, 오늘 밤 실측 중에 OpenAlex가 장애를 냈고 도구 뒤에서 Crossref로 바뀌었습니다. MCP로 감싼 이유가 바로 이겁니다. 국내 DB도 같은 자리에 꽂으면 됩니다.");
+    { text: "check_quote(재현율 90% 이상)", options: { bold: true, breakLine: true } }, { text: "→ 참", options: { color: C.blueInk, bold: true, breakLine: true } },
+    { text: "check_quote(정밀도 95% 달성)", options: { bold: true, breakLine: true } }, { text: "→ 거짓(원문에 없음)", options: { color: C.blueInk, bold: true, breakLine: true } },
+    { text: "search_prior_art(grant proposal review)", options: { bold: true, breakLine: true } }, { text: "→ 논문 3편", options: { color: C.blueInk, bold: true } },
+  ], { x: rx + 0.3, y: 3.5, w: rw - 0.6, h: 2.8, fontSize: 13.5, lineSpacingMultiple: 1.35 });
+  s.addNotes("[20초] 검사 도구 두 개를 MCP로 감쌌습니다. 다른 AI 비서인 Codex에 붙여서 실제로 불러 봤고, 원문에 있는 인용은 참, 없는 인용은 거짓이 나왔습니다. 도구로 감싼 이유는 어젯밤 실험 도중에 OpenAlex가 멈췄을 때 뒤에서 Crossref로 자동으로 바뀌었기 때문입니다.");
 }
 
-// ---------- 측정 — 잴 수 있는 것만 ----------
+// 9. 측정
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "측정 — 잴 수 있는 것만 숫자로");
-  title(s, "정답표를 먼저 고정하고,\n**처음 보는 공고**와 제거 실험으로 쟀습니다");
-  const ex = N.extract;
+  eyebrow(s, "측정");
+  title(s, "처음 보는 공고로도,\n**직접** 쟀습니다");
   const nm = (e) => e.agency.replace("국가과학기술연구회", "NAIS 해커톤");
   const hn = { "msit-national-scientist-2026": "과기정통부 국가과학자", "msit-rising-star-2026": "과기정통부 라이징스타" };
-  t(s, "① 공고 파싱 — 요건 재현율(심사표 배점은 5건 모두 100%)", { x: X0, y: 2.85, w: 6.2, h: 0.3, fontSize: 12.5, bold: true, color: C.sub });
-  const rows = ex.map((e) => [`${nm(e)} · 개발용`, `${e.recall}%`, `${e.rmin}~${e.rmax}`, false])
-    .concat(hb.map((r, i) => [`${hn[Object.keys(HO.blind)[i]] || ""} · 처음 봄`, `${pct0(r.recall)}%`, `${pct0(r.recall_min)}~${pct0(r.recall_max)}`, true]));
+  t(s, "요건을 놓치지 않은 비율", { x: X0, y: 2.85, w: 6, h: 0.3, fontSize: 13, bold: true, color: C.sub });
+  const rows = exs.map((e) => [nm(e), `${e.recall}%`, "개발에 쓴 공고", false])
+    .concat(hb.map((r, i) => [hn[Object.keys(HO.blind)[i]] || "", `${pct0(r.recall)}%`, "처음 보는 공고", true]));
   rows.forEach(([a1, b1, c1, hold], i) => {
-    const y = 3.25 + i * 0.42;
-    t(s, a1, { x: X0, y, w: 3.6, h: 0.32, fontSize: 13, bold: hold, color: hold ? C.blueInk : C.ink });
-    t(s, b1, { x: X0 + 3.6, y, w: 0.95, h: 0.32, fontSize: 14, bold: true, align: "right", color: hold ? C.blueInk : C.ink });
-    t(s, c1, { x: X0 + 4.7, y: y + 0.03, w: 1.3, h: 0.28, fontSize: 10.5, color: C.gray });
+    const y = 3.25 + i * 0.46;
+    t(s, a1, { x: X0, y, w: 3.4, h: 0.34, fontSize: 14, bold: hold, color: hold ? C.blueInk : C.ink });
+    t(s, c1, { x: X0 + 3.4, y: y + 0.03, w: 1.6, h: 0.3, fontSize: 11, color: C.gray });
+    t(s, b1, { x: X0 + 5.0, y, w: 1.0, h: 0.34, fontSize: 16, bold: true, align: "right", color: hold ? C.blueInk : C.ink });
   });
-  t(s, "「처음 봄」= 개발에 안 쓴 공고를 링크로 새로 가져와 정답표를 측정 전에 커밋(3회). 라이징스타에서 놓친 9개 중 6개가 ※주석 조건 → 규칙 1줄 후 89~95%(따로 표기)",
-    { x: X0, y: 5.4, w: 6.1, h: 0.62, fontSize: 10.5, color: C.sub, lineSpacingMultiple: 1.15 });
-  const rx = 7.35, rw = R - rx;
-  t(s, `② 제거 실험 — 근거를 지운 초안 ${P.n}개에서 오탐(안 지운 곳을 짚음)`, { x: rx, y: 2.85, w: rw, h: 0.3, fontSize: 12.5, bold: true, color: C.sub });
+  t(s, "심사표 배점은 다섯 건 모두 정확히 뽑았습니다", { x: X0, y: 5.6, w: 6, h: 0.3, fontSize: 12, color: C.sub });
+  const rx = 7.3, rw = R - rx;
+  t(s, `근거를 일부러 지운 초안 ${P.n}개, 잘못 짚은 곳`, { x: rx, y: 2.85, w: rw, h: 0.3, fontSize: 13, bold: true, color: C.sub });
   const cw = (rw - 0.3) / 3;
   AB.forEach((a, i) => {
     const x = rx + i * (cw + 0.15), hi = a.mode !== "single";
-    box(s, x, 3.25, cw, 1.95, { fill: hi ? C.blueBg : C.white, lineColor: hi ? C.blue : C.line });
-    t(s, a.label.replace("(단일 LLM)", "").replace("(현재)", ""), { x: x + 0.15, y: 3.35, w: cw - 0.3, h: 0.5, fontSize: 11, bold: true, lineSpacingMultiple: 1.05 });
-    t(s, `${a.fp}`, { x: x + 0.15, y: 3.85, w: cw - 0.3, h: 0.75, fontSize: 40, bold: true, color: hi ? C.blueInk : C.ink });
-    t(s, `짚은 ${a.detect}`, { x: x + 0.15, y: 4.72, w: cw - 0.3, h: 0.3, fontSize: 11, color: C.sub });
+    box(s, x, 3.25, cw, 2.0, { fill: hi ? C.blueBg : C.white, lineColor: hi ? C.blue : C.line });
+    t(s, a.mode === "single" ? "관점 1개" : a.mode === "roles" ? "관점 6개" : "6개·3사", { x: x + 0.15, y: 3.4, w: cw - 0.3, h: 0.3, fontSize: 12, bold: true });
+    t(s, `${a.fp}`, { x: x + 0.15, y: 3.8, w: cw - 0.3, h: 0.8, fontSize: 42, bold: true, color: hi ? C.blueInk : C.ink });
+    t(s, `찾은 곳 ${a.detect}`, { x: x + 0.15, y: 4.75, w: cw - 0.3, h: 0.3, fontSize: 11, color: C.sub });
   });
-  t(s, "관점을 나누자 오탐이 0 — 세 회사 모델을 섞는 효과는 이 표본(5개·각 1회)에선 확인 안 됨(섞는 이유는 가용성)", { x: rx, y: 5.4, w: rw, h: 0.62, fontSize: 10.5, color: C.sub, lineSpacingMultiple: 1.15 });
-  hline(s, 6.2);
-  t(s, `링크 입력 ${LK ? `${LK.ok}/${LK.n}` : "-"}건(HWP·스크립트 다운로드·공고문 2개 합치기) · 처음 본 공고 추출 51개 원문 대조 감사: 지어낸 요건 0 · 신청 요건 맞음 44(86%) · 안내·사후 의무 7`, { x: X0, y: 6.35, w: W, h: 0.32, fontSize: 12, bold: true });
-  src(s, "정답표·감사: 파이프라인(OpenAI)과 다른 회사 모델(Claude) — 사람 검수 아님 · 검증 정답표 커밋 430ea7d(21:37) 뒤 측정 · 감사 data/eval/audit-national-scientist.json");
-  s.addNotes(`[30초] 잴 수 있는 것만 숫자로 말씀드립니다. 예시 공고에만 맞춘 게 아닌지 보려고, 개발에 안 쓴 과기정통부 공고 두 건을 링크로 가져와 정답표를 먼저 고정하고 쟀습니다. 94%와 77%, 심사표 배점은 다섯 건 모두 맞혔습니다. 그리고 관점을 여러 개로 나눌 필요가 있는지 제거 실험을 했습니다. 관점 하나는 안 지운 곳을 ${single.fp}곳 잘못 짚었고, 여섯으로 나누자 0이었습니다. 회사 모델을 섞는 효과는 확인되지 않았다고 그대로 말씀드립니다.`);
+  t(s, "회사 모델을 섞는 효과는 이번 표본에선 보이지 않았습니다", { x: rx, y: 5.6, w: rw, h: 0.3, fontSize: 12, color: C.sub });
+  hline(s, 6.15);
+  t(s, `처음 보는 공고에서 뽑은 요건 51개를 원문과 대조해 보니, 지어낸 요건은 0개였습니다`, { x: X0, y: 6.3, w: W, h: 0.35, fontSize: 14, bold: true });
+  src(s, "정답표와 대조 감사는 파이프라인과 다른 회사 모델(Claude)이 작성, 사람 검수는 아님  ·  data/eval, data/holdout 공개");
+  s.addNotes(`[30초] 예시에만 맞춘 게 아닌지 보려고, 개발에 안 쓴 과기정통부 공고 두 건을 링크로 가져와 정답표를 먼저 고정하고 쟀습니다. ${hb.map((r) => pct0(r.recall) + "%").join("와 ")}였고 심사표 배점은 다섯 건 모두 맞혔습니다. 오른쪽은 관점을 나눈 효과입니다. 관점 하나는 안 지운 곳을 ${single.fp}곳 잘못 짚었고, 여섯으로 나누니 0이었습니다. 회사 모델을 섞는 효과는 이번엔 보이지 않았다고 그대로 말씀드립니다.`);
 }
 
-// ---------- 예선 약속 → 본선 구현 ----------
+// 10. 우리 먼저
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "예선 약속 → 본선 구현 — 포스터와 현실의 거리");
-  title(s, "예선 때 약속한 것을,\n**그대로** 대조했습니다");
-  const rows = [
-    ["공고 URL·PDF·HWPX 입력", "✓", "+HWP, 실제 공지 13/13"],
-    ["요건·평가지표 구조화(출처 쪽)", "✓", "모든 항목에 쪽·원문 인용"],
-    ["가상 평가위원 독립 채점 → 합의/논쟁/확인 불가", "✓", "관점 6개(현장 멘토링 반영)"],
-    ["보완 지정 — 문장은 쓰지 않음", "✓", "근거 종류·넣을 위치만"],
-    ["선행 탐색(논문·NTIS 과제·KIPRIS 특허, MCP)", "△", "논문만 — 축소 규칙 적용, NTIS·KIPRIS는 키 미확보"],
-    ["RAG(bge-m3 + FAISS)", "✕", "원문 전체 + 인용 대조로 교체 — 판정 근거 추적이 더 직접적"],
-    ["요건 재현율 ≥ 90%", "△", "개발 85~93% · 처음 본 공고 77~94%"],
-    ["결핍 탐지 정밀도 ≥ 80%", "✓", "오탐 0(100%) · 탐지 4/5, 표본 5"],
-    ["초안 비저장 · 오픈소스(MIT)", "✓", "+개인정보 가림 · LICENSE 공개"],
-  ];
-  rows.forEach(([a1, mark, note], i) => {
-    const y = 2.85 + i * 0.43;
-    const col = mark === "✓" ? C.blueInk : mark === "△" ? "B7791F" : "C0392B";
-    t(s, a1, { x: X0, y, w: 6.2, h: 0.34, fontSize: 13.5, bold: true });
-    t(s, mark, { x: X0 + 6.3, y, w: 0.5, h: 0.34, fontSize: 16, bold: true, color: col, align: "center" });
-    t(s, note, { x: X0 + 7.0, y: y + 0.02, w: W - 7.0, h: 0.32, fontSize: 12, color: C.sub });
-    if (i < rows.length - 1) hline(s, y + 0.39);
-  });
-  src(s, "기획서 v2(9/5 제출)·아이디어 포스터(9/15 제출) 대비 — 못 한 것도 지우지 않았습니다 · 전체 표는 저장소 README");
-  s.addNotes("[20초] 예선 때 약속한 것을 그대로 대조했습니다. 링크 입력, 구조화, 독립 채점, 보완 지정은 했습니다. 특허·과제 탐색은 논문만 했고, RAG는 원문 인용 대조로 바꿨고, 재현율 90%는 공고에 따라 못 미친 곳이 있습니다. 못 한 것도 지우지 않았습니다.");
-}
-
-// ---------- 10. 우리 자신에게 먼저 ----------
-{
-  const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "우리 자신에게 먼저 — 이 대회 본선 심사표로 예선 기획서를");
-  title(s, `이 대회 심사표로 우리를 먼저 검사하니,\n**${nsel.length}개 관점**에서 걸린 점이 오늘의 준비물이 됐습니다`, { fontSize: 30 });
-  t(s, "각 관점이 쓴 「가장 걸리는 점」(원문)", { x: X0, y: 2.85, w: 6, h: 0.3, fontSize: 12.5, bold: true, color: C.blue });
-  t(s, "그래서 오늘 가져온 것", { x: 7.35, y: 2.85, w: 5, h: 0.3, fontSize: 12.5, bold: true, color: C.blue });
+  eyebrow(s, "우리 먼저");
+  title(s, "이 대회 심사표로,\n**저희 기획서**부터 검사했습니다");
   const answer = {
-    "세부 전문형": "차별성의 근거 — LLM은 증인·판정은 코드(6장), 관점 1개 대 6개 제거 실험(9장)",
-    "기술 타당성 검증형": "성능 근거 — 처음 보는 공고 재현율·원문 대조 감사(9장)",
-    "사업성·시장형": "첫 실증 대상 — 전문기관 접수 후 요건 사전검토(12장)",
-    "행정·관리형": `구현 계획 대신 구현 결과 — 커밋 ${N.git.commits}개·테스트 ${N.tests}개·예선 약속 대조(10장)`,
+    "세부 전문형": "구조의 차별점과 관점 수 실험을 준비했습니다",
+    "기술 타당성 검증형": "처음 보는 공고로 잰 숫자를 준비했습니다",
+    "사업성·시장형": "첫 실증 대상을 전문기관 사전검토로 정했습니다",
+    "행정·관리형": "계획 대신 구현 결과와 커밋 기록을 가져왔습니다",
   };
+  t(s, "관점별로 가장 걸린 점", { x: X0, y: 2.85, w: 5.8, h: 0.3, fontSize: 13, bold: true, color: C.gray });
+  t(s, "그래서 오늘", { x: 7.35, y: 2.85, w: 5, h: 0.3, fontSize: 13, bold: true, color: C.gray });
   nsel.slice(0, 3).forEach((x, i) => {
-    const y = 3.3 + i * 1.05, nmx = pn[x.id] || x.id;
-    t(s, nmx, { x: X0, y, w: 6.0, h: 0.3, fontSize: 13, bold: true });
-    t(s, `“${x.point}”`, { x: X0, y: y + 0.32, w: 6.0, h: 0.6, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.12 });
-    arrow(s, X0 + 6.1, y + 0.35, 7.25, y + 0.35, C.blue);
-    t(s, answer[nmx] || "—", { x: 7.35, y: y + 0.12, w: R - 7.35, h: 0.6, fontSize: 13, bold: true, color: C.blueInk, lineSpacingMultiple: 1.12 });
+    const y = 3.3 + i * 1.0, nmx = pn[x.id] || x.id;
+    t(s, nmx, { x: X0, y, w: 5.8, h: 0.3, fontSize: 12, bold: true, color: C.blue });
+    t(s, x.point, { x: X0, y: y + 0.32, w: 5.8, h: 0.4, fontSize: 15, bold: true });
+    arrow(s, X0 + 6.0, y + 0.5, 7.2, y + 0.5, C.gray);
+    t(s, answer[nmx] || "", { x: 7.35, y: y + 0.32, w: R - 7.35, h: 0.4, fontSize: 15, color: C.ink });
+    if (i < 2) hline(s, y + 0.88);
   });
-  hline(s, 6.55);
-  t(s, `항목 근거는 거의 다 있었지만 ${nsel.length}개 관점이 전체 인상을 「보류」로 적었습니다 — 결과 예측이 아니라, 발표 전에 대비할 질문을 먼저 받은 것`, { x: X0, y: 6.65, w: W, h: 0.3, fontSize: 11.5, color: C.gray });
-  s.addNotes(`[20초] 이 대회 본선 심사표로 저희 예선 기획서를 먼저 검사했습니다. 결과를 예측한 게 아니라, 세 관점에서 걸리는 점을 받았습니다. 차별성의 근거가 약하다, 구매 주체가 약하다, 구현 계획이 구체적이지 않다. 그래서 오늘 구조의 차별점과 제거 실험, 첫 실증 대상, 그리고 계획 대신 구현 결과를 가져왔습니다.`);
+  t(s, "결과를 맞히려던 게 아니라, 발표 전에 받을 질문을 먼저 받아 본 것입니다.", { x: X0, y: 6.45, w: W, h: 0.35, fontSize: 13, color: C.sub });
+  s.addNotes("[20초] 이 대회 심사표로 저희 기획서부터 검사했습니다. 세 관점이 걸리는 점을 냈습니다. 차별성의 근거, 구매 주체, 구현 계획. 그래서 오늘은 구조의 차별점과 실험, 첫 실증 대상, 그리고 계획 대신 구현 결과를 가져왔습니다.");
 }
 
-// ---------- 11. 확장 ----------
+// 11. 확장
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "확장 — 같은 엔진, 세 개의 시점");
-  title(s, "제출 전 → 접수 후 → 심사 중,\n**같은 엔진**이 이어집니다");
-  const steps = [
-    ["연구자", "제출 전", "셀프 점검", "고칠 곳·판단할 곳·관점별로 걸리는 점", "지금 이 앱 — 구현"],
-    ["전문기관", "접수 후", "요건 사전검토", "같은 요건 매트릭스로 형식 미비·필수 서류 누락을 먼저 걸러 담당자 검토 시간 단축", "첫 실증 목표 — 계획"],
-    ["평가위원", "심사 중", "근거 위치 표시", "지표마다 제안서의 근거 문장 위치를 옆에 띄워 심사 보조 — 판정은 사람", "계획"],
-  ];
+  eyebrow(s, "확장");
+  title(s, "제출 전에서 심사까지,\n**같은 엔진**으로 갑니다");
+  const steps = [["제출 전", "연구자", "셀프 점검", "고칠 곳과 판단할 곳을 원문과 함께 봅니다. 지금 이 앱으로 됩니다", true], ["접수 후", "전문기관", "요건 사전검토", "형식 미비와 서류 누락을 먼저 거릅니다. 첫 실증 목표", false],
+    ["심사 중", "평가위원", "근거 위치 표시", "지표마다 제안서의 근거 문장을 옆에 띄웁니다. 판정은 사람", false]];
   const cw = (W - 0.6) / 3;
-  steps.forEach(([who, when, what, how, st], i) => {
+  steps.forEach(([when, who, what, how, now], i) => {
     const x = X0 + i * (cw + 0.3);
-    box(s, x, 2.85, cw, 2.55, { fill: i === 0 ? C.blueBg : C.white, lineColor: i === 0 ? C.blue : C.line });
-    t(s, `${when} · ${who}`, { x: x + 0.25, y: 3.0, w: cw - 0.5, h: 0.3, fontSize: 12, bold: true, color: C.blue });
-    t(s, what, { x: x + 0.25, y: 3.38, w: cw - 0.5, h: 0.45, fontSize: 20, bold: true });
-    t(s, how, { x: x + 0.25, y: 3.95, w: cw - 0.5, h: 0.95, fontSize: 12, color: C.sub, lineSpacingMultiple: 1.15 });
-    t(s, st, { x: x + 0.25, y: 4.95, w: cw - 0.5, h: 0.3, fontSize: 11.5, bold: true, color: i === 0 ? C.blueInk : C.gray });
-    if (i < 2) arrow(s, x + cw + 0.03, 4.1, x + cw + 0.27, 4.1, C.blue);
+    box(s, x, 2.85, cw, 2.4, { fill: now ? C.blueBg : C.white, lineColor: now ? C.blue : C.line });
+    t(s, `${when} · ${who}`, { x: x + 0.3, y: 3.05, w: cw - 0.6, h: 0.3, fontSize: 13, bold: true, color: C.blue });
+    t(s, what, { x: x + 0.3, y: 3.45, w: cw - 0.6, h: 0.5, fontSize: 22, bold: true });
+    t(s, how, { x: x + 0.3, y: 4.1, w: cw - 0.6, h: 0.9, fontSize: 13, color: C.sub, lineSpacingMultiple: 1.2 });
+    if (i < 2) arrow(s, x + cw + 0.03, 4.05, x + cw + 0.27, 4.05, C.blue);
   });
-  t(s, [
-    { text: "NAIS 비전과의 연결 — ", options: { bold: true } },
-    { text: "「가설부터 실험·분석까지 스스로 하는 AI 사이언티스트, 1인 1연구소」에서 빠진 순간이 과제 신청입니다 — 그 자리를 채우는 도구입니다.", options: { breakLine: true } },
-    { text: "데이터가 쌓이는 방향 — ", options: { bold: true } },
-    { text: "실제 심사 의견은 평가기관에 있습니다(멘토링). 전문기관과 연계하면 가상 평가위원을 실제 심사 의견 유형으로 보정합니다.", options: { breakLine: true } },
-    { text: "연결 — ", options: { bold: true } },
-    { text: "MCP 도구로 NAIS 플랫폼·연구자 AI 비서에 그대로 꽂히고, 같은 엔진이 연차·성과보고서(지표 대비 실적)와 연구비 정산(증빙 대비 항목)으로 넓어집니다.", options: {} },
-  ], { x: X0, y: 5.55, w: W, h: 1.4, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.25 });
-  s.addNotes("[15초] 같은 엔진이 세 시점으로 이어집니다. 지금은 연구자의 제출 전 셀프 점검이고, 첫 실증 목표는 전문기관의 접수 후 요건 사전검토, 그다음은 심사 중 평가위원에게 근거 위치를 띄워 주는 보조입니다. 실제 심사 의견 데이터는 평가기관에 있으니, 연계하면 가상 평가위원을 실제 유형으로 보정할 수 있습니다.");
+  numRow(s, "", "실제 심사 의견은 평가기관에 있습니다", "기관과 연계하면 관점을 실제 심사 의견 유형으로 맞출 수 있습니다", X0, 5.55, W / 2 - 0.2, { hSize: 15, dSize: 12 });
+  numRow(s, "", "NAIS 플랫폼에 도구로 꽂힙니다", "AI 사이언티스트가 과제 신청까지 하는 날, 그 마지막 점검", X0 + W / 2, 5.55, W / 2, { hSize: 15, dSize: 12 });
+  s.addNotes("[15초] 같은 엔진이 세 시점으로 이어집니다. 지금은 연구자의 제출 전 점검이고, 첫 실증 목표는 전문기관의 접수 후 요건 검토, 그다음은 심사 보조입니다. 실제 심사 의견은 평가기관에 있으니, 연계하면 관점을 실제 유형에 맞출 수 있습니다.");
 }
 
-// ---------- 12. 마무리 ----------
+// 12. 마무리
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "지금 직접 해 보세요 — 공고 링크 하나, 초안 하나", 1.15);
-  title(s, "제출 전에,\n**빈칸**부터.", { y: 1.8, h: 2.3, fontSize: 52 });
-  t(s, `커밋 ${N.git.commits}개 · 코드는 전부 본선 중 커밋(첫 코드 커밋 ${N.git.first_code}, 그 전엔 문서뿐) · 테스트 ${N.tests}개\nSPEC → 테스트 → 구현 순서 · 측정 스크립트와 정답표 공개`, { x: X0, y: 4.45, w: 6.6, h: 0.8, fontSize: 14, color: C.sub, lineSpacingMultiple: 1.25 });
-  t(s, "라이브가 끊기면 — 앱의 「② 우리 기획서 먼저 채점」 탭이 저장된 실행 기록으로 같은 결과를 보여 줍니다", { x: X0, y: 5.45, w: 6.6, h: 0.6, fontSize: 12, color: C.gray, lineSpacingMultiple: 1.2 });
+  eyebrow(s, "지금 직접 해 보세요", 1.15);
+  title(s, "제출 전에,\n**빈칸**부터.", { y: 1.8, h: 2.3, fontSize: 54 });
+  t(s, `공고 링크 하나, 초안 하나면 됩니다.\n커밋 ${N.git.commits}개, 테스트 ${N.tests}개, 첫 코드 커밋 ${N.git.first_code}`, { x: X0, y: 4.5, w: 6.6, h: 0.9, fontSize: 15, color: C.sub, lineSpacingMultiple: 1.35 });
   t(s, "팀 루미아 · 김태걸 · 박세훈", { x: X0, y: 6.4, w: 6, h: 0.45, fontSize: 16, bold: true });
   const qs = [["라이브 앱", N.qr_live, N.live_url.replace(/^https?:\/\//, "")], ["GitHub", N.qr_repo, N.repo_url.replace(/^https?:\/\//, "")]];
   qs.forEach(([k, img, url], i) => {
@@ -427,7 +349,30 @@ const REVM = (v) => [...new Set(B.personas.filter((q) => q.vendor === v).map((q)
     t(s, k, { x: x + 0.2, y: y + 1.98, w: 1.65, h: 0.35, fontSize: 14, bold: true });
     t(s, url, { x: x + 0.2, y: y + 2.38, w: 1.7, h: 1.0, fontSize: 9.5, color: C.gray, lineSpacingMultiple: 1.15, fit: "none" });
   });
-  s.addNotes("[10초] 공고 링크 하나, 초안 하나. 제출 전에 빈칸부터 짚어 드립니다. 화면의 주소에서 지금 직접 해 보실 수 있습니다. 감사합니다.");
+  s.addNotes("[10초] 제출 전에, 빈칸부터. 화면의 주소에서 지금 직접 해 보실 수 있습니다. 감사합니다.");
+}
+
+// 13. 부록 — 출처(규정 기재 의무)
+{
+  const s = pres.addSlide(); s.background = { color: C.white };
+  eyebrow(s, "부록");
+  title(s, "사용 모델, 라이브러리,\n데이터 출처", { fontSize: 30 });
+  const rows = [
+    ["생성형 AI", "OpenAI gpt-4.1(공고 정리·점검 질문·보완), gpt-5.4-mini·gpt-4.1-mini(관점 판정·대체) · Google Gemini(관점 판정) · Upstage Solar pro3(관점 판정·대체·보안 모드)"],
+    ["에이전트·도구", "LangGraph 1.2(상태 그래프) · MCP Python SDK 2.2(도구 서버) · Streamlit 1.64(화면)"],
+    ["문서 처리", "pdfplumber 0.11(PDF) · olefile 0.47(HWP) · HWPX 직접 파싱(zipfile) · httpx 0.28(링크 수집)"],
+    ["데이터", "OpenAlex·Crossref 공개 학술 API · 공개 R&D 공고 5건(NST NAIS, 우주항공청 2026-0024, 산업통상부 2026-64, 과기정통부 2026-0940·0945)"],
+    ["정답표·감사", "Claude(Anthropic)가 원문을 읽어 작성, 파이프라인 모델과 독립 · 사람 검수 아님"],
+    ["코딩 보조", "Claude Code(Anthropic) · Codex(OpenAI)"],
+  ];
+  rows.forEach(([k, v], i) => {
+    const y = 2.85 + i * 0.66;
+    t(s, k, { x: X0, y, w: 2.3, h: 0.5, fontSize: 13, bold: true, color: C.blue });
+    t(s, v, { x: X0 + 2.4, y, w: W - 2.4, h: 0.55, fontSize: 12, color: C.ink, lineSpacingMultiple: 1.15 });
+    if (i < rows.length - 1) hline(s, y + 0.61);
+  });
+  src(s, "전체 표와 라이선스는 저장소 README  ·  github.com/Ryugi62/rfp-to-fit");
+  s.addNotes("[0초] 부록 — 발표하지 않음. 공고 규정(사용 모델·라이브러리·데이터 출처 기재) 충족용.");
 }
 
 pres.writeFile({ fileName: OUT }).then((f) => console.log("wrote", f));

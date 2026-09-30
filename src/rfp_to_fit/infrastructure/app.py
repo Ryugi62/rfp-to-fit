@@ -20,6 +20,8 @@ from rfp_to_fit.adapters.graph import run_graph  # noqa: E402
 from rfp_to_fit.application.serialize import extraction_from_dict, run_from_dict  # noqa: E402
 from rfp_to_fit.domain.model import FindingKind  # noqa: E402
 from rfp_to_fit.domain.privacy import mask_pii  # noqa: E402
+from rfp_to_fit.domain.quotes import context  # noqa: E402
+from html import escape as html_escape  # noqa: E402
 from rfp_to_fit.infrastructure.wiring import actual_models, make_llms, personas_with_models, prior_search  # noqa: E402
 
 DATA = ROOT / "data"
@@ -81,7 +83,7 @@ def extract_from_url(url: str):
     f = fetch_url(url)
     doc, spans = load_fetched(f, "url")
     info = (f"첨부 {len(f.attachments)}개 중 공고문 {len(spans)}개: " + " + ".join(n for n, _, _ in spans)) if f.attachments else spans[0][0]
-    return extraction_to_dict(extract_rfp(doc, gemini)), len(doc.pages), info[:160]
+    return extraction_to_dict(extract_rfp(doc, gemini)), len(doc.pages), info[:160], doc.pages
 
 
 @st.cache_data(show_spinner=False, max_entries=20)
@@ -89,7 +91,12 @@ def extract_uploaded(digest: str, data: bytes, name: str):
     from rfp_to_fit.application.serialize import extraction_to_dict
     gemini, _ = llms()
     doc = load_bytes(data, name, "upload")
-    return extraction_to_dict(extract_rfp(doc, gemini)), len(doc.pages)
+    return extraction_to_dict(extract_rfp(doc, gemini)), len(doc.pages), doc.pages
+
+
+@st.cache_data(show_spinner=False)
+def example_pages(rid: str):
+    return load_bytes((DATA / "rfp" / f"{rid}.pdf").read_bytes(), f"{rid}.pdf", rid).pages
 
 
 def cached_rubric(key, sub):
@@ -120,6 +127,9 @@ st.markdown('<div class="sub">공고가 요구하는데 내 초안에 <b>근거�
             '<b>심사 결과를 예측하지 않으며</b>, 문장을 대신 쓰지 않습니다.</div>', unsafe_allow_html=True)
 st.write("")
 
+secure = st.toggle("🔒 보안 모드 — 초안을 국산 모델(Upstage Solar)에만 보내고, 해외 학술 DB 검색도 끕니다", value=False,
+                   help="기관 도입 시 기본값. 공고(공개 문서) 파싱은 그대로 두고, 초안이 닿는 판정·보완만 국산 모델로 돌립니다.")
+
 tab_run, tab_ba, tab_trust = st.tabs(["① 실행", "② 우리 기획서 먼저 채점", "③ 신뢰 장치·정확도"])
 
 # ---------------- ① 실행 ----------------
@@ -143,7 +153,8 @@ with tab_run:
                 st.rerun()
             if url.strip():
                 with st.status("링크에서 공고문을 찾는 중…", expanded=False) as s:
-                    ex_dict, n_pages, info = extract_from_url(url.strip())
+                    ex_dict, n_pages, info, pages = extract_from_url(url.strip())
+                    st.session_state["rfp_pages"] = pages
                     s.update(label=f"공고 파싱 완료 · {n_pages}쪽 · {info}", state="complete")
                 rfp_label = url
         elif src.startswith("파일"):
@@ -151,16 +162,18 @@ with tab_run:
             if up:
                 data = up.getvalue()
                 with st.status("공고를 3쪽씩 나눠 병렬로 읽는 중… (쪽 수에 따라 20초~2분)", expanded=False) as s:
-                    ex_dict, n_pages = extract_uploaded(hashlib.sha256(data).hexdigest(), data, up.name)
+                    ex_dict, n_pages, pages = extract_uploaded(hashlib.sha256(data).hexdigest(), data, up.name)
+                    st.session_state["rfp_pages"] = pages
                     s.update(label=f"공고 파싱 완료 · {n_pages}쪽", state="complete")
                 rfp_label = up.name
         else:
             rid = st.selectbox("예시", list(EXAMPLES), format_func=lambda k: EXAMPLES[k], label_visibility="collapsed")
             ex_dict = cached_extraction(rid)
+            st.session_state["rfp_pages"] = example_pages(rid)
             rfp_label = EXAMPLES[rid]
             if ex_dict is None:
                 data = (DATA / "rfp" / f"{rid}.pdf").read_bytes()
-                ex_dict, n_pages = extract_uploaded(hashlib.sha256(data).hexdigest(), data, f"{rid}.pdf")
+                ex_dict, n_pages, _ = extract_uploaded(hashlib.sha256(data).hexdigest(), data, f"{rid}.pdf")
     with right:
         st.markdown("**2. 연구자 초안**")
         dsrc = st.radio("초안", ["내 초안 올리기(PDF·HWPX·HWP·TXT)", "붙여넣기", "예시: 우리 팀 예선 기획서"], horizontal=True,
@@ -200,8 +213,8 @@ with tab_run:
     rubric_key = f"{rid}.{stage or 'all'}" if (src == "예시 공고" and rid) else None
     go = st.button("평가위원 6명에게 보내기", type="primary", disabled=not (ex and draft.strip()), use_container_width=True)
     if go:
-        gemini, solar = llms()
-        personas, llm_for = personas_with_models(gemini, solar)
+        gemini, solar = (make_llms(secure=True) if secure else llms())
+        personas, llm_for = personas_with_models(gemini, solar, secure=secure)
         sub = Extraction(ex.requirements, [c for c in ex.criteria if stage is None or c.stage == stage], ex.dropped)
         t0 = time.time()
         with st.status("에이전트가 일하는 중…", expanded=True) as status:
@@ -218,12 +231,14 @@ with tab_run:
                 st.write(msg)
 
             run = run_graph(sub, draft, personas, gemini, llm_for, on_step=on_step, items=cached_rubric(rubric_key, sub),
-                            prior_search=prior_search())
+                            prior_search=None if secure else prior_search())
             used = actual_models(personas, llm_for)
             run.trace.append({"step": "실제 판정 모델", **used})
             status.update(label=f"완료 · {time.time() - t0:.0f}초", state="complete", expanded=False)
         st.session_state["run"] = run
         st.session_state["rfp_label"] = rfp_label
+        st.session_state["draft_text"] = draft          # 세션 메모리만(디스크·로그 없음)
+        st.session_state["checks"] = {}
 
     run = st.session_state.get("run")
     if run:
@@ -266,6 +281,33 @@ with tab_run:
             st.markdown("**심사기준 대조표** — 지표 × 평가위원(점수)")
             st.dataframe(df, use_container_width=True)
 
+        rfp_pages = st.session_state.get("rfp_pages") or []
+        dtext = st.session_state.get("draft_text", "")
+        checks = st.session_state.setdefault("checks", {})
+
+        def mark(quote: str, source: str):
+            c3 = context(quote, source)
+            if not c3:
+                return None
+            pre, hit, post = (html_escape(x) for x in c3)
+            return f'<div class="quote">…{pre}<mark style="background:#FFF3BF">{hit}</mark>{post}…</div>'
+
+        def rfp_evidence(ev):
+            page = ev.page or 1
+            src = rfp_pages[page - 1] if 0 < page <= len(rfp_pages) else "\n".join(rfp_pages)
+            return mark(ev.quote, src) or mark(ev.quote, "\n".join(rfp_pages))
+
+        def check_buttons(key: str):
+            a, b, c = st.columns([1, 1, 3])
+            if a.button("✓ 맞음", key=f"ok-{key}"):
+                checks[key] = True
+                st.rerun()
+            if b.button("✗ 틀림", key=f"ng-{key}"):
+                checks[key] = False
+                st.rerun()
+            if key in checks:
+                c.markdown(f'<div class="muted">사람 확인: {"맞음" if checks[key] else "틀림"}</div>', unsafe_allow_html=True)
+
         def finding_card(f):
             it = items[f.item_id]
             c = crit[it.criterion_id]
@@ -279,11 +321,29 @@ with tab_run:
                          f'<b>「{r.location}」</b>에 · <span class="muted">{r.why}</span></div>')
             html += "</div>"
             st.markdown(html, unsafe_allow_html=True)
-            with st.expander("평가위원 메모·인용 보기"):
+            with st.expander("원문 보기 — 공고 근거 · 관점별 판정과 초안 인용(원문 위치 강조)"):
+                ev_html = rfp_evidence(c.evidence)
+                st.markdown(f"**공고 근거** — {c.name} {c.points:g}점 · p.{c.evidence.page}")
+                st.markdown(ev_html or f'<div class="quote">“{html_escape(c.evidence.quote)}”</div>', unsafe_allow_html=True)
                 for v in f.verdicts:
                     st.markdown(f"- **{pname[v.reviewer_id]}** ({v.label.value}) {v.reason}")
                     if v.quote:
-                        st.markdown(f'<div class="quote">“{v.quote}”</div>', unsafe_allow_html=True)
+                        st.markdown(mark(v.quote, dtext) or f'<div class="quote">“{html_escape(v.quote)}” <b>— 원문에 없음(무효)</b></div>',
+                                    unsafe_allow_html=True)
+            check_buttons(f"f:{f.item_id}")
+
+        fk = [v for k, v in checks.items() if k.startswith("f:")]
+        rk = [v for k, v in checks.items() if k.startswith("r:")]
+        if fk or rk:
+            msg = []
+            if fk:
+                msg.append(f"지적 {len(fk)}개 확인 → 맞음 {sum(fk)} · 틀림 {len(fk) - sum(fk)} (사람 확인 정밀도 {sum(fk) / len(fk) * 100:.0f}%)")
+            if rk:
+                msg.append(f"요건 {len(rk)}개 확인 → 맞음 {sum(rk)} · 틀림 {len(rk) - sum(rk)} ({sum(rk) / len(rk) * 100:.0f}%)")
+            st.info("🧑‍⚖️ 현장 검증 — " + " / ".join(msg))
+        else:
+            st.markdown('<div class="muted">🧑‍⚖️ 현장 검증: 카드의 「원문 보기」로 근거를 확인하고 ✓/✗를 누르면, 사람이 확인한 정밀도가 여기에 쌓입니다.</div>',
+                        unsafe_allow_html=True)
 
         c1, c2 = st.columns(2)
         with c1:
@@ -307,10 +367,28 @@ with tab_run:
             with st.expander(f"선행연구 {len(run.prior_art)}편 — MCP 도구 서버 경유 OpenAlex 검색(혁신성 판정 참고)"):
                 for w in run.prior_art:
                     st.markdown(f"- [{w['title']}]({w.get('doi') or '#'}) · {w.get('year')} · 피인용 {w.get('cited_by')} · 검색어 `{w.get('query')}`")
-        with st.expander(f"공고 요건 매트릭스 ({len(run.requirements)}개) — 모두 공고 쪽 번호·원문 인용 포함"):
+        with st.expander(f"공고 요건 매트릭스 ({len(run.requirements)}개) — 쪽 번호·원문 인용 · 직접 확인해 보세요", expanded=False):
             import pandas as pd
-            st.dataframe(pd.DataFrame([{"분류": r.category, "요건": r.text, "쪽": r.evidence.page, "원문 인용": r.evidence.quote}
-                                       for r in run.requirements]), use_container_width=True, hide_index=True)
+            order = {"탈락": 0, "감점": 1, "불이익": 2}
+            reqs = sorted(run.requirements, key=lambda r: order.get(r.consequence, 3))
+            df = pd.DataFrame([{"맞음": checks.get(f"r:{r.id}") is True, "틀림": checks.get(f"r:{r.id}") is False,
+                                "어기면": r.consequence or "-", "분류": r.category, "요건": r.text, "쪽": r.evidence.page,
+                                "원문 인용": r.evidence.quote} for r in reqs])
+            ed = st.data_editor(df, use_container_width=True, hide_index=True, disabled=["어기면", "분류", "요건", "쪽", "원문 인용"],
+                                key="req_editor")
+            changed = False
+            for r, (_, row) in zip(reqs, ed.iterrows()):
+                val = True if (row["맞음"] and not row["틀림"]) else False if (row["틀림"] and not row["맞음"]) else None
+                if val is not None and checks.get(f"r:{r.id}") is not val:
+                    checks[f"r:{r.id}"] = val
+                    changed = True
+            if changed:
+                st.rerun()
+            pick = st.selectbox("원문 보기 — 요건 선택", [f"{r.id} · p.{r.evidence.page} · {r.text[:40]}" for r in reqs], index=None,
+                                placeholder="요건을 고르면 공고 원문에서 위치를 강조해 보여 줍니다")
+            if pick:
+                r = next(x for x in reqs if pick.startswith(x.id + " "))
+                st.markdown(rfp_evidence(r.evidence) or "원문 위치를 찾지 못했습니다(표 셀 순서가 섞인 쪽).", unsafe_allow_html=True)
         with st.expander("에이전트 실행 기록·사용 모델"):
             used = next((t for t in run.trace if t.get("step") == "실제 판정 모델"), {})
             st.json({"trace": run.trace, "평가위원": [{"id": p.id, "렌즈": p.name, "실제 모델": used.get(p.id, p.model)}

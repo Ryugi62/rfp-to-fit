@@ -27,12 +27,15 @@ def _llm(vendor: str):
     return FallbackLLM(SolarLLM(temperature=0.0), OpenAILLM("gpt-4.1-mini"))
 
 
-def make_llms():
+def make_llms(secure: bool = False):
+    """secure=True(보안 모드): 초안이 닿는 모든 호출을 국산 Upstage Solar로만 — 해외 API로 초안을 보내지 않는다."""
+    if secure:
+        return SolarLLM(temperature=0.0), None
     return FallbackLLM(OpenAILLM(os.environ.get("RFP_OPENAI_MODEL", "gpt-4.1")), SolarLLM(temperature=0.0)), None
 
 
-def personas_with_models(main=None, _unused=None):
-    llms = {p.id: _llm(VENDOR[p.id]) for p in DEFAULT_PERSONAS}
+def personas_with_models(main=None, _unused=None, secure: bool = False):
+    llms = {p.id: (SolarLLM(temperature=0.0) if secure else _llm(VENDOR[p.id])) for p in DEFAULT_PERSONAS}
     ps = [replace(p, model=llms[p.id].name) for p in DEFAULT_PERSONAS]
     return ps, (lambda p: llms[p.id])
 

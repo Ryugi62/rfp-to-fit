@@ -112,3 +112,13 @@ def test_split_tables_cuts_mixed_stage_at_100_points():
     out = split_tables(cs)
     assert [c.stage for c in out] == ["단일·표1"] * 4 + ["단일·표2"] * 3
     assert split_tables(cs[:4])[0].stage == "단일"
+
+
+def test_locate_and_context_ignore_spacing():
+    from rfp_to_fit.domain.quotes import context, locate
+    src = "앞 문장입니다. 정답표 대비 요건  추출 재현율 90%\n이상을 목표로 한다. 뒤 문장."
+    a, b = locate("요건 추출 재현율 90% 이상", src)
+    assert src[a:b].replace(" ", "").replace("\n", "") == "요건추출재현율90%이상"
+    pre, hit, post = context("재현율 90% 이상", src, radius=5)
+    assert "재현율" in hit and post.startswith("을")
+    assert locate("없는 문장", src) is None

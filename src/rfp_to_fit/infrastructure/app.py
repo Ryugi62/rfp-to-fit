@@ -38,8 +38,22 @@ html, body, [class*="css"] { font-family: 'Pretendard', -apple-system, 'Apple SD
 .ok { background:#E8F5E9; color:#2E7D32; } .unk { background:#ECEFF1; color:#546E7A; }
 .card { border: 1px solid #E5E8EB; border-radius: 16px; padding: 16px 18px; margin-bottom: 12px; background: #fff; }
 .card h4 { margin: 4px 0 8px 0; font-size: 17px; color:#191F28; }
-.muted { color:#8B95A1; font-size: 13px; }
-.quote { background:#F2F4F6; border-radius: 8px; padding: 6px 10px; font-size: 13px; color:#333D4B; margin: 4px 0; }
+.muted { color:#6B7684; font-size: 13px; }
+.quote { background:#F2F4F6; border-radius: 8px; padding: 6px 10px; font-size: 13px; color:#333D4B; margin: 4px 0; overflow-wrap: anywhere; }
+.muted a, .sub a { overflow-wrap: anywhere; }
+/* 주 행동 버튼: 전폭·52px, 스크롤해도 화면 아래에 붙는다(결과로 내려가면 따라오지 않음) */
+div[data-testid="stElementContainer"]:has(button[kind="primary"]) { position: sticky; bottom: 0; z-index: 20; background: #fff; padding: 10px 0 12px 0; box-shadow: 0 -10px 14px -6px rgba(255,255,255,0.95); }
+button[kind="primary"]:disabled { background: #E8F3FF !important; color: #6B7684 !important; border-color: #E8F3FF !important; opacity: 1 !important; }
+button[kind="primary"] { min-height: 52px; font-size: 16px !important; font-weight: 700; border-radius: 14px; }
+@media (max-width: 640px) {
+  .block-container { padding: 2.8rem 1rem 3rem 1rem; }
+  .big { font-size: 40px; letter-spacing: -1px; }
+  h2 { font-size: 26px !important; }
+  h3 { font-size: 20px !important; }
+  .card { padding: 14px; }
+  .card h4 { font-size: 16px; }
+  .muted { font-size: 13px; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -117,6 +131,73 @@ def accuracy_panel():
     for c, r in zip(cols, rows):
         c.metric(EXAMPLES.get(r["id"], r["id"])[:18], f'재현율 {r["recall"] * 100:.0f}%',
                  f'지표 일치 {r["criteria_agreement"] * 100:.0f}% · 정밀도 {r.get("precision", 0) * 100:.0f}%')
+
+
+def mark(quote: str, source: str):
+    c3 = context(quote, source)
+    if not c3:
+        return None
+    pre, hit, post = (html_escape(x) for x in c3)
+    return f'<div class="quote">…{pre}<mark style="background:#FFF3BF">{hit}</mark>{post}…</div>'
+
+
+def rfp_evidence(ev):
+    rfp_pages = st.session_state.get("rfp_pages") or []
+    page = ev.page or 1
+    src = rfp_pages[page - 1] if 0 < page <= len(rfp_pages) else "\n".join(rfp_pages)
+    return mark(ev.quote, src) or mark(ev.quote, "\n".join(rfp_pages))
+
+
+CHOICE = {"✓ 맞음": True, "✗ 틀림": False}
+
+
+def _record_check(key: str):
+    v = st.session_state.get(f"seg-{key}")
+    checks = st.session_state.setdefault("checks", {})
+    if v in CHOICE:
+        checks[key] = CHOICE[v]
+    else:
+        checks.pop(key, None)
+
+
+def check_buttons(key: str):
+    """맞음·틀림 한 줄 선택(모바일에서도 가로 한 줄). 콜백에서 기록해 같은 실행 안에서 집계가 바로 바뀐다."""
+    st.segmented_control("사람 확인", list(CHOICE), key=f"seg-{key}", label_visibility="collapsed",
+                         on_change=_record_check, args=(key,))
+
+
+def requirements_panel(reqs):
+    """공고 요건 목록 — 어기면 탈락인 것부터. 요건을 고르면 공고 원문에서 위치를 강조하고, 맞음·틀림을 기록한다."""
+    checks = st.session_state.setdefault("checks", {})
+    import pandas as pd
+    order = {"탈락": 0, "감점": 1, "불이익": 2}
+    reqs = sorted(reqs, key=lambda r: order.get(r.consequence, 3))
+    mark_of = {True: "맞음", False: "틀림"}
+    df = pd.DataFrame([{"사람 확인": mark_of.get(checks.get(f"r:{r.id}"), ""), "어기면": r.consequence or "-", "분류": r.category,
+                        "요건": r.text, "쪽": r.evidence.page, "원문 인용": r.evidence.quote} for r in reqs])
+    st.dataframe(df, use_container_width=True, hide_index=True, height=min(38 + 35 * len(df), 320))
+    pick = st.selectbox("원문 보기 — 요건 선택", [f"{r.id} · p.{r.evidence.page} · {r.text[:40]}" for r in reqs], index=None,
+                        placeholder="요건을 고르면 공고 원문에서 위치를 강조해 보여 줍니다")
+    if pick:
+        r = next(x for x in reqs if pick.startswith(x.id + " "))
+        st.markdown(rfp_evidence(r.evidence) or "원문 위치를 찾지 못했습니다(표 셀 순서가 섞인 쪽).", unsafe_allow_html=True)
+        check_buttons(f"r:{r.id}")
+
+
+def verification_tally():
+    """현장 검증 집계 — 사람이 누른 맞음·틀림만 센다(자기보고가 아니라 이 화면에서 확인한 것)."""
+    checks = st.session_state.get("checks", {})
+    fk = [v for k, v in checks.items() if k.startswith("f:")]
+    rk = [v for k, v in checks.items() if k.startswith("r:")]
+    if not (fk or rk):
+        return False
+    msg = []
+    if fk:
+        msg.append(f"지적 {len(fk)}개 확인 → 맞음 {sum(fk)} · 틀림 {len(fk) - sum(fk)} (사람 확인 정밀도 {sum(fk) / len(fk) * 100:.0f}%)")
+    if rk:
+        msg.append(f"요건 {len(rk)}개 확인 → 맞음 {sum(rk)} · 틀림 {len(rk) - sum(rk)} ({sum(rk) / len(rk) * 100:.0f}%)")
+    st.info("🧑‍⚖️ 현장 검증 — " + " / ".join(msg))
+    return True
 
 
 # ---------------- 머리 ----------------
@@ -212,6 +293,9 @@ with tab_run:
         crits = [c for c in ex.criteria if stage is None or c.stage == stage]
         st.markdown(f'<div class="muted">공고에서 찾은 것: 요건 {len(ex.requirements)}개 · 평가지표 {len(crits)}개 ('
                     + " · ".join(f"{c.name} {c.points:g}" for c in crits) + ")</div>", unsafe_allow_html=True)
+        with st.expander(f"공고 요건 {len(ex.requirements)}개 보기 — 어기면 탈락인 것부터, 원문 위치 강조"):
+            requirements_panel(ex.requirements)
+            verification_tally()
 
     rubric_key = f"{rid}.{stage or 'all'}" if (src == "예시 공고" and rid) else None
     go = st.button("평가위원 6명에게 보내기", type="primary", disabled=not (ex and draft.strip()), use_container_width=True)
@@ -243,6 +327,8 @@ with tab_run:
         st.session_state["rfp_label"] = rfp_label
         st.session_state["draft_text"] = draft          # 세션 메모리만(디스크·로그 없음)
         st.session_state["checks"] = {}
+        for k in [k for k in st.session_state if str(k).startswith("seg-f:")]:
+            del st.session_state[k]          # 새 실행이면 지적 확인 표시도 비운다
 
     run = st.session_state.get("run")
     if run:
@@ -282,35 +368,8 @@ with tab_run:
             df = pd.DataFrame({crit[r.criterion.id].name + f" ({r.criterion.points:g})":
                                {pname[k]: round(v, 1) for k, v in r.per_reviewer.items()} for r in t.rows}).T
             df["평균"] = [round(r.expected_points, 1) for r in t.rows]
-            st.markdown("**심사기준 대조표** — 지표 × 평가위원(점수)")
-            st.dataframe(df, use_container_width=True)
-
-        rfp_pages = st.session_state.get("rfp_pages") or []
-        dtext = st.session_state.get("draft_text", "")
-        checks = st.session_state.setdefault("checks", {})
-
-        def mark(quote: str, source: str):
-            c3 = context(quote, source)
-            if not c3:
-                return None
-            pre, hit, post = (html_escape(x) for x in c3)
-            return f'<div class="quote">…{pre}<mark style="background:#FFF3BF">{hit}</mark>{post}…</div>'
-
-        def rfp_evidence(ev):
-            page = ev.page or 1
-            src = rfp_pages[page - 1] if 0 < page <= len(rfp_pages) else "\n".join(rfp_pages)
-            return mark(ev.quote, src) or mark(ev.quote, "\n".join(rfp_pages))
-
-        def check_buttons(key: str):
-            a, b, c = st.columns([1, 1, 3])
-            if a.button("✓ 맞음", key=f"ok-{key}"):
-                checks[key] = True
-                st.rerun()
-            if b.button("✗ 틀림", key=f"ng-{key}"):
-                checks[key] = False
-                st.rerun()
-            if key in checks:
-                c.markdown(f'<div class="muted">사람 확인: {"맞음" if checks[key] else "틀림"}</div>', unsafe_allow_html=True)
+            with st.expander("심사기준 대조표 — 지표 × 관점별 근거 충족도"):
+                st.dataframe(df, use_container_width=True)
 
         def finding_card(f):
             it = items[f.item_id]
@@ -332,20 +391,11 @@ with tab_run:
                 for v in f.verdicts:
                     st.markdown(f"- **{pname[v.reviewer_id]}** ({v.label.value}) {v.reason}")
                     if v.quote:
-                        st.markdown(mark(v.quote, dtext) or f'<div class="quote">“{html_escape(v.quote)}” <b>— 원문에 없음(무효)</b></div>',
+                        st.markdown(mark(v.quote, st.session_state.get("draft_text", "")) or f'<div class="quote">“{html_escape(v.quote)}” <b>— 원문에 없음(무효)</b></div>',
                                     unsafe_allow_html=True)
             check_buttons(f"f:{f.item_id}")
 
-        fk = [v for k, v in checks.items() if k.startswith("f:")]
-        rk = [v for k, v in checks.items() if k.startswith("r:")]
-        if fk or rk:
-            msg = []
-            if fk:
-                msg.append(f"지적 {len(fk)}개 확인 → 맞음 {sum(fk)} · 틀림 {len(fk) - sum(fk)} (사람 확인 정밀도 {sum(fk) / len(fk) * 100:.0f}%)")
-            if rk:
-                msg.append(f"요건 {len(rk)}개 확인 → 맞음 {sum(rk)} · 틀림 {len(rk) - sum(rk)} ({sum(rk) / len(rk) * 100:.0f}%)")
-            st.info("🧑‍⚖️ 현장 검증 — " + " / ".join(msg))
-        else:
+        if not verification_tally():
             st.markdown('<div class="muted">🧑‍⚖️ 현장 검증: 카드의 「원문 보기」로 근거를 확인하고 ✓/✗를 누르면, 사람이 확인한 정밀도가 여기에 쌓입니다.</div>',
                         unsafe_allow_html=True)
 
@@ -371,28 +421,6 @@ with tab_run:
             with st.expander(f"선행연구 {len(run.prior_art)}편 — MCP 도구 서버 경유 OpenAlex 검색(혁신성 판정 참고)"):
                 for w in run.prior_art:
                     st.markdown(f"- [{w['title']}]({w.get('doi') or '#'}) · {w.get('year')} · 피인용 {w.get('cited_by')} · 검색어 `{w.get('query')}`")
-        with st.expander(f"공고 요건 매트릭스 ({len(run.requirements)}개) — 쪽 번호·원문 인용 · 직접 확인해 보세요", expanded=False):
-            import pandas as pd
-            order = {"탈락": 0, "감점": 1, "불이익": 2}
-            reqs = sorted(run.requirements, key=lambda r: order.get(r.consequence, 3))
-            df = pd.DataFrame([{"맞음": checks.get(f"r:{r.id}") is True, "틀림": checks.get(f"r:{r.id}") is False,
-                                "어기면": r.consequence or "-", "분류": r.category, "요건": r.text, "쪽": r.evidence.page,
-                                "원문 인용": r.evidence.quote} for r in reqs])
-            ed = st.data_editor(df, use_container_width=True, hide_index=True, disabled=["어기면", "분류", "요건", "쪽", "원문 인용"],
-                                key="req_editor")
-            changed = False
-            for r, (_, row) in zip(reqs, ed.iterrows()):
-                val = True if (row["맞음"] and not row["틀림"]) else False if (row["틀림"] and not row["맞음"]) else None
-                if val is not None and checks.get(f"r:{r.id}") is not val:
-                    checks[f"r:{r.id}"] = val
-                    changed = True
-            if changed:
-                st.rerun()
-            pick = st.selectbox("원문 보기 — 요건 선택", [f"{r.id} · p.{r.evidence.page} · {r.text[:40]}" for r in reqs], index=None,
-                                placeholder="요건을 고르면 공고 원문에서 위치를 강조해 보여 줍니다")
-            if pick:
-                r = next(x for x in reqs if pick.startswith(x.id + " "))
-                st.markdown(rfp_evidence(r.evidence) or "원문 위치를 찾지 못했습니다(표 셀 순서가 섞인 쪽).", unsafe_allow_html=True)
         with st.expander("에이전트 실행 기록·사용 모델"):
             used = next((t for t in run.trace if t.get("step") == "실제 판정 모델"), {})
             st.json({"trace": run.trace, "평가위원": [{"id": p.id, "렌즈": p.name, "실제 모델": used.get(p.id, p.model)}

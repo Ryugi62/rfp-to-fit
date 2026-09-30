@@ -40,7 +40,7 @@ with sync_playwright() as p:
     pg.get_by_text("원문 보기 — 공고 근거").first.click(); time.sleep(0.8); mark("cards")
     pg.get_by_text("원문 보기 — 공고 근거").first.scroll_into_view_if_needed()
     time.sleep(max(1.0, narr["cards"] * 0.5))
-    pg.get_by_role("button", name="✓ 맞음").first.click(); time.sleep(2.0)
+    pg.get_by_role("radio", name="✓ 맞음").first.click(); time.sleep(2.0)
     pg.locator("text=/사람 확인 정밀도/").first.scroll_into_view_if_needed(); mark("memo")
     time.sleep(max(1.0, narr["cards"] * 0.5))
     pg.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})"); time.sleep(1.0)

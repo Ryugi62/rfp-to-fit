@@ -18,7 +18,7 @@ with sync_playwright() as p:
     pg.wait_for_selector("text=/완료 · [0-9]+초/", timeout=500000); print("run", round(time.time() - t0), "s")
     time.sleep(2)
     pg.get_by_text("원문 보기 — 공고 근거").first.click(); time.sleep(1)
-    pg.get_by_role("button", name="✓ 맞음").first.click(); time.sleep(3)
+    pg.get_by_role("radio", name="✓ 맞음").first.click(); time.sleep(3)
     pg.get_by_text("원문 보기 — 공고 근거").first.click(); time.sleep(1.5)
     tally = pg.locator("text=/사람 확인 정밀도 [0-9]+%/").first
     tally.scroll_into_view_if_needed(); time.sleep(0.8)

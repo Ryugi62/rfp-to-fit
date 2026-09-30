@@ -1,0 +1,93 @@
+{
+ "input": {
+  "1280": {
+   "vw": 1280,
+   "scrollW": 1280,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  },
+  "390": {
+   "vw": 390,
+   "scrollW": 390,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  }
+ },
+ "parsed": {
+  "1280": {
+   "vw": 1280,
+   "scrollW": 1280,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  },
+  "390": {
+   "vw": 390,
+   "scrollW": 390,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  }
+ },
+ "run_seconds": 24,
+ "result": {
+  "1280": {
+   "vw": 1280,
+   "scrollW": 1280,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  },
+  "390": {
+   "vw": 390,
+   "scrollW": 390,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  }
+ },
+ "04-before-after": {
+  "1280": {
+   "vw": 1280,
+   "scrollW": 1280,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  },
+  "390": {
+   "vw": 390,
+   "scrollW": 390,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  }
+ },
+ "05-trust": {
+  "1280": {
+   "vw": 1280,
+   "scrollW": 1280,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  },
+  "390": {
+   "vw": 390,
+   "scrollW": 390,
+   "overflowX": false,
+   "outside": [],
+   "n_outside": 0,
+   "min_font": 12
+  }
+ }
+}

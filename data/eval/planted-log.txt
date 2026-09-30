@@ -1,1 +1,8 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+base total 97.0
+{'variant': 'drop2-ethics', 'expected': ['활용성'], 'detected': True, 'new_gaps': 4, 'hits': 2, 'total': 89.3, 'per': {'적합성': 20.0, '활용성': 14.0, '혁신성': 28.0, '실현가능성': 9.3, '확장성': 18.0}}
+{'variant': 'drop2-comparison', 'expected': ['혁신성'], 'detected': True, 'new_gaps': 1, 'hits': 1, 'total': 93.7, 'per': {'적합성': 20.0, '활용성': 20.0, '혁신성': 25.0, '실현가능성': 9.3, '확장성': 19.3}}
+{'variant': 'drop2-plan', 'expected': ['실현가능성'], 'detected': True, 'new_gaps': 1, 'hits': 1, 'total': 92.0, 'per': {'적합성': 18.7, '활용성': 20.0, '혁신성': 28.0, '실현가능성': 6.7, '확장성': 18.7}}
+{'variant': 'drop2-impact', 'expected': ['확장성'], 'detected': True, 'new_gaps': 2, 'hits': 2, 'total': 82.0, 'per': {'적합성': 20.0, '활용성': 14.7, '혁신성': 28.0, '실현가능성': 10.0, '확장성': 9.3}}
+{'variant': 'drop2-problem', 'expected': ['적합성'], 'detected': False, 'new_gaps': 0, 'hits': 0, 'total': 96.0, 'per': {'적합성': 20.0, '활용성': 16.0, '혁신성': 30.0, '실현가능성': 10.0, '확장성': 20.0}}
+detect 0.8 precision 0.75

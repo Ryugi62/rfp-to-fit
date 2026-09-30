@@ -19,7 +19,7 @@ from rfp_to_fit.application.extract import Extraction, extract_rfp  # noqa: E402
 from rfp_to_fit.adapters.graph import run_graph  # noqa: E402
 from rfp_to_fit.application.serialize import extraction_from_dict, run_from_dict  # noqa: E402
 from rfp_to_fit.domain.model import FindingKind  # noqa: E402
-from rfp_to_fit.infrastructure.wiring import make_llms, personas_with_models, prior_search  # noqa: E402
+from rfp_to_fit.infrastructure.wiring import actual_models, make_llms, personas_with_models, prior_search  # noqa: E402
 
 DATA = ROOT / "data"
 st.set_page_config(page_title="RFP-to-Fit · 평가위원의 눈으로 빈칸 찾기", page_icon="🔎", layout="wide")
@@ -130,14 +130,11 @@ with tab_run:
         dsrc = st.radio("초안", ["예시: 우리 팀 예선 기획서", "직접 올리기", "붙여넣기"], horizontal=True, label_visibility="collapsed")
         draft = ""
         if dsrc.startswith("예시"):
-            variant = st.selectbox("예시 초안", ["original", "drop-ai-ethics", "drop-hackathon-plan", "drop-comparison-table",
-                                               "drop-impact-pilot", "drop-accuracy-target"],
-                                   format_func=lambda v: {"original": "원본(예선 제출본)", "drop-ai-ethics": "결함 주입: 윤리 절 삭제",
-                                                          "drop-hackathon-plan": "결함 주입: 구현 계획 삭제",
-                                                          "drop-comparison-table": "결함 주입: 기존 도구 비교표 삭제",
-                                                          "drop-impact-pilot": "결함 주입: 기대효과·파일럿 삭제",
-                                                          "drop-accuracy-target": "결함 주입: 정확도 목표 삭제"}[v],
-                                   label_visibility="collapsed")
+            labels = {"original": "원본(예선 제출본)", "after": "보완본(본선 구현 결과 추가)",
+                      "drop2-ethics": "결함 주입: 윤리·신뢰성 제거", "drop2-comparison": "결함 주입: 차별성 비교 제거",
+                      "drop2-plan": "결함 주입: 구현 계획 제거", "drop2-impact": "결함 주입: 기대효과·확장 제거",
+                      "drop2-problem": "결함 주입: 문제 정의 제거"}
+            variant = st.selectbox("예시 초안", list(labels), format_func=labels.get, label_visibility="collapsed")
             draft = (DATA / "drafts" / "nais-hackathon-2026" / f"{variant}.md").read_text()
         elif dsrc == "직접 올리기":
             dup = st.file_uploader("초안 파일", type=["pdf", "hwpx", "md", "txt"], label_visibility="collapsed")
@@ -181,6 +178,8 @@ with tab_run:
 
             run = run_graph(sub, draft, personas, gemini, llm_for, on_step=on_step, items=cached_rubric(rubric_key, sub),
                             prior_search=prior_search())
+            used = actual_models(personas, llm_for)
+            run.trace.append({"step": "실제 판정 모델", **used})
             status.update(label=f"완료 · {time.time() - t0:.0f}초", state="complete", expanded=False)
         st.session_state["run"] = run
         st.session_state["rfp_label"] = rfp_label
@@ -259,7 +258,9 @@ with tab_run:
             st.dataframe(pd.DataFrame([{"분류": r.category, "요건": r.text, "쪽": r.evidence.page, "원문 인용": r.evidence.quote}
                                        for r in run.requirements]), use_container_width=True, hide_index=True)
         with st.expander("에이전트 실행 기록·사용 모델"):
-            st.json({"trace": run.trace, "평가위원": [{"id": p.id, "렌즈": p.name, "모델": p.model} for p in run.personas]})
+            used = next((t for t in run.trace if t.get("step") == "실제 판정 모델"), {})
+            st.json({"trace": run.trace, "평가위원": [{"id": p.id, "렌즈": p.name, "실제 모델": used.get(p.id, p.model)}
+                                                  for p in run.personas]})
 
 # ---------------- ② 전·후 ----------------
 with tab_ba:

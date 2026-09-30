@@ -36,8 +36,8 @@ with sync_playwright() as p:
     print("run seconds", round(time.time() - t))
     head = box(pg, "모두가 깎는 곳")
     table = box(pg, "심사기준 대조표")
-    pg.screenshot(path=str(OUT / "result.png"),
-                  clip={"x": btn["x"] - 10, "y": head["y"] - 16, "width": btn["width"] + 20, "height": 330})
+    pg.screenshot(path=str(OUT / "result.png"),  # 심사기준 대조표만(점수 한 줄은 실행마다 달라 덱 숫자와 섞지 않는다)
+                  clip={"x": table["x"] - 8, "y": table["y"] - 12, "width": btn["x"] + btn["width"] - table["x"] + 16, "height": 300})
     g = box(pg, "고칠 곳 — 합의 결핍")
     pr = pg.get_by_text("선행연구", exact=False).last.bounding_box() or {"y": g["y"] + 700}
     pg.screenshot(path=str(OUT / "cards.png"),

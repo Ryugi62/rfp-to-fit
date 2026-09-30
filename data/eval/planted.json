@@ -1,94 +1,94 @@
 {
  "n": 5,
- "detect_rate": 0.4,
- "precision": 0.4,
- "base_total": 97.3,
+ "detect_rate": 0.8,
+ "precision": 0.75,
+ "base_total": 97.0,
  "stage": "예선",
+ "planted": "planted2.json",
  "rows": [
   {
-   "variant": "drop-ai-ethics",
+   "variant": "drop2-ethics",
    "expected": [
     "활용성"
-   ],
-   "detected": false,
-   "new_gaps": 1,
-   "hits": 0,
-   "total": 91.0,
-   "per": {
-    "적합성": 20.0,
-    "활용성": 16.7,
-    "혁신성": 25.0,
-    "실현가능성": 10.0,
-    "확장성": 19.3
-   }
-  },
-  {
-   "variant": "drop-accuracy-target",
-   "expected": [
-    "실현가능성",
-    "활용성"
-   ],
-   "detected": false,
-   "new_gaps": 1,
-   "hits": 0,
-   "total": 92.7,
-   "per": {
-    "적합성": 18.7,
-    "활용성": 17.3,
-    "혁신성": 30.0,
-    "실현가능성": 10.0,
-    "확장성": 16.7
-   }
-  },
-  {
-   "variant": "drop-hackathon-plan",
-   "expected": [
-    "실현가능성"
    ],
    "detected": true,
-   "new_gaps": 2,
-   "hits": 1,
-   "total": 92.3,
+   "new_gaps": 4,
+   "hits": 2,
+   "total": 89.3,
    "per": {
     "적합성": 20.0,
-    "활용성": 17.3,
-    "혁신성": 30.0,
-    "실현가능성": 7.0,
+    "활용성": 14.0,
+    "혁신성": 28.0,
+    "실현가능성": 9.3,
     "확장성": 18.0
    }
   },
   {
-   "variant": "drop-comparison-table",
+   "variant": "drop2-comparison",
    "expected": [
     "혁신성"
-   ],
-   "detected": false,
-   "new_gaps": 0,
-   "hits": 0,
-   "total": 100.0,
-   "per": {
-    "적합성": 20.0,
-    "활용성": 20.0,
-    "혁신성": 30.0,
-    "실현가능성": 10.0,
-    "확장성": 20.0
-   }
-  },
-  {
-   "variant": "drop-impact-pilot",
-   "expected": [
-    "확장성"
    ],
    "detected": true,
    "new_gaps": 1,
    "hits": 1,
-   "total": 93.3,
+   "total": 93.7,
    "per": {
     "적합성": 20.0,
-    "활용성": 18.7,
+    "활용성": 20.0,
+    "혁신성": 25.0,
+    "실현가능성": 9.3,
+    "확장성": 19.3
+   }
+  },
+  {
+   "variant": "drop2-plan",
+   "expected": [
+    "실현가능성"
+   ],
+   "detected": true,
+   "new_gaps": 1,
+   "hits": 1,
+   "total": 92.0,
+   "per": {
+    "적합성": 18.7,
+    "활용성": 20.0,
+    "혁신성": 28.0,
+    "실현가능성": 6.7,
+    "확장성": 18.7
+   }
+  },
+  {
+   "variant": "drop2-impact",
+   "expected": [
+    "확장성"
+   ],
+   "detected": true,
+   "new_gaps": 2,
+   "hits": 2,
+   "total": 82.0,
+   "per": {
+    "적합성": 20.0,
+    "활용성": 14.7,
     "혁신성": 28.0,
     "실현가능성": 10.0,
-    "확장성": 16.7
+    "확장성": 9.3
+   }
+  },
+  {
+   "variant": "drop2-problem",
+   "expected": [
+    "적합성"
+   ],
+   "detected": false,
+   "new_gaps": 0,
+   "hits": 0,
+   "total": 96.0,
+   "per": {
+    "적합성": 20.0,
+    "활용성": 16.0,
+    "혁신성": 30.0,
+    "실현가능성": 10.0,
+    "확장성": 20.0
    }
   }
  ],

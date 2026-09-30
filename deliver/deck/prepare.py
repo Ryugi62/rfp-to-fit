@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pypdfium2
@@ -62,6 +63,8 @@ def run_numbers(run: dict) -> dict:
         "n_contested": len(kinds.get("논쟁 지점", [])),
         "mcp_via": trace.get("선행 탐색", {}).get("via", ""),
         "personas": [{"name": p["name"], "model": p["model"]} for p in run["personas"]],
+        "answered": sorted({v["reviewer_id"] for v in run["verdicts"]}),
+        "reviewers": review.get("reviewers", len({v["reviewer_id"] for v in run["verdicts"]})),
     }
 
 
@@ -78,7 +81,7 @@ def crop_shots() -> dict:
     mine = DECK / "shots"
     shots = ROOT / "deliver" / "shots"
     boxes = {  # (좌, 위, 우, 아래) — 1400×1000 전체 캡처 기준. Streamlit 상단 바·잘린 머리글 제외
-        "result": ("02-result.png", (180, 700, 1220, 990)),
+        "result": ("02-result.png", (615, 722, 1220, 985)),  # 심사기준 대조표만
         "input": ("01-input.png", (180, 262, 1220, 600)),
     }
     out = {}
@@ -112,7 +115,9 @@ def main():
         extract.append({"id": k, "agency": gold[k]["agency"].split(" ")[0].split("/")[0],
                         "recall": pct(e["recall"]), "n_gold": e["n_gold"],
                         "hit": e["n_gold"] - len(e["missed"]), "pages": pages[k], "model": e["model"],
-                        "seconds": e["seconds"]})
+                        "seconds": e["seconds"], "n_extracted": e["n_extracted"],
+                        "missed_form": sum("기획서 항목" in m for m in e["missed"]),
+                        "crit_agree": pct(e.get("criteria_agreement", 0))})
     motir = gold["motir-industrial-cluster-rnd-2026"]
     tracks = {c.get("track") for c in motir["criteria"] if c.get("track")}
 
@@ -122,10 +127,19 @@ def main():
         p = json.loads(planted_path.read_text())
         if p.get("stage") == "예선":
             det = sum(1 for r in p["rows"] if r["detected"])
-            planted = {"ready": True, "n": p["n"], "detected": det,
+            planted = {"ready": True, "n": p["n"], "detected": det, "stage": p["stage"],
                        "detect": f"{det}/{p['n']}",
                        "precision": PENDING if p.get("precision") is None else f"{pct(p['precision'])}%"}
 
+    v1 = []
+    for f in sorted((ROOT / "data/eval").glob("planted-v1*.json")):
+        q = json.loads(f.read_text())
+        v1.append(sum(1 for r in q["rows"] if r["detected"]))
+    if planted["ready"]:
+        p = json.loads(planted_path.read_text())
+        totals = [r["total"] for r in p["rows"]]
+        planted.update({"v1": v1, "base": p["base_total"], "drop_min": round(p["base_total"] - max(totals), 1),
+                        "drop_max": round(p["base_total"] - min(totals), 1)})
     before = run_numbers(load(f"data/runs/{RID}--original.json"))
     after = run_numbers(load(f"data/runs/{RID}--after.json"))
     tests = sum(l.lstrip().startswith("def test_") for f in (ROOT / "tests").glob("test_*.py")
@@ -146,6 +160,11 @@ def main():
         "qr_live": qr(LIVE_URL, "live"),
         "qr_repo": qr(REPO_URL, "repo"),
     }
+    for k, r in (("original", before), ("after", after)):
+        if r["reviewers"] < len(r["personas"]):
+            print(f"WARN: {k} 실행에서 평가위원 {len(r['personas'])}명 중 {r['reviewers']}명만 판정 — 덱의 「5명 독립 채점」과 어긋남. 재실행 필요", file=sys.stderr)
+    if planted["ready"] is False:
+        print("WARN: planted.json stage≠예선 → 8장 「측정 중」", file=sys.stderr)
     (OUT / "numbers.json").write_text(json.dumps(nums, ensure_ascii=False, indent=1))
     print(json.dumps({k: v for k, v in nums.items() if k not in ("img",)}, ensure_ascii=False)[:1500])
 

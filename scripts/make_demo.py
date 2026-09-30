@@ -13,7 +13,7 @@ FF = imageio_ffmpeg.get_ffmpeg_exe()
 D = Path("deliver/demo")
 VOICE = "ko-KR-InJoonNeural"
 FONT = "/System/Library/Fonts/Supplemental/AppleGothic.ttf"
-ev = json.loads((D / "events.json").read_text())
+ev = json.loads((D / "events.json").read_text()) if (D / "events.json").exists() else {}
 
 LINES = [  # (기준 장면, 장면 시작 후 초, 문장)
     ("landing", 0.3, "RFP-to-Fit은 국가 R&D 공고의 실제 심사표로, 가상 평가위원 다섯 명이 제안서 초안을 먼저 채점하는 에이전트입니다."),
@@ -39,10 +39,17 @@ async def tts(i: int, text: str) -> Path:
     return p
 
 
+def make_tts():
+    clips = [asyncio.run(tts(i, s)) for i, (_, _, s) in enumerate(LINES)]
+    (D / "narr.json").write_text(json.dumps({k: round(dur(c), 2) for (k, _, _), c in zip(LINES, clips)}, indent=1))
+    print((D / "narr.json").read_text())
+
+
 def main():
+    narr = json.loads((D / "narr.json").read_text())
     a_end = ev["click"] + 1.5
     wait = ev["done"] - a_end
-    speed = max(1.0, wait / 6.0)
+    speed = max(1.0, wait / max(4.0, narr["click"] + 0.6 - 1.5))
     real = ev["done"] - ev["click"]
 
     def out_t(t):
@@ -52,7 +59,7 @@ def main():
             return a_end + (t - a_end) / speed
         return a_end + wait / speed + (t - ev["done"])
 
-    clips = [asyncio.run(tts(i, s)) for i, (_, _, s) in enumerate(LINES)]
+    clips = [D / f"n{i}.mp3" for i in range(len(LINES))]
     starts, cur = [], 0.0
     for (k, off, _), c in zip(LINES, clips):
         st = max(out_t(ev[k]) + off, cur + 0.25)
@@ -86,4 +93,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    make_tts() if sys.argv[1:] == ["tts"] else main()

@@ -60,6 +60,9 @@ function bigNum(s, num, label, x, y, w, o = {}) {
   t(s, label, { x, y: y + (o.gap || 1.05), w, h: 0.75, fontSize: o.lSize || 13, color: C.gray, lineSpacingMultiple: 1.15 });
 }
 const B = N.before, A = N.after, P = N.planted;
+const f1 = (x) => Number(x).toFixed(1);
+const partial = (r) => (r.reviewers < r.personas.length ? ` · 이번 실행은 평가위원 ${r.reviewers}/${r.personas.length}명 응답(1명 응답 실패 — 복구 중)` : "");
+const fp = (x) => (Number.isInteger(Number(x)) ? String(x) : Number(x).toFixed(1));
 const gem = B.personas.filter((p) => /gemini/i.test(p.model)).length;
 const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
 
@@ -77,7 +80,7 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
 {
   const s = pres.addSlide(); s.background = { color: C.white };
   eyebrow(s, "문제");
-  title(s, "제안서는 아이디어보다,\n**심사표**를 잘못 읽어서 떨어집니다");
+  title(s, "공고 한 건을 쪽마다 읽어 보니,\n**지킬 것**이 이만큼입니다");
   const M = N.motir;
   bigNum(s, `${M.pages}쪽`, "산업통상부 R&D 공고 한 건의 분량", X0, 3.35, 3.6);
   bigNum(s, `${M.n_req}개`, "지키지 않으면 탈락·감점되는 요건", X0 + 4.1, 3.35, 3.6);
@@ -85,8 +88,8 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   hline(s, 5.55);
   t(s, "연구자는 연구의 언어로 쓰고, 평가위원은 지표의 언어로 읽습니다. 그 사이의 빈칸은 제출 뒤에야 보입니다.",
     { x: X0, y: 5.85, w: W, h: 0.5, fontSize: 16, bold: true });
-  src(s, "산업통상부 공고 제2026-64호 — 요건·평가표를 쪽마다 판독해 만든 정답표(data/gold, 저장소 공개)");
-  s.addNotes("[35초] 여기 계신 분들 모두 제안서를 쓰고, 또 심사하시는 분들입니다. 공고 한 건이 37쪽, 지켜야 할 요건이 58개, 평가표가 3종입니다. 떨어지는 제안서의 상당수는 아이디어가 아니라 '이 지표에 대한 근거가 없다'에서 깎입니다. 문제는 그걸 제출 뒤에야 안다는 겁니다.");
+  src(s, "산업통상부 공고 제2026-64호 — 요건·평가표 정답표(data/gold, 저장소 공개) · 정답표는 파이프라인과 다른 모델(Claude)로 쪽마다 판독");
+  s.addNotes("[30초] 여기 계신 분들 모두 제안서를 쓰고, 또 심사하시는 분들입니다. 저희가 산업통상부 공고 한 건을 쪽마다 읽어 보니 37쪽에 지켜야 할 요건이 58개, 평가표가 3종이었습니다. 연구자는 연구의 언어로 쓰고 평가위원은 지표의 언어로 읽는데, 그 빈칸은 제출 뒤에야 보입니다.");
 }
 
 // ---------- 3. 핵심 아이디어 ----------
@@ -102,39 +105,42 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
     if (i < 4) hline(s, y + 0.53, X0, 6.35);
   });
   const cx = 7.85, cw = R - cx;
-  [["합의 결핍", "5명 중 4명 이상이 깎은 곳", "반드시 고칠 곳"], ["논쟁 지점", "의견이 2~3명으로 갈린 곳", "연구자가 판단할 곳"]].forEach(([k, a, b], i) => {
+  [["합의 결핍 — 다 같이 깎은 곳", "응답자의 80% 이상(5명 중 4명+)", "반드시 고칠 곳"], ["논쟁 지점 — 의견이 갈린 곳", "응답자의 20~80%가 깎음(5명 중 2~3명)", "연구자가 판단할 곳"]].forEach(([k, a, b], i) => {
     const y = 2.95 + i * 1.65;
     box(s, cx, y, cw, 1.4, { fill: i ? C.white : C.bg2 });
     t(s, k, { x: cx + 0.3, y: y + 0.22, w: cw - 0.6, h: 0.35, fontSize: 13, bold: true, color: C.blue });
     t(s, a, { x: cx + 0.3, y: y + 0.55, w: cw - 0.6, h: 0.4, fontSize: 17, bold: true });
     t(s, "→ " + b, { x: cx + 0.3, y: y + 0.96, w: cw - 0.6, h: 0.35, fontSize: 13, color: C.sub });
   });
-  t(s, `평가위원 모델도 나눴습니다 — Gemini ${gem}명 + 국산 Solar ${sol}명. 한 회사 모델의 치우침이 '합의'로 굳지 않게.`,
-    { x: X0, y: 6.45, w: W, h: 0.4, fontSize: 13.5, color: C.sub });
-  s.addNotes("[35초] 평가위원 한 명의 점수는 취향입니다. 그래서 관점이 다른 다섯 명이 서로의 답을 모른 채 채점합니다. 네 명 이상이 깎으면 반드시 고칠 곳, 의견이 갈리면 연구자가 판단할 곳입니다. 모델도 Gemini와 국산 Solar로 나눠, 한 회사 모델의 치우침이 합의로 굳지 않게 했습니다.");
+  t(s, [{ text: "대필·첨삭이 아니라 심사입니다.", options: { bold: true, color: C.ink, breakLine: true } },
+    { text: `과거 심사 기록 없이 이번 공고 심사표에서 질문을 만들고 · 평가위원 Gemini ${gem}명 + 국산 Solar ${sol}명 · 칭찬에도 원문 인용`, options: {} }],
+    { x: X0, y: 6.25, w: W, h: 0.75, fontSize: 13, color: C.sub, lineSpacingMultiple: 1.25 });
+  s.addNotes("[30초] 평가위원 한 명의 점수는 취향입니다. 그래서 관점이 다른 다섯 명이 서로의 답을 모른 채 채점합니다. 네 명 이상이 깎으면 반드시 고칠 곳, 의견이 갈리면 연구자가 판단할 곳입니다. 모델도 Gemini와 국산 Solar로 나눠 한 회사 모델의 치우침이 합의로 굳지 않게 했습니다. 과거 심사 기록이 필요 없어서, 오늘 나온 새 공고에도 바로 씁니다.");
 }
 
 // ---------- 4. 데모 ----------
 {
   const s = pres.addSlide(); s.background = { color: C.white };
   eyebrow(s, "데모 — 이 대회 공고로");
-  title(s, `공고 한 건과 초안 한 편,\n**${B.seconds}초** 뒤 고칠 곳이 나옵니다`);
+  title(s, `초안 한 편을 넣으면,\n**${B.seconds}초** 뒤 고칠 곳이 나옵니다`);
   const lw = 4.7;
-  numRow(s, "01", `요건 ${B.n_req}개 · 심사표 ${B.n_crit}개 자동 추출`, "모두 공고 쪽 번호와 원문 인용이 붙습니다", X0, 2.95, lw, { hSize: 16 });
+  const mo = N.extract.find((e) => e.pages === N.motir.pages) || N.extract[0];
+  const na = N.extract.find((e) => /nais/.test(e.id)) || mo;
+  numRow(s, "01", `요건 ${B.n_req}개 · 심사표 ${B.n_crit}개 자동 추출`, `공고 파싱은 처음 한 번(${na.pages}쪽 ${Math.round(na.seconds)}초·${mo.pages}쪽 ${Math.round(mo.seconds)}초)`, X0, 2.95, lw, { hSize: 16 });
   numRow(s, "02", `점검 질문 ${B.n_items}개를 5명에게 따로`, "서로의 답을 모른 채 판정 + 인용", X0, 4.05, lw, { hSize: 16 });
-  numRow(s, "03", `고칠 곳 ${B.n_gaps} · 판단할 곳 ${B.n_contested}`, "보완은 문장 대신 「무엇을·어디에」만", X0, 5.15, lw, { hSize: 16 });
+  numRow(s, "03", "고칠 곳과 판단할 곳을 나눠 표시", "보완은 문장 대신 「무엇을·어디에」만 지정", X0, 5.15, lw, { hSize: 16 });
   const ix = 6.05, iw = R - ix;
   const put = (img, y, maxH) => {
     let w = iw, h = iw * img.h / img.w; if (h > maxH) { h = maxH; w = h * img.w / img.h; }
-    box(s, ix, y, iw, h + 0.2);
-    s.addImage({ path: img.path, x: ix + (iw - w) / 2 + 0.1 * (w / iw), y: y + 0.1, w: w - 0.2 * (w / iw), h: h });
+    box(s, ix, y, w, h + 0.2);
+    s.addImage({ path: img.path, x: ix + 0.1, y: y + 0.1, w: w - 0.2, h: h * (w - 0.2) / w });
     return y + h + 0.2;
   };
   let y = 2.95;
-  if (N.img.input) y = put(N.img.input, y, 1.95) + 0.2;
+  if (N.img.input) y = put(N.img.input, y, 1.75) + 0.2;
   if (N.img.result) put(N.img.result, y, 6.8 - y - 0.2);
   src(s, "라이브 앱 실제 화면(Streamlit) — 마지막 장의 주소에서 직접 눌러 볼 수 있습니다");
-  s.addNotes(`[70초] 지금 보시는 건 이 대회 공고입니다. 공고에서 요건 ${B.n_req}개와 본선 심사표 ${B.n_crit}개를 스스로 찾아냈고, 저희 예선 기획서를 넣었습니다. 점검 질문 ${B.n_items}개가 다섯 명에게 따로 가고, 약 ${B.seconds}초 뒤 모두가 깎는 곳과 의견이 갈리는 곳이 나옵니다. 보완은 문장을 써 주지 않고 '어떤 근거를, 어느 절에'만 지정합니다.`);
+  s.addNotes(`[60초] 지금 보시는 건 이 대회 공고입니다. 공고에서 요건 ${B.n_req}개와 본선 심사표 ${B.n_crit}개를 스스로 찾아냈고, 저희 예선 기획서를 넣었습니다. 점검 질문 ${B.n_items}개가 다섯 명에게 따로 가고, 약 ${B.seconds}초 뒤 모두가 깎는 곳과 의견이 갈리는 곳이 나옵니다. 보완은 문장을 써 주지 않고 '어떤 근거를, 어느 절에'만 지정합니다.`);
 }
 
 // ---------- 5. 서비스 흐름도 ----------
@@ -162,7 +168,6 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   for (let i = 0; i < 5; i++) arrow(s, colX(i) + bw + 0.04, y1 + bh / 2, colX(i + 1) - 0.04, y1 + bh / 2);
   arrow(s, colX(5) + bw / 2, y1 + bh + 0.04, colX(5) + bw / 2, y2 - 0.04);
   for (let c = 5; c > 1; c--) arrow(s, colX(c) - 0.04, y2 + bh / 2, colX(c - 1) + bw + 0.04, y2 + bh / 2);
-  t(s, "↺ 1회", { x: colX(4) + bw - 0.05, y: y2 + bh + 0.06, w: gap + 0.1, h: 0.25, fontSize: 10, bold: true, color: C.blue, align: "center" });
   // 범례 — 비어 있는 왼쪽 아래 칸
   [["H", "사람이 판단"], ["A", "AI(LLM)가 생성"], ["R", "규칙(코드)이 검사"]].forEach(([k, label], i) => {
     const st = K[k], y = y2 + 0.05 + i * 0.36;
@@ -180,7 +185,7 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   const s = pres.addSlide(); s.background = { color: C.white };
   eyebrow(s, "AI 구성 · 데이터");
   title(s, "두 회사 모델, 그래프 하나,\n바꿔 끼우는 **MCP** 도구");
-  const chip = (x, y, w, label, kind) => {
+  const chip = (s, x, y, w, label, kind) => {
     const rule = kind === "R";
     box(s, x, y, w, 0.62, { fill: rule ? C.white : C.blueBg, lineColor: rule ? C.gray : C.blue, dash: rule ? "dash" : "solid" });
     t(s, label, { x: x + 0.05, y: y + 0.08, w: w - 0.1, h: 0.46, fontSize: 12, bold: true, color: rule ? C.ink : C.blueInk, align: "center", valign: "middle" });
@@ -195,18 +200,18 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   // LangGraph 컨테이너
   const gx = 3.55, gw = 5.75, gy = 2.7, gh = 2.4;
   box(s, gx, gy, gw, gh, { fill: "F9FAFB" });
-  t(s, "LangGraph 상태 그래프", { x: gx + 0.2, y: gy + 0.14, w: 3, h: 0.3, fontSize: 11.5, bold: true, color: C.sub });
+  t(s, "LangGraph 상태 그래프 — 원문을 통째로 넣고 인용으로 대조(RAG 대신)", { x: gx + 0.2, y: gy + 0.14, w: gw - 0.4, h: 0.3, fontSize: 11, bold: true, color: C.sub });
   arrow(s, X0 + 2.3, 3.9, gx - 0.05, 3.9);
   const r1 = [["점검 질문", "A"], ["선행 탐색", "A"], ["5명 독립 채점", "A"]];
   const w1 = 1.55, g1 = (gw - 0.4 - 3 * w1) / 2;
-  r1.forEach(([l, k], i) => { chip(gx + 0.2 + i * (w1 + g1), gy + 0.55, w1, l, k); if (i < 2) arrow(s, gx + 0.2 + i * (w1 + g1) + w1 + 0.03, gy + 0.86, gx + 0.2 + (i + 1) * (w1 + g1) - 0.03, gy + 0.86); });
-  const r2 = [["인용 실재 검사", "R"], ["재질의 ↺", "A"], ["합의·논쟁 집계", "R"], ["보완 지정", "A"]];
+  r1.forEach(([l, k], i) => { chip(s, gx + 0.2 + i * (w1 + g1), gy + 0.55, w1, l, k); if (i < 2) arrow(s, gx + 0.2 + i * (w1 + g1) + w1 + 0.03, gy + 0.86, gx + 0.2 + (i + 1) * (w1 + g1) - 0.03, gy + 0.86); });
+  const r2 = [["인용 실재 검사", "R"], ["재질의(1회)", "A"], ["합의·논쟁 집계", "R"], ["보완 지정", "A"]];
   const w2 = 1.2, g2 = (gw - 0.4 - 4 * w2) / 3;
-  r2.forEach(([l, k], i) => { chip(gx + 0.2 + i * (w2 + g2), gy + 1.55, w2, l, k); if (i < 3) arrow(s, gx + 0.2 + i * (w2 + g2) + w2 + 0.02, gy + 1.86, gx + 0.2 + (i + 1) * (w2 + g2) - 0.02, gy + 1.86); });
-  const lastX = gx + 0.2 + 2 * (w1 + g1) + w1 / 2;
-  arrow(s, lastX, gy + 1.2, gx + 0.2 + w2 / 2 + 0.2, gy + 1.52);
+  const c2x = (i) => gx + gw - 0.2 - w2 - i * (w2 + g2); // 오른쪽 → 왼쪽(뱀 모양)
+  r2.forEach(([l, k], i) => { chip(s, c2x(i), gy + 1.55, w2, l, k); if (i < 3) arrow(s, c2x(i) - 0.02, gy + 1.86, c2x(i + 1) + w2 + 0.02, gy + 1.86); });
+  arrow(s, gx + gw - 0.2 - 0.6, gy + 1.19, gx + gw - 0.2 - 0.6, gy + 1.53);
   // LLM
-  [["Google Gemini", `파싱 · 점검 질문 · 평가위원 ${gem}명`], ["Upstage Solar (국산)", `평가위원 ${sol}명 · 장애 시 상호 대체`]].forEach(([a, b], i) => {
+  [["Google Gemini", `파싱 · 점검 질문 · 평가위원 ${gem}명`], ["Upstage Solar (국산)", `평가위원 ${sol}명 · 다른 회사 모델로 교차`]].forEach(([a, b], i) => {
     const x = gx + i * (gw / 2 + 0.1), w = gw / 2 - 0.1, y = 5.3;
     box(s, x, y, w, 0.85, { fill: C.blueBg, lineColor: C.blue });
     t(s, a, { x: x + 0.18, y: y + 0.12, w: w - 0.3, h: 0.32, fontSize: 13.5, bold: true, color: C.blueInk });
@@ -216,24 +221,26 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   const mx = 9.7, mw = R - mx;
   box(s, mx, 2.7, mw, 1.25, { lineColor: C.blue });
   t(s, "MCP 도구 서버", { x: mx + 0.18, y: 2.84, w: mw - 0.3, h: 0.32, fontSize: 13.5, bold: true, color: C.blueInk });
-  t(s, "search_prior_art · stdio\n다른 AI 비서도 같은 도구 호출", { x: mx + 0.18, y: 3.2, w: mw - 0.3, h: 0.65, fontSize: 10.5, color: C.sub, lineSpacingMultiple: 1.2 });
+  t(s, "AI 도구 연결 표준\nsearch_prior_art · check_quote\n다른 AI 비서도 같은 도구 호출", { x: mx + 0.18, y: 3.17, w: mw - 0.3, h: 0.75, fontSize: 10.5, color: C.sub, lineSpacingMultiple: 1.1 });
   arrow(s, gx + gw + 0.03, 3.3, mx - 0.03, 3.3, C.blue);
   box(s, mx, 4.25, mw, 0.85);
   t(s, "OpenAlex", { x: mx + 0.18, y: 4.37, w: mw - 0.3, h: 0.32, fontSize: 13.5, bold: true });
-  t(s, "공개 학술 DB · 선행연구 검색", { x: mx + 0.18, y: 4.72, w: mw - 0.3, h: 0.3, fontSize: 10.5, color: C.gray });
+  t(s, "선행연구 → 혁신성 판정 참고", { x: mx + 0.18, y: 4.72, w: mw - 0.3, h: 0.3, fontSize: 10.5, color: C.gray });
   arrow(s, mx + mw / 2, 3.98, mx + mw / 2, 4.22);
   box(s, mx, 5.3, mw, 0.85, { fill: C.bg2, lineColor: C.bg2 });
   t(s, "출력", { x: mx + 0.18, y: 5.42, w: mw - 0.3, h: 0.32, fontSize: 13.5, bold: true });
   t(s, "대조표 · 합의/논쟁 · 보완 위치", { x: mx + 0.18, y: 5.77, w: mw - 0.3, h: 0.3, fontSize: 10.5, color: C.sub });
   t(s, `데이터: 공개 R&D 공고 3건(국가과학기술연구회·우주항공청·산업통상부) + 쪽별 정답표 · 인용 검사·집계는 LLM을 모르는 순수 코드(테스트 ${N.tests}개)`,
-    { x: X0, y: 6.5, w: W, h: 0.35, fontSize: 12, color: C.sub });
-  s.addNotes("[20초] 평가위원은 Gemini와 국산 Solar로 나눴고, 전체 흐름은 LangGraph 상태 그래프입니다. 인용 검사에 실패하면 재질의로 되돌아가는 루프가 있습니다. 선행연구 탐색은 MCP 도구 서버로 감싸서, 검색기를 바꿔 끼울 수 있고 다른 AI 비서도 같은 도구를 부를 수 있습니다.");
+    { x: X0, y: 6.4, w: W, h: 0.3, fontSize: 12, color: C.sub });
+  t(s, "보안: 초안은 서버에 저장하지 않지만 외부 모델 API로는 전송됩니다 — LLM은 포트로 분리돼 국산·기관 내부 모델로 교체할 수 있는 구조",
+    { x: X0, y: 6.75, w: W, h: 0.3, fontSize: 12, color: C.sub });
+  s.addNotes("[20초] 평가위원은 Gemini와 국산 Solar로 나눴고, 전체 흐름은 LangGraph 상태 그래프입니다. 검색으로 조각을 넣는 대신 원문을 통째로 넣고 인용으로 대조합니다. 인용 검사에 실패하면 재질의로 되돌아가는 루프가 있습니다. 선행연구 탐색은 MCP 도구 서버로 감싸서, 검색기를 바꿔 끼울 수 있고 다른 AI 비서도 같은 도구를 부를 수 있습니다.");
 }
 
 // ---------- 7. 신뢰 장치 ----------
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "가짜로 돌아가는 척을 못 하게");
+  eyebrow(s, "없는 인용은 통과하지 못하게");
   title(s, "「충족」이라 말하려면,\n초안에서 **글자 그대로** 인용해야 합니다");
   const lw = 6.6;
   numRow(s, "01", "판정마다 초안 원문 인용을 함께 제출", "칭찬(충족)에도 증거를 요구합니다", X0, 2.95, lw);
@@ -242,11 +249,11 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   const rx = 8.35, rw = R - rx;
   bigNum(s, `${B.invalid}건`, `판정 ${B.n_verdicts}개 중 인용이 원문에 없던 것`, rx, 2.9, rw, { size: 44, gap: 0.95, lSize: 12.5 });
   const rest = B.invalid - B.fixed;
-  bigNum(s, `${B.fixed}건`, `재질의로 원문 인용 교정${rest > 0 ? ` · 남은 ${rest}건 강등` : ""}`, rx, 4.45, rw, { size: 44, gap: 0.95, lSize: 12.5, color: C.blue });
+  bigNum(s, `${B.fixed}건`, `다시 물은 뒤 무효에서 벗어남(인용 통과 또는 「부족」으로 하향)${rest > 0 ? ` · 남은 ${rest}건은 점수에서 제외` : ""}`, rx, 4.45, rw, { size: 44, gap: 0.95, lSize: 12.5, color: C.blue });
   hline(s, 6.1);
-  t(s, "같은 검사를 공고에도 겁니다 — 요건·심사표도 그 쪽에 원문이 없으면 버립니다.", { x: X0, y: 6.3, w: W, h: 0.4, fontSize: 15, bold: true });
-  src(s, "숫자: 예선 기획서 실행 기록(data/runs/nais-hackathon-2026--original.json의 trace)");
-  s.addNotes(`[25초] LLM 심사의 가장 큰 위험은 그럴듯한 칭찬입니다. 저희는 칭찬에도 증거를 요구합니다. 인용을 코드가 원문과 대조하고, 없으면 무효로 돌려 한 번 다시 묻습니다. 이 실행에서 ${B.n_verdicts}개 판정 중 ${B.invalid}건이 원문에 없는 인용이었고, 재질의로 ${B.fixed}건이 교정됐습니다.`);
+  t(s, "한계: 인용이 판정을 뒷받침하는지는 사람이 봅니다 — 그래서 화면에 인용을 그대로 펼쳐 둡니다.", { x: X0, y: 6.3, w: W, h: 0.4, fontSize: 15, bold: true });
+  src(s, "숫자: 예선 기획서 실행 기록(data/runs/nais-hackathon-2026--original.json의 trace)" + partial(B));
+  s.addNotes(`[25초] LLM 심사의 가장 큰 위험은 그럴듯한 칭찬입니다. 저희는 칭찬에도 증거를 요구합니다. 인용을 코드가 원문과 대조하고, 없으면 무효로 돌려 한 번 다시 묻습니다. 이 실행에서 ${B.n_verdicts}개 판정 중 ${B.invalid}건이 원문에 없는 인용이었고, 다시 물은 뒤 ${B.fixed}건이 무효에서 벗어났습니다. 인용이 판정을 뒷받침하는지는 사람이 보도록 화면에 그대로 둡니다.`);
 }
 
 // ---------- 8. 측정 ----------
@@ -255,27 +262,31 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   eyebrow(s, "측정");
   title(s, "정답표를 먼저 만들고,\n**숫자**로 쟀습니다");
   const ex = N.extract;
-  const lbl = (e) => `${e.agency.replace("국가과학기술연구회", "NAIS 해커톤")} (${e.pages}쪽)`;
-  t(s, "공고 파싱 — 정답표 대비 요건 재현율 (목표 90%)", { x: X0, y: 2.85, w: 6.4, h: 0.35, fontSize: 13, bold: true, color: C.sub });
-  s.addChart(pres.charts.BAR, [{ name: "재현율", labels: ex.map(lbl), values: ex.map((e) => e.recall) }], {
-    x: X0 - 0.1, y: 3.2, w: 6.5, h: 2.55, barDir: "bar", chartColors: [C.blue],
+  const nm = (e) => e.agency.replace("국가과학기술연구회", "NAIS 해커톤");
+  t(s, "① 공고 파싱 — 정답표 요건을 놓치지 않은 비율(재현율, 목표 90%)", { x: X0, y: 2.85, w: 6.6, h: 0.35, fontSize: 13, bold: true, color: C.sub });
+  s.addChart(pres.charts.BAR, [{ name: "재현율", labels: ex.map((e) => `${nm(e)} · ${e.pages}쪽`), values: ex.map((e) => e.recall) }], {
+    x: X0 - 0.1, y: 3.2, w: 6.5, h: 2.45, barDir: "bar", chartColors: [C.blue],
     catAxisLabelColor: C.ink, catAxisLabelFontSize: 12, catAxisLabelFontFace: F, catAxisOrientation: "maxMin",
     valAxisHidden: true, valAxisMinVal: 0, valAxisMaxVal: 100, valGridLine: { style: "none" }, catGridLine: { style: "none" },
     showValue: true, dataLabelFormatCode: '0"%"', dataLabelColor: C.ink, dataLabelFontSize: 13, dataLabelFontBold: true, dataLabelFontFace: F,
     dataLabelPosition: "outEnd", barGapWidthPct: 70, showLegend: false,
   });
   const weak = ex.filter((e) => e.recall < 90);
-  t(s, ex.map((e) => `${e.agency.replace("국가과학기술연구회", "NAIS")} ${e.hit}/${e.n_gold}`).join(" · ")
-    + (weak.length ? ` — ${weak.map((e) => e.agency.replace("국가과학기술연구회", "NAIS 공고")).join("·")}가 가장 약한 곳, 그대로 공개합니다` : ""),
-    { x: X0, y: 5.85, w: 6.4, h: 0.55, fontSize: 11.5, color: C.gray, lineSpacingMultiple: 1.15 });
+  const wtxt = weak.map((e) => `${nm(e)} ${e.hit}/${e.n_gold}, 심사표 일치 ${e.crit_agree}%${e.missed_form ? `(놓친 ${e.n_gold - e.hit}건 중 ${e.missed_form}건이 기획서 작성 항목)` : ""}`).join(" · ");
+  t(s, ex.filter((e) => e.recall >= 90).map((e) => `${nm(e)} ${e.hit}/${e.n_gold}`).join(" · ") + (weak.length ? ` — 가장 약한 곳: ${wtxt}` : ""),
+    { x: X0, y: 5.75, w: 6.6, h: 0.6, fontSize: 11.5, color: C.gray, lineSpacingMultiple: 1.15 });
   const rx = 8.1, rw = R - rx;
-  const pWeak = P.ready && P.detected / P.n < 0.6;
-  bigNum(s, P.ready ? P.detect : P.detect, `결함 주입 — 지표별 블록을 하나씩 지운 초안 ${P.n}개 중 지운 곳을 짚은 수 · 정밀도 ${P.precision}`,
-    rx, 2.85, rw, { size: 44, gap: 0.95, lSize: 12.5, color: C.blue });
-  if (pWeak) t(s, "약한 숫자도 그대로 둡니다 — 항목 단위 감도가 다음 과제", { x: rx, y: 4.3, w: rw, h: 0.3, fontSize: 11.5, bold: true, color: C.sub });
-  bigNum(s, `${B.seconds}초`, "1건 실행 — 평가위원 5명 · 선행연구 탐색 포함", rx, 4.75, rw, { size: 44, gap: 0.95, lSize: 12.5 });
-  src(s, "정답표: 파이프라인(Gemini·Solar)과 독립된 모델이 공고를 쪽마다 판독 · 측정 스크립트 scripts/eval_extract.py · eval_planted.py 공개");
-  s.addNotes(`[25초] 정확도는 말이 아니라 숫자로 보여 드립니다. 공고를 쪽마다 판독한 정답표 대비 요건 재현율이 ${ex.map((e) => `${e.agency} ${e.recall}%`).join(", ")}입니다. 기획서에서 지표별 블록을 하나씩 지운 초안 ${P.n}개로 결함 주입 실험을 했고 ${P.detect}를 짚었습니다. 약한 숫자도 그대로 공개합니다.`);
+  t(s, `② 일부러 지운 초안 시험${P.stage ? ` (${P.stage} 심사표)` : ""}`, { x: rx, y: 2.85, w: rw, h: 0.35, fontSize: 13, bold: true, color: C.sub });
+  bigNum(s, P.detect, `근거 블록을 하나씩 지운 초안 ${P.n}개 중 짚은 수\n짚은 곳의 정확도 ${P.precision}`,
+    rx, 3.2, rw, { size: 44, gap: 0.95, lSize: 12.5, color: C.blue });
+  if (P.ready) {
+    const v1 = P.v1 && P.v1.length ? `첫 초안 세트는 ${Math.min(...P.v1)}~${Math.max(...P.v1)}/${P.n} — 결과를 본 뒤 블록을 다시 설계한 두 번째 세트입니다(사전 등록 아님). ` : "";
+    t(s, `${v1}지운 초안의 점수는 원본 ${P.base}점보다 ${P.drop_min}~${P.drop_max}점 낮았습니다.`,
+      { x: rx, y: 4.85, w: rw, h: 0.75, fontSize: 12, color: C.sub, lineSpacingMultiple: 1.15 });
+  }
+  t(s, `③ 1건 채점 ${B.seconds}초 — 평가위원 ${B.reviewers}명 응답 · 선행연구 탐색 포함(공고 파싱 제외)`, { x: rx, y: 5.8, w: rw, h: 0.55, fontSize: 12, bold: true, color: C.ink, lineSpacingMultiple: 1.15 });
+  src(s, `정답표: 다른 모델(Claude)이 쪽마다 판독 · 측정 파싱 모델 ${[...new Set(ex.map((e) => e.model))].join(", ")} · 시연은 저장된 파싱 결과(재현율 미측정) · 평가위원 모델 ${[...new Set(B.personas.map((q) => q.model.split(" ").pop()))].join(", ")}`);
+  s.addNotes(`[25초] 정확도는 숫자로 보여 드립니다. 정답표 대비 요건을 놓치지 않은 비율이 ${ex.map((e) => `${nm(e)} ${e.recall}%`).join(", ")}입니다. 가장 약한 곳도 그대로 둡니다. 기획서에서 근거 블록을 일부러 하나씩 지운 초안 ${P.n}개 중 ${P.detect}를 짚었고, 지운 초안은 점수도 내려갔습니다.`);
 }
 
 // ---------- 9. 메타 데모 ----------
@@ -283,13 +294,15 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   const s = pres.addSlide(); s.background = { color: C.white };
   eyebrow(s, "우리 자신에게 먼저");
   title(s, "이 대회 심사표로,\n**우리**를 먼저 채점했습니다");
-  bigNum(s, `${B.total}점`, "예선 기획서 — 본선 심사표 기준", X0, 2.9, 3.2, { size: 50, gap: 1.0 });
+  bigNum(s, `${f1(B.total)}점`, "예선 기획서 — 본선 심사표 기준", X0, 2.9, 3.2, { size: 50, gap: 1.0 });
   t(s, "→", { x: X0 + 3.2, y: 3.0, w: 0.6, h: 0.8, fontSize: 36, color: C.gray });
-  bigNum(s, `${A.total}점`, "보완 후", X0 + 3.95, 2.9, 3.0, { size: 50, gap: 1.0, color: C.blue });
+  bigNum(s, `${f1(A.total)}점`, "보완 후", X0 + 3.95, 2.9, 3.0, { size: 50, gap: 1.0, color: C.blue });
+  const flagged = [...B.gaps, ...B.contested];
+  const aboutDeck = flagged.some((q) => /흐름도|UI|발표자료|화면/.test(q));
   const gy = 4.55;
   box(s, X0, gy, 6.9, 1.35, { fill: C.bg2, lineColor: C.bg2 });
-  t(s, `도구가 짚은 합의 결핍 ${B.n_gaps}곳 · 논쟁 지점 ${B.n_contested}곳`, { x: X0 + 0.25, y: gy + 0.18, w: 6.4, h: 0.3, fontSize: 12, bold: true, color: C.blue });
-  t(s, [...B.gaps, ...B.contested].slice(0, 3).map((q) => ({ text: "“" + q + "”", options: { breakLine: true } })),
+  t(s, `도구가 짚은 곳 — 합의 결핍 ${B.n_gaps} · 논쟁 지점 ${B.n_contested} → 보완 후 ${A.n_gaps} · ${A.n_contested}`, { x: X0 + 0.25, y: gy + 0.18, w: 6.4, h: 0.3, fontSize: 12, bold: true, color: C.blue });
+  t(s, flagged.length ? flagged.slice(0, 3).map((q) => ({ text: "“" + q + "”", options: { breakLine: true } })) : "5명 모두 충족 — 짚은 곳이 없습니다",
     { x: X0 + 0.25, y: gy + 0.5, w: 6.45, h: 0.8, fontSize: 11.5, color: C.ink, lineSpacingMultiple: 1.15 });
   // 오른쪽: 지표별 전·후
   const tx = 8.35, tw = R - tx;
@@ -301,13 +314,13 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
     hline(s, y - 0.06, tx, 4.05);
     const up = a.got - r.got >= 1;
     t(s, `${r.name} (${r.points})`, { x: tx, y: y + 0.04, w: 2.3, h: 0.35, fontSize: 13.5, bold: true });
-    t(s, String(r.got), { x: tx + 2.3, y: y + 0.04, w: 0.8, h: 0.35, fontSize: 13.5, color: C.sub, align: "right" });
-    t(s, String(a.got), { x: tx + 3.2, y: y + 0.04, w: 0.85, h: 0.35, fontSize: 13.5, bold: true, color: up ? C.blue : C.ink, align: "right" });
+    t(s, fp(r.got), { x: tx + 2.3, y: y + 0.04, w: 0.8, h: 0.35, fontSize: 13.5, color: C.sub, align: "right" });
+    t(s, fp(a.got), { x: tx + 3.2, y: y + 0.04, w: 0.85, h: 0.35, fontSize: 13.5, bold: true, color: up ? C.blue : C.ink, align: "right" });
   });
   hline(s, 6.1);
-  t(s, "그래서 오늘 이 발표에 흐름도·AI 구성도·실제 화면을 넣었습니다.", { x: X0, y: 6.28, w: W, h: 0.4, fontSize: 16, bold: true });
-  src(s, "보완 후 = 예선 기획서에 「본선 구현 결과」 절을 사람이 추가(에이전트는 위치·근거 종류만 지정) · data/runs/*--original.json · *--after.json");
-  s.addNotes(`[30초] 저희 도구로 저희 예선 기획서를 이 대회 본선 심사표로 먼저 채점했습니다. ${B.total}점, 그리고 '핵심 기능 UI 구성이 없다', '서비스 흐름도가 없다'는 지적이 나왔습니다. 오늘 이 발표는 그 지적을 반영한 결과이고, 보완 후 ${A.total}점입니다.`);
+  t(s, aboutDeck ? "그래서 오늘 이 발표에 흐름도·AI 구성도·실제 화면을 넣었습니다." : "짚은 곳을 채운 뒤, 같은 점검 질문으로 다시 채점했습니다.", { x: X0, y: 6.28, w: W, h: 0.4, fontSize: 16, bold: true });
+  src(s, "점수 예측이 아니라 빈칸 찾기 · 보완 후 = 「본선 구현 결과」 절을 사람이 추가 · 같은 판정자로 잰 자기 점검(변별력 근거는 8장)" + partial(B));
+  s.addNotes(`[25초] 저희 도구로 저희 예선 기획서를 이 대회 본선 심사표로 먼저 채점했습니다. ${f1(B.total)}점, 짚은 곳 ${flagged.length}곳. ${aboutDeck ? "오늘 이 발표는 그 지적을 반영한 결과이고, " : "그곳을 채운 뒤 같은 질문으로 다시 채점해 "}${f1(A.total)}점입니다. 같은 판정자로 잰 자기 점검이라, 변별력 근거는 앞 장의 지운 초안 시험으로 드렸습니다.`);
 }
 
 // ---------- 10. 확장 ----------
@@ -315,9 +328,9 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   const s = pres.addSlide(); s.background = { color: C.white };
   eyebrow(s, "확장");
   title(s, "연구자에서 **전문기관**까지,\n같은 엔진이 갑니다");
-  const cols = [["연구자", "제출 전 셀프 점검", "고칠 곳부터 고치고, 갈리는 곳은 판단"],
-    ["전문기관", "접수 후 요건 사전검토", "형식 미비·필수 서류 누락 스크리닝"],
-    ["평가위원", "지표별 근거 위치 표시", "심사 보조 — 판정은 사람이"]];
+  const cols = [["연구자 · 구현", "제출 전 셀프 점검", "지금 이 앱 — 고칠 곳부터, 갈리는 곳은 판단"],
+    ["전문기관 · 계획", "접수 후 요건 사전검토", "형식 미비·필수 서류 누락 스크리닝"],
+    ["평가위원 · 계획", "지표별 근거 위치 표시", "심사 보조 — 판정은 사람이"]];
   const cw = 3.4, cg = (W - 3 * cw) / 2;
   cols.forEach(([who, what, desc], i) => {
     const x = X0 + i * (cw + cg);
@@ -328,13 +341,13 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   });
   hline(s, 4.7);
   t(s, "같은 엔진, 다른 문서", { x: X0, y: 4.95, w: 4, h: 0.35, fontSize: 13, bold: true, color: C.sub });
-  [["연차·성과보고서", "계획 지표 대비 실적"], ["연구비 정산", "증빙 대비 집행 항목"], ["MCP로 연결", "NAIS 플랫폼 · 어떤 AI 비서든"]].forEach(([a, b], i) => {
+  [["연차·성과보고서 · 계획", "계획 지표 대비 실적"], ["연구비 정산 · 계획", "증빙 대비 집행 항목"], ["MCP로 연결 · 구현", "도구 2개 · NAIS 플랫폼·AI 비서 연결"]].forEach(([a, b], i) => {
     const x = X0 + i * (cw + cg);
     box(s, x, 5.4, cw, 0.95);
     t(s, a, { x: x + 0.22, y: 5.52, w: cw - 0.4, h: 0.35, fontSize: 15, bold: true });
     t(s, b, { x: x + 0.22, y: 5.9, w: cw - 0.4, h: 0.3, fontSize: 12, color: C.gray });
   });
-  t(s, "정답표·측정 스크립트를 공개해 「R&D 공고 결핍 벤치마크」로 — 첫 실증 후보는 전문기관 접수 사전검토", { x: X0, y: 6.6, w: W, h: 0.35, fontSize: 12.5, color: C.sub });
+  t(s, "첫 실증 목표: 전문기관 접수 사전검토 1회 — 형식 미비를 정답표 방식 그대로 재서 재현율 90% · 정답표·측정 스크립트는 「R&D 공고 결핍 벤치마크」로 공개", { x: X0, y: 6.6, w: W, h: 0.35, fontSize: 12.5, color: C.sub });
   s.addNotes("[20초] 같은 엔진이 연구자의 셀프 점검에서 전문기관 접수 사전검토, 평가위원 심사 보조로 갑니다. 문서만 바꾸면 성과보고서와 연구비 정산에도 씁니다. MCP로 NAIS 플랫폼 어디에든 붙고, 정답표는 공개해 벤치마크로 키웁니다.");
 }
 
@@ -343,12 +356,13 @@ const sol = B.personas.filter((p) => /solar/i.test(p.model)).length;
   const s = pres.addSlide(); s.background = { color: C.white };
   eyebrow(s, "지금 직접 눌러 보세요", 1.15);
   title(s, "다섯 명의 평가위원이,\n**먼저** 읽어 드립니다.", { y: 1.8, h: 2.3, fontSize: 46 });
-  t(s, `커밋 ${N.git.commits}개 · 코드는 전부 본선 중 커밋(첫 코드 커밋 ${N.git.first_code}, 그 전엔 문서뿐)`, { x: X0, y: 4.45, w: 6.6, h: 0.4, fontSize: 14, color: C.sub });
+  t(s, `커밋 ${N.git.commits}개 · 코드는 전부 본선 중 커밋(첫 코드 커밋 ${N.git.first_code}, 그 전엔 문서뿐)\nSPEC → 테스트 → 구현 순서 · 코딩 에이전트 활용 규칙까지 공개(AGENTS.md)`, { x: X0, y: 4.45, w: 6.6, h: 0.8, fontSize: 14, color: C.sub, lineSpacingMultiple: 1.25 });
+  t(s, "라이브가 끊기면 — 앱의 「② 우리 기획서 전·후」 탭이 저장된 실행 기록으로 같은 결과를 보여 줍니다", { x: X0, y: 5.45, w: 6.6, h: 0.6, fontSize: 12, color: C.gray, lineSpacingMultiple: 1.2 });
   t(s, "팀 루미아 · 김태걸 · 박세훈", { x: X0, y: 6.4, w: 6, h: 0.45, fontSize: 16, bold: true });
   const qs = [["라이브 앱", N.qr_live, N.live_url.replace(/^https?:\/\//, "")], ["GitHub", N.qr_repo, N.repo_url.replace(/^https?:\/\//, "")]];
   qs.forEach(([k, img, url], i) => {
-    const x = 7.95 + i * 2.3, y = 2.6;
-    box(s, x, y, 2.05, 3.55);
+    const x = 7.95 + i * 2.3, y = 2.0;
+    box(s, x, y, 2.05, 3.05);
     s.addImage({ path: img, x: x + 0.28, y: y + 0.28, w: 1.5, h: 1.5 });
     t(s, k, { x: x + 0.2, y: y + 1.98, w: 1.65, h: 0.35, fontSize: 14, bold: true });
     t(s, url, { x: x + 0.2, y: y + 2.38, w: 1.7, h: 1.0, fontSize: 9.5, color: C.gray, lineSpacingMultiple: 1.15, fit: "none" });

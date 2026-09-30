@@ -12,6 +12,8 @@ url = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8501"
 out = Path("deliver/demo")
 out.mkdir(parents=True, exist_ok=True)
 ev = {}
+narr = json.loads((out / "narr.json").read_text())   # make_demo.py tts 가 만든 내레이션 길이 — 장면이 내레이션만큼 머문다
+hold = lambda k, extra=0.6: time.sleep(narr[k] + extra)  # noqa: E731
 with sync_playwright() as p:
     b = p.chromium.launch()
     ctx = b.new_context(viewport={"width": 1440, "height": 900}, record_video_dir=str(out / "tmp"),
@@ -22,26 +24,27 @@ with sync_playwright() as p:
     pg.goto(url)
     pg.wait_for_selector("text=평가위원 5명에게 보내기", timeout=60000)
     time.sleep(1.0); mark("landing")
-    time.sleep(6.0)
+    hold("landing")
     pg.mouse.wheel(0, 250); time.sleep(0.5); mark("inputs")
-    time.sleep(7.0)
+    hold("inputs")
     pg.get_by_role("button", name="평가위원 5명에게 보내기").click(); mark("click")
     pg.wait_for_selector("text=심사기준 대조표", timeout=300000); mark("done")
     time.sleep(1.0)
     pg.evaluate("window.scrollTo({top: document.querySelector('.big')?.getBoundingClientRect().top + window.scrollY - 120, behavior: 'smooth'})")
-    time.sleep(8.0); mark("result")
+    mark("result")
+    hold("result")
     pg.mouse.wheel(0, 520); time.sleep(1.0); mark("cards")
-    time.sleep(6.0)
+    time.sleep(max(1.0, narr["cards"] * 0.45))
     try:
-        pg.get_by_text("평가위원 메모·인용 보기").first.click(); time.sleep(0.8); mark("memo")
+        pg.get_by_text("평가위원 메모").first.click(timeout=3000); time.sleep(0.8); mark("memo")
     except Exception:
         mark("memo")
-    time.sleep(7.0)
+    time.sleep(max(1.0, narr["cards"] * 0.55))
     pg.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})"); time.sleep(1.0)
     pg.get_by_role("tab", name="② 우리 기획서 전·후").click(); time.sleep(1.0); mark("before_after")
-    time.sleep(9.0)
+    hold("before_after")
     pg.get_by_role("tab", name="③ 신뢰 장치·정확도").click(); time.sleep(1.0); mark("trust")
-    time.sleep(9.0); mark("end")
+    hold("trust", 1.2); mark("end")
     video = pg.video.path()
     ctx.close(); b.close()
 Path(video).rename(out / "raw.webm")

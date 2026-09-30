@@ -69,7 +69,8 @@ class FallbackLLM:
     def complete_json(self, system: str, prompt: str):
         try:
             out = self.primary.complete_json(system, prompt)
-            self.last_model = getattr(self.primary, "last_model", None) or self.primary.name
+            lm = getattr(self.primary, "last_model", None)
+            self.last_model = f"Google {lm}" if lm else self.primary.name
             return out
         except Exception:
             out = self.secondary.complete_json(system, prompt)

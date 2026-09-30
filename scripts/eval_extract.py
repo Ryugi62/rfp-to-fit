@@ -11,7 +11,7 @@ from rfp_to_fit.domain.metrics import criteria_agreement, match_requirements, re
 which = sys.argv[1] if len(sys.argv) > 1 else "gemini"
 only = sys.argv[2:] 
 from rfp_to_fit.adapters.llm import FallbackLLM
-llm = FallbackLLM(GeminiLLM(), SolarLLM()) if which == "gemini" else SolarLLM()
+llm = FallbackLLM(GeminiLLM(), SolarLLM()) if which == "gemini" else FallbackLLM(SolarLLM(temperature=0.0), GeminiLLM())
 out, root = [], Path("data")
 for gold_path in sorted((root / "gold").glob("*.json")):
     gold = json.loads(gold_path.read_text())
@@ -33,4 +33,7 @@ for gold_path in sorted((root / "gold").glob("*.json")):
     out.append({"id": gold["id"], "model": getattr(llm, "last_model", None) or llm.name, "recall": rec, "criteria_agreement": ca,
                 "n_gold": len(m), "n_extracted": len(exr), "dropped": len(ex.dropped), "seconds": round(sec, 1), "missed": missed})
 Path("data/eval").mkdir(parents=True, exist_ok=True)
-Path(f"data/eval/extract-{which}.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
+dst = Path(f"data/eval/extract-{which}.json")   # 일부만 다시 재면 기존 행과 합친다
+prev = {r["id"]: r for r in json.loads(dst.read_text())} if dst.exists() else {}
+prev.update({r["id"]: r for r in out})
+dst.write_text(json.dumps(list(prev.values()), ensure_ascii=False, indent=1))

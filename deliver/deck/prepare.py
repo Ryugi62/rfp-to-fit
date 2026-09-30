@@ -171,7 +171,7 @@ def main():
                         "drop_max": round(p["base_total"] - min(totals), 1),
                         "lower": sum(t < p["base_total"] for t in totals), "higher": sum(t > p["base_total"] for t in totals)})
     ablation = []
-    for mode, label, f in [("single", "평가위원 1명(단일 LLM)", "data/eval/planted-ablation-single.json"),
+    for mode, label, f in [("single", "관점 1개(단일 LLM)", "data/eval/planted-ablation-single.json"),
                            ("roles", "6역할 · 한 회사 모델", "data/eval/planted-ablation-roles-one-model.json"),
                            ("panel", "6역할 · 3사 모델(현재)", "data/eval/planted.json")]:
         if (ROOT / f).exists():

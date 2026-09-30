@@ -114,10 +114,10 @@ def accuracy_panel():
 
 # ---------------- 머리 ----------------
 st.markdown('<div class="sub">팀 루미아 · 2026 NAIS AI 해커톤</div>', unsafe_allow_html=True)
-st.markdown("## 평가위원의 눈으로, 제출 전에 빈칸을 먼저.")
-st.markdown('<div class="sub">공고의 <b>실제 심사표</b>로 실제 심사위원 유형 6가지(기술 타당성·기술 큰그림·세부 전문·사업성·행정·사업 취지)의 가상 평가위원이 초안을 <b>따로</b> 채점합니다. '
-            '모두가 깎는 곳(합의 결핍)과 의견이 갈리는 곳(논쟁 지점)을 나누고, 무엇을 어디에 보완할지 지정합니다. 문장은 대신 쓰지 않습니다.</div>',
-            unsafe_allow_html=True)
+st.markdown("## 제출 전에, 빈칸부터.")
+st.markdown('<div class="sub">공고가 요구하는데 내 초안에 <b>근거가 없는 곳</b>을 원문으로 짚습니다. 실제 심사 경험에서 나온 <b>관점 6개</b>로 나눠 '
+            '서로 모른 채 근거를 찾게 하고, 모든 지적은 공고 원문(쪽·인용)과 초안 원문(인용)에 묶입니다. 관점이 갈리면 판정하지 않고 사람에게 넘깁니다. '
+            '<b>심사 결과를 예측하지 않으며</b>, 문장을 대신 쓰지 않습니다.</div>', unsafe_allow_html=True)
 st.write("")
 
 tab_run, tab_ba, tab_trust = st.tabs(["① 실행", "② 우리 기획서 먼저 채점", "③ 신뢰 장치·정확도"])
@@ -252,7 +252,7 @@ with tab_run:
                 st.warning(f"응답하지 못한 평가위원: {', '.join(pname.get(x, x) for x in run.failed)} — 나머지로 집계했습니다.")
             if run.stances:
                 cnt = {d: sum(1 for x in run.stances if x.decision == d) for d in ("선정", "보류", "탈락")}
-                st.markdown(f'<div style="margin-top:14px" class="sub">심사위원의 마음(항목 점수와 별개인 전체 인상)</div>'
+                st.markdown(f'<div style="margin-top:14px" class="sub">관점별 전체 인상과 가장 걸리는 점(예측이 아니라 대비할 질문)</div>'
                             f'<div style="font-size:22px;font-weight:800">선정 {cnt["선정"]} · 보류 {cnt["보류"]} · 탈락 {cnt["탈락"]}</div>',
                             unsafe_allow_html=True)
                 for x in run.stances:
@@ -355,7 +355,14 @@ with tab_ba:
 
 # ---------------- ③ 신뢰 ----------------
 with tab_trust:
-    st.markdown("### 가짜로 돌아가는 척을 못 하게 설계했습니다")
+    st.markdown("### 신뢰도를 이렇게 정의했습니다 — 맞히는 것이 아니라 확인할 수 있는 것")
+    st.markdown("""
+1. **추적 가능** — 모든 지적은 공고 원문(쪽·인용)과 초안 원문(인용) 두 끝에 묶입니다.
+2. **날조 없음** — 원문에 없는 인용은 코드가 걸러 판정에서 뺍니다.
+3. **모르면 넘김** — 관점이 갈리면(20~80%) 「논쟁 지점」으로 사람에게, 근거 있는 판정이 절반 미만이면 「확인 불가」.
+4. **잴 수 있는 것만 숫자로** — 요건 추출(정답표 대비)과 지운 근거 탐지(오탐)만 숫자로 말하고, 심사 예측 정확도는 주장하지 않습니다.
+""")
+    st.markdown("#### 이를 위한 장치")
     st.markdown("""
 - **인용 실재 검사(결정론)**: 평가위원이 「충족」이라 하면 초안에서 그대로 복사한 인용을 내야 하고, 코드가 원문과 글자 단위로 대조합니다. 없으면 그 판정은 버립니다(강등).
 - **공고 인용 검사**: 요건·지표도 공고 쪽 번호와 원문 인용을 달아야 하고, 그 쪽에 없으면 버립니다.

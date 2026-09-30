@@ -1,4 +1,4 @@
-# HANDOFF — 2026-09-30 21:00 Claude(Jarvis, iMac) → Codex·사람 공용
+# HANDOFF — 2026-09-30 23:55 Claude(Jarvis, iMac) → Codex·사람 공용
 <!-- 템플릿: # HANDOFF — <YYYY-MM-DD HH:MM> <쓴 쪽> / 세션 / 브랜치 / 마지막 커밋 / 목표 1개 / 체크리스트 / 다음 1개 / 막힌 것 / 금지 -->
 브랜치: **main에 직접**(현장 심사위원이 main 커밋 과정을 본다 — 9/30 19:14 공지. day/laptop·night/imac은 쓰지 않음)
 목표 1개: 10/1 09:00~09:20 제출 = 발표자료(PDF/PPTX) + 프로토타입(라이브 주소·저장소) + 데모 영상, 09:30 발표 5분+질의 3분.
@@ -12,15 +12,16 @@
 - 엔진: 주 엔진 OpenAI gpt-4.1(장애 시 Solar) · 평가위원 6유형(현장 멘토링 반영) × 3사 모델(OpenAI gpt-5.4-mini 2 · Gemini 2(무료 20회/일, 소진 시 gpt-4.1-mini) · Upstage Solar 2). 키는 `.env`(커밋 금지).
 - 테스트 29개 초록(`uv run pytest`).
 
-## 체크리스트
-[x] 데이터·정답표 3건 [x] SPEC [x] 파싱+측정 [x] 6인 독립 채점·인용 검사·재질의 [x] 보완 지정 [x] 화면 [x] MCP 선행 탐색(OpenAlex) [x] README 출처 표 [x] 덱 [x] 데모 영상
-[ ] 온라인 멘토링 메일(23:00 마감, 초안은 사용자 승인 대기 — Jarvis 채팅)
-[ ] 블라인드 심사(독립 3인) — Claude 주간 한도 소진(10/5 재설정)으로 서브에이전트 불가
-[ ] 아침 07:30 라이브 점검: 주소 200 + 예시 1회 실행 + 덱 QR 주소 일치
-[ ] 제출 방식 확인(현장) → 09:00~09:20 제출
+## 체크리스트(23:55)
+[x] 링크 입력(13/13)·HWP·검증 공고 2건·제거 실험·MCP 외부 연동 실측 [x] 포지셔닝 전환(심사위원 3인 온라인 멘토링) [x] 신뢰도 정의 [x] 현장 검증(원문 보기·✓/✗·사람 확인 정밀도) [x] 보안 모드 [x] README·LICENSE [x] 덱 v4.1(13장·290초) [x] 대본·질의응답 12 [x] 고정 주소 https://ryugi62.github.io/rfp-to-fit/
+[ ] (OpenAI 크레딧 충전 뒤) 주 엔진 복구 확인 — `source .env; curl https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY"` 200
+[ ] 4장 화면 캡처를 링크 입력·현장 검증 화면으로 교체 → `bash deliver/deck/build.sh`
+[ ] 데모 영상 재녹화(링크 입력 → 보안 모드 없이 실행 → 원문 보기 → ✓) — `scripts/make_demo.py tts` → `scripts/record_demo.py` → `scripts/make_demo.py`(내레이션 LINES 갱신 필요)
+[ ] 07:30 라이브 점검(고정 주소 → 터널 200, 예시 1회) · 08:00 김태걸 리허설 2회(대본 deliver/발표-대본-노트.md)
+[ ] 09:00~09:20 제출: deliver/deck/RFP-to-Fit_루미아.pdf(+pptx) · deliver/demo/RFP-to-Fit_demo.mp4 · 저장소 링크 — 방식은 현장 공지
 
 ## 다음 1개
-아침 점검: `curl -s -o /dev/null -w "%{http_code}" <라이브 주소>` → 200이 아니면 「복구」.
+엔진 복구 확인 → 4장 캡처·영상 재녹화.
 
 ## 복구 (iMac)
 ```

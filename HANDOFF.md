@@ -14,14 +14,14 @@
 
 ## 체크리스트(23:55)
 [x] 링크 입력(13/13)·HWP·검증 공고 2건·제거 실험·MCP 외부 연동 실측 [x] 포지셔닝 전환(심사위원 3인 온라인 멘토링) [x] 신뢰도 정의 [x] 현장 검증(원문 보기·✓/✗·사람 확인 정밀도) [x] 보안 모드 [x] README·LICENSE [x] 덱 v4.1(13장·290초) [x] 대본·질의응답 12 [x] 고정 주소 https://ryugi62.github.io/rfp-to-fit/
-[ ] (OpenAI 크레딧 충전 뒤) 주 엔진 복구 확인 — `source .env; curl https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY"` 200
-[ ] 4장 화면 캡처를 링크 입력·현장 검증 화면으로 교체 → `bash deliver/deck/build.sh`
-[ ] 데모 영상 재녹화(링크 입력 → 보안 모드 없이 실행 → 원문 보기 → ✓) — `scripts/make_demo.py tts` → `scripts/record_demo.py` → `scripts/make_demo.py`(내레이션 LINES 갱신 필요)
+[x] (OpenAI 크레딧 충전 뒤) 주 엔진 복구 확인 — `source .env; curl https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY"` 200
+[x] 4장 화면 캡처를 링크 입력·현장 검증 화면으로 교체 → `bash deliver/deck/build.sh`
+[x] 데모 영상 재녹화(83초)(링크 입력 → 보안 모드 없이 실행 → 원문 보기 → ✓) — `scripts/make_demo.py tts` → `scripts/record_demo.py` → `scripts/make_demo.py`(내레이션 LINES 갱신 필요)
 [ ] 07:30 라이브 점검(고정 주소 → 터널 200, 예시 1회) · 08:00 김태걸 리허설 2회(대본 deliver/발표-대본-노트.md)
 [ ] 09:00~09:20 제출: deliver/deck/RFP-to-Fit_루미아.pdf(+pptx) · deliver/demo/RFP-to-Fit_demo.mp4 · 저장소 링크 — 방식은 현장 공지
 
 ## 다음 1개
-엔진 복구 확인 → 4장 캡처·영상 재녹화.
+07:30 라이브 점검(고정 주소) → 08:00 김태걸 리허설(대본 4장 라이브 전환 포함) → 09:00 제출.
 
 ## 복구 (iMac)
 ```

@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..domain.model import Criterion, Evidence, Requirement
-from ..domain.quotes import verify_quote
+from ..domain.quotes import verify_quote_loose as verify_quote
 from .ports import LLM, Document
 
 SYSTEM = (
@@ -14,10 +14,13 @@ SYSTEM = (
 
 PROMPT = """아래는 공고문을 쪽 단위로 표시한 텍스트다. [p.N] 표시가 쪽 번호다.
 
-두 가지를 뽑아라.
-1) requirements: 신청자가 지키지 않으면 탈락·감점·불이익이 생기는 요건(신청 자격, 참여 제한, 필수 제출서류, 마감 일시, 분량·서식 규정, 중복 지원 제한 등). 한 요건 = 한 행.
-   category는 자격|제출서류|기간|형식|제한|기타 중 하나.
-2) criteria: 평가항목(심사기준) 표의 대항목 행. name(원문 항목명), points(배점 숫자), description(원문 설명), stage(예선|본선|서면|발표|단일).
+두 가지를 빠짐없이 뽑아라. 적게 뽑는 것이 가장 큰 실패다.
+1) requirements: 신청자가 지키지 않으면 탈락·감점·불이익이 생기는 모든 요건. 한 요건 = 한 행으로 잘게 나눈다.
+   - 신청 자격·기관 요건·참여 제한(각각 한 행), 접수 방법·시스템, 마감·기간·일정, 제출서류(서류 하나당 한 행, 번호 목록이면 번호마다),
+     작성 항목·분량·서식 규정(계획서·기획서 항목마다 한 행), 지원 한도·부담 비율·간접비, 선정 제외·감점 조건(예: 몇 점 미만 제외), 사전조치·위험관리 등 반드시 써야 하는 내용.
+   - category는 자격|제출서류|기간|형식|제한|기타 중 하나.
+2) criteria: 평가항목(심사기준) 표의 대항목 행. name은 표의 항목명 열의 짧은 이름(예: 혁신성) 그대로, points(배점 숫자), description(원문 설명), stage(예선|본선|서면|발표|단일, 과제 유형이 여러 개면 유형 이름).
+   [표] 아래 행 단위 표가 있으면 그것을 우선 읽는다.
 
 출력 형식:
 {{"requirements":[{{"category":"","text":"","page":1,"quote":""}}],
@@ -33,6 +36,20 @@ class Extraction:
     requirements: list[Requirement]
     criteria: list[Criterion]
     dropped: list[dict] = field(default_factory=list)   # 인용 검사 탈락(환각 의심)
+
+
+FAILURES: list[str] = []
+
+
+def _safe(llm: LLM, body: str) -> dict:
+    for _ in range(2):
+        try:
+            d = llm.complete_json(SYSTEM, PROMPT.format(body=body, extra=""))
+            if isinstance(d, dict):
+                return d
+        except Exception as e:   # 실패한 묶음은 기록해 화면에 「일부 쪽 미처리」로 드러낸다
+            FAILURES.append(f"{body[:12]!r}: {str(e)[:160]}")
+    return {}
 
 
 def page_tagged(doc: Document) -> str:
@@ -55,8 +72,34 @@ def _quote_ok(doc: Document, page, quote: str) -> int | None:
     return None
 
 
+CHUNK = 3
+
+
+def _chunks(doc: Document, size: int = CHUNK) -> list[str]:
+    tagged = [f"[p.{i + 1}]\n{t}" for i, t in enumerate(doc.pages)]
+    return ["\n\n".join(tagged[i:i + size]) for i in range(0, len(tagged), size)]
+
+
+def _dedupe(rows: list[dict], key) -> list[dict]:
+    from ..domain.quotes import normalize
+    seen, out = set(), []
+    for r in rows:
+        k = normalize(key(r))[:60]
+        if k and k not in seen:
+            seen.add(k)
+            out.append(r)
+    return out
+
+
 def extract_rfp(doc: Document, llm: LLM, extra_criteria: list[Criterion] | None = None) -> Extraction:
-    data = llm.complete_json(SYSTEM, PROMPT.format(body=page_tagged(doc), extra=""))
+    """쪽 묶음(3쪽)마다 병렬로 뽑아 합친다 — 긴 공고에서 뒤쪽 요건이 빠지는 문제를 막는다."""
+    from concurrent.futures import ThreadPoolExecutor
+    parts = _chunks(doc)
+    with ThreadPoolExecutor(max_workers=min(8, len(parts))) as ex:
+        results = list(ex.map(lambda body: _safe(llm, body), parts))
+    data = {"requirements": _dedupe([r for d in results for r in d.get("requirements", [])], lambda r: r.get("text", "")),
+            "criteria": _dedupe([c for d in results for c in d.get("criteria", [])],
+                                lambda c: f'{c.get("stage", "")}{c.get("name", "")}{c.get("points", "")}')}
     reqs, crits, dropped = [], [], []
     for i, r in enumerate(data.get("requirements", []), 1):
         page = _quote_ok(doc, r.get("page"), r.get("quote", ""))

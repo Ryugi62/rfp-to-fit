@@ -73,3 +73,10 @@ def test_fit_table_expected_score_scales_by_points():
     assert abs(row.expected_points - 15.625) < 1e-6
     assert row.per_reviewer["P0"] == 12.5
     assert table.total_points == 25
+
+
+def test_loose_quote_accepts_table_cells_split_across_lines():
+    from rfp_to_fit.domain.quotes import verify_quote_loose
+    page = "§ 문제 정의의 명확성 및 대회 § 문제 해결 성과\n적합성 20 10\n취지와의 부합성"
+    assert verify_quote_loose("적합성 20 § 문제 정의의 명확성 및 대회 취지와의 부합성", page)
+    assert not verify_quote_loose("적합성 30 연구비 집행의 투명성", page)

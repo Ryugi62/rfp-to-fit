@@ -5,7 +5,7 @@ from dataclasses import asdict
 
 from ..domain.model import (
     CheckItem, Criterion, Evidence, Finding, FindingKind, FitRow, FitTable, RemedyItem, Requirement,
-    ReviewerPersona, Verdict, VerdictLabel,
+    ReviewerPersona, ReviewerStance, Verdict, VerdictLabel,
 )
 from .extract import Extraction
 from .pipeline import ReviewRun
@@ -40,6 +40,8 @@ def run_to_dict(run: ReviewRun) -> dict:
         "remedies": [asdict(x) for x in run.remedies],
         "trace": run.trace,
         "prior_art": run.prior_art,
+        "stances": [asdict(x) for x in run.stances],
+        "failed": run.failed,
     }
 
 
@@ -57,4 +59,4 @@ def run_from_dict(d: dict) -> ReviewRun:
         rows.append(FitRow(by_c[r["criterion_id"]], r["expected_points"], r["per_reviewer"], fs))
     reqs = [Requirement(r["id"], r["category"], r["text"], Evidence(**r["evidence"])) for r in d["requirements"]]
     return ReviewRun(reqs, crits, items, personas, verdicts, FitTable(rows), [RemedyItem(**x) for x in d["remedies"]], d.get("trace", []),
-                     d.get("prior_art", []))
+                     d.get("prior_art", []), [ReviewerStance(**x) for x in d.get("stances", [])], d.get("failed", []))

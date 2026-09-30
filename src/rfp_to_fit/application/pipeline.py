@@ -23,6 +23,8 @@ class ReviewRun:
     remedies: list[RemedyItem]
     trace: list[dict] = field(default_factory=list)
     prior_art: list[dict] = field(default_factory=list)
+    stances: list = field(default_factory=list)
+    failed: list[str] = field(default_factory=list)
 
 
 def run_review(extraction: Extraction, draft: str, personas: list[ReviewerPersona], llm: LLM,

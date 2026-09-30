@@ -18,6 +18,8 @@ class S(TypedDict, total=False):
     items: list
     prior: list
     verdicts: list
+    stances: list
+    failed: list
     rechecked: int
     table: Any
     remedies: list
@@ -55,10 +57,11 @@ def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Cal
         return {"prior": works}
 
     def n_review(s: S):
-        vs = review_all(personas, ex.criteria, s["items"], draft, llm_for, as_context(s.get("prior", [])))
+        vs, stances, failed = review_all(personas, ex.criteria, s["items"], draft, llm_for,
+                                         as_context(s.get("prior", [])), with_stance=True)
         bad = sum(1 for v in vs if invalid(v))
-        step("독립 채점", n=len(vs), reviewers=len({v.reviewer_id for v in vs}), invalid=bad)
-        return {"verdicts": vs, "rechecked": 0}
+        step("독립 채점", n=len(vs), reviewers=len({v.reviewer_id for v in vs}), of=len(personas), invalid=bad, failed=failed)
+        return {"verdicts": vs, "stances": stances, "failed": failed, "rechecked": 0}
 
     def route(s: S):
         return "recheck" if s.get("rechecked", 0) == 0 and any(invalid(v) for v in s["verdicts"]) else "aggregate"
@@ -98,4 +101,4 @@ def run_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step=None, 
     app, trace = build_graph(ex, draft, personas, llm, llm_for, on_step, items, prior_search)
     s = app.invoke({})
     return ReviewRun(ex.requirements, ex.criteria, s["items"], personas, s["verdicts"], s["table"], s["remedies"], trace,
-                     s.get("prior", []))
+                     s.get("prior", []), s.get("stances", []), s.get("failed", []))

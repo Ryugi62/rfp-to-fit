@@ -95,3 +95,10 @@ def test_rows_of_accepts_bare_list_and_skips_junk():
     assert rows_of([{"item_id": "a"}, "x"], "remedies") == [{"item_id": "a"}]
     assert rows_of({"remedies": [{"item_id": "b"}]}, "remedies") == [{"item_id": "b"}]
     assert rows_of(None, "remedies") == []
+
+
+def test_trimmed_mean_drops_max_and_min_from_five_or_more():
+    from rfp_to_fit.domain.aggregate import trimmed_mean
+    assert trimmed_mean([10, 20, 20, 20, 100]) == 20
+    assert trimmed_mean([10, 20]) == 15
+    assert trimmed_mean([]) == 0.0

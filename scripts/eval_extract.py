@@ -1,5 +1,5 @@
 """정답표 대비 공고 파싱 정확도: python scripts/eval_extract.py [gemini|solar] → data/eval/extract-<llm>.json"""
-import json, sys, time
+import json, os, sys, time
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
@@ -11,7 +11,10 @@ from rfp_to_fit.domain.metrics import criteria_agreement, match_requirements, re
 which = sys.argv[1] if len(sys.argv) > 1 else "gemini"
 only = sys.argv[2:] 
 from rfp_to_fit.adapters.llm import FallbackLLM
-llm = FallbackLLM(GeminiLLM(), SolarLLM()) if which == "gemini" else FallbackLLM(SolarLLM(temperature=0.0), GeminiLLM())
+from rfp_to_fit.adapters.llm import OpenAILLM
+llm = {"gemini": lambda: FallbackLLM(GeminiLLM(), SolarLLM()),
+       "solar": lambda: FallbackLLM(SolarLLM(temperature=0.0), GeminiLLM()),
+       "openai": lambda: FallbackLLM(OpenAILLM(os.environ.get("RFP_OPENAI_MODEL", "gpt-4.1")), SolarLLM(temperature=0.0))}[which]()
 out, root = [], Path("data")
 for gold_path in sorted((root / "gold").glob("*.json")):
     gold = json.loads(gold_path.read_text())

@@ -63,6 +63,14 @@ class Verdict:
     reason: str
 
 
+@dataclass(frozen=True)
+class ReviewerStance:
+    """평가위원의 「마음속 등수」 — 항목 점수와 별개로 전체 인상(선정·보류·탈락)과 당락을 가를 포인트 하나."""
+    reviewer_id: str
+    decision: str        # 선정|보류|탈락
+    key_point: str
+
+
 class FindingKind(str, Enum):
     CONSENSUS_GAP = "합의 결핍"
     CONTESTED = "논쟁 지점"

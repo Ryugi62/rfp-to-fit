@@ -70,7 +70,7 @@ class FallbackLLM:
         try:
             out = self.primary.complete_json(system, prompt)
             lm = getattr(self.primary, "last_model", None)
-            self.last_model = f"Google {lm}" if lm else self.primary.name
+            self.last_model = (f"Google {lm}" if lm.startswith("gemini") else self.primary.name) if lm else self.primary.name
             return out
         except Exception:
             out = self.secondary.complete_json(system, prompt)
@@ -101,3 +101,34 @@ class SolarLLM:
                 last = e
                 time.sleep(2 * (attempt + 1))
         raise RuntimeError(f"Solar 호출 실패: {last}")
+
+
+class OpenAILLM:
+    URL = "https://api.openai.com/v1/chat/completions"
+
+    def __init__(self, model: str | None = None, temperature: float = 0.0):
+        self.model = model or os.environ.get("RFP_OPENAI_MODEL", "gpt-4.1-mini")
+        self.name = f"OpenAI {self.model}"
+        self.temperature = temperature
+        self.last_model = None
+        self._key = os.environ["OPENAI_API_KEY"]
+
+    def complete_json(self, system: str, prompt: str):
+        body = {"model": self.model, "response_format": {"type": "json_object"},
+                "messages": [{"role": "system", "content": system + " 반드시 JSON 객체로만 답한다."},
+                             {"role": "user", "content": prompt}]}
+        if not self.model.startswith(("gpt-5", "o")):
+            body["temperature"] = self.temperature
+        else:
+            body["reasoning_effort"] = "low"
+        last = None
+        for attempt in range(4):
+            try:
+                r = httpx.post(self.URL, json=body, headers={"Authorization": f"Bearer {self._key}"}, timeout=180)
+                r.raise_for_status()
+                self.last_model = self.model
+                return parse_json(r.json()["choices"][0]["message"]["content"])
+            except Exception as e:
+                last = e
+                time.sleep(2 * (attempt + 1))
+        raise RuntimeError(f"OpenAI 호출 실패: {last}")

@@ -37,6 +37,16 @@ def aggregate_item(item_id: str, verdicts: list[Verdict], draft: str) -> Finding
     return Finding(item_id, kind, ratio, len(valid), demoted, verdicts)
 
 
+def trimmed_mean(vals: list[float]) -> float:
+    """실제 심사처럼 5명 이상이면 최고점·최저점을 하나씩 빼고 평균한다."""
+    if not vals:
+        return 0.0
+    v = sorted(vals)
+    if len(v) >= 5:
+        v = v[1:-1]
+    return sum(v) / len(v)
+
+
 def build_fit_table(criteria: list[Criterion], items: list[CheckItem], personas: list[ReviewerPersona],
                     verdicts: list[Verdict], draft: str) -> FitTable:
     rows = []
@@ -54,6 +64,6 @@ def build_fit_table(criteria: list[Criterion], items: list[CheckItem], personas:
                 vals.append(VALUE[lab] if lab is not None else 0.0)
             if vals:
                 per[p.id] = sum(vals) / len(vals) * c.points
-        expected = sum(per.values()) / len(per) if per else 0.0
+        expected = trimmed_mean(list(per.values()))
         rows.append(FitRow(c, expected, per, findings))
     return FitTable(rows)

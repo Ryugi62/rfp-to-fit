@@ -5,7 +5,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 
 from ..domain.model import (
-    CheckItem, Criterion, Finding, FindingKind, RemedyItem, ReviewerPersona, Verdict, VerdictLabel,
+    CheckItem, Criterion, Finding, FindingKind, RemedyItem, ReviewerPersona, ReviewerStance, Verdict, VerdictLabel,
 )
 from .ports import LLM
 
@@ -73,7 +73,11 @@ REVIEW_PROMPT = """평가지표와 점검 질문:
 실제 심사처럼 엄격하게: 애매하면 충족이 아니라 부족이다.
 reason은 심사위원 메모처럼 한 문장(40자 이내).
 
-출력: {{"verdicts":[{{"item_id":"C1-1","label":"충족","quote":"","reason":""}}]}}
+마지막으로, 실제 심사위원처럼 항목 합산과 별개로 이 제안서에 대한 전체 인상을 정하라:
+stance.decision = 선정|보류|탈락, stance.key_point = 너의 관점에서 당락을 가를 한 가지(40자 이내).
+
+출력: {{"verdicts":[{{"item_id":"C1-1","label":"충족","quote":"","reason":""}}],
+       "stance":{{"decision":"보류","key_point":""}}}}
 
 제안서 본문:
 <<<
@@ -90,7 +94,7 @@ def rows_of(data, key: str) -> list[dict]:
 
 
 def review_one(persona: ReviewerPersona, criteria: list[Criterion], items: list[CheckItem], draft: str, llm: LLM,
-               context: str = "") -> list[Verdict]:
+               context: str = "", with_stance: bool = False):
     by_id = {c.id: c for c in criteria}
     listing = "\n".join(f"- {i.id} [{by_id[i.criterion_id].name} {by_id[i.criterion_id].points:g}점] {i.question}" for i in items)
     prompt = REVIEW_PROMPT.format(items=listing + (f"\n\n[참고 자료 — 인용 금지]\n{context}" if context else ""), draft=draft)
@@ -102,20 +106,48 @@ def review_one(persona: ReviewerPersona, criteria: list[Criterion], items: list[
             continue
         label = _LABELS.get(str(v.get("label", "")).strip(), VerdictLabel.MISSING)
         out.append(Verdict(persona.id, v["item_id"], label, str(v.get("quote", "") or ""), str(v.get("reason", "") or "")))
-    return out
+    if not with_stance:
+        return out
+    st = data.get("stance") if isinstance(data, dict) else None
+    stance = None
+    if isinstance(st, dict) and str(st.get("decision", "")).strip() in ("선정", "보류", "탈락"):
+        stance = ReviewerStance(persona.id, str(st["decision"]).strip(), str(st.get("key_point", "") or "")[:80])
+    return out, stance
 
 
-def review_all(personas: list[ReviewerPersona], criteria, items, draft: str, llm_for, context: str = "") -> list[Verdict]:
-    """평가위원마다 따로 호출한다(서로의 답을 입력으로 받지 않음 — SPEC S2). llm_for(persona) → LLM."""
+def review_all(personas: list[ReviewerPersona], criteria, items, draft: str, llm_for, context: str = "",
+               with_stance: bool = False):
+    """평가위원마다 따로 호출한다(서로의 답을 입력으로 받지 않음 — SPEC S2). llm_for(persona) → LLM.
+    실패한 평가위원은 순차로 한 번 더 시도하고, 그래도 실패하면 failed에 남긴다(조용히 버리지 않는다).
+    with_stance=True면 (verdicts, stances, failed)를 돌려준다."""
+    def one(p):
+        return review_one(p, criteria, items, draft, llm_for(p), context, True)
+
+    results, stances, failed = [], [], []
     with ThreadPoolExecutor(max_workers=len(personas) or 1) as ex:
-        futs = [ex.submit(review_one, p, criteria, items, draft, llm_for(p), context) for p in personas]
-        results = []
-        for f in futs:
-            try:
-                results.extend(f.result())
-            except Exception:   # 한 평가위원이 실패해도 나머지로 집계(확인 불가로 드러남)
-                continue
-    return results
+        futs = {p.id: ex.submit(one, p) for p in personas}
+    retry = []
+    for p in personas:
+        try:
+            vs, stc = futs[p.id].result()
+            if not vs:
+                raise ValueError("판정 0개")
+            results.extend(vs)
+            if stc:
+                stances.append(stc)
+        except Exception:
+            retry.append(p)
+    for p in retry:   # 한도(429)·형식 오류는 대개 일시적 — 순차로 한 번 더
+        try:
+            vs, stc = one(p)
+            if not vs:
+                raise ValueError("판정 0개")
+            results.extend(vs)
+            if stc:
+                stances.append(stc)
+        except Exception:
+            failed.append(p.id)
+    return (results, stances, failed) if with_stance else results
 
 
 # ---------- 보완 지정 ----------

@@ -3,97 +3,57 @@
   {
    "id": "R1",
    "category": "자격",
-   "text": "AI 활용에 아이디어를 제안하고 싶은 대한민국 국민",
+   "text": "대한민국 국민만 신청 가능",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 1,
-    "quote": "AI 활용에 아이디어를 제안하고 싶은 대한민국 국민"
+    "quote": "대한민국 국민"
    }
   },
   {
    "id": "R2",
    "category": "자격",
-   "text": "개인 또는 최대 5인 구성의 팀(전공 무관)",
+   "text": "개인 또는 최대 5인 구성의 팀만 신청 가능",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 1,
-    "quote": "개인 또는 최대 5인 구성의 팀(전공 무관)"
+    "quote": "개인 또는 최대 5인 구성의 팀"
    }
   },
   {
    "id": "R3",
-   "category": "기간",
-   "text": "참가 신청 마감: 2026년 9월 7일(월) 17:00",
-   "evidence": {
-    "source": "nais-hackathon-2026",
-    "page": 2,
-    "quote": "9.7.(월) 17:00 참가 신청서 제출"
-   }
-  },
-  {
-   "id": "R4",
-   "category": "형식",
-   "text": "온라인 접수(https://ai4scikorea.org/#competition) 또는 QR 접수",
-   "evidence": {
-    "source": "nais-hackathon-2026",
-    "page": 2,
-    "quote": "온라인 접수(https://ai4scikorea.org/#competition) 또는 신청 QR"
-   }
-  },
-  {
-   "id": "R5",
    "category": "제출서류",
    "text": "참가신청서 제출",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 2,
-    "quote": "참가신청서 및 기획서, 개인정보 동의서, 서약서 제출"
+    "quote": "참가신청서"
    }
   },
   {
-   "id": "R6",
-   "category": "제출서류",
-   "text": "기획서 제출",
-   "evidence": {
-    "source": "nais-hackathon-2026",
-    "page": 2,
-    "quote": "참가신청서 및 기획서, 개인정보 동의서, 서약서 제출"
-   }
-  },
-  {
-   "id": "R7",
+   "id": "R4",
    "category": "제출서류",
    "text": "개인정보 동의서 제출",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 2,
-    "quote": "참가신청서 및 기획서, 개인정보 동의서, 서약서 제출"
+    "quote": "개인정보 동의서"
    }
   },
   {
-   "id": "R8",
+   "id": "R5",
    "category": "제출서류",
-   "text": "서약서 제출",
+   "text": "아이디어 포스터 제출(본선 진출 시)",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 2,
-    "quote": "참가신청서 및 기획서, 개인정보 동의서, 서약서 제출"
+    "quote": "아이디어 포스터"
    }
   },
   {
-   "id": "R9",
+   "id": "R6",
    "category": "제출서류",
-   "text": "본선 진출 대상자: 아이디어 포스터 제출",
-   "evidence": {
-    "source": "nais-hackathon-2026",
-    "page": 2,
-    "quote": "사전 제출 자료 안내(아이디어 포스터 등)"
-   }
-  },
-  {
-   "id": "R10",
-   "category": "제출서류",
-   "text": "본선 진출 대상자: 참가 자격 증빙 서류 (필요시)",
+   "text": "참가 자격 증빙 서류 제출(필요시)",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 2,
@@ -101,29 +61,49 @@
    }
   },
   {
-   "id": "R11",
+   "id": "R7",
    "category": "제출서류",
-   "text": "본선 과제: 시연 결과물 제출",
+   "text": "시연 결과물 제출(본선 진출 시)",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 2,
-    "quote": "시연 결과물 발표 자료"
+    "quote": "시연 결과물"
    }
   },
   {
-   "id": "R12",
+   "id": "R8",
    "category": "제출서류",
-   "text": "본선 과제: 발표 자료 제출",
+   "text": "발표 자료 제출(본선 진출 시)",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 2,
-    "quote": "시연 결과물 발표 자료"
+    "quote": "발표 자료"
    }
   },
   {
-   "id": "R13",
+   "id": "R9",
+   "category": "기간",
+   "text": "참가 신청 8.5.(수)~9.7.(월) 17:00까지",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "8.5.(수)~ 9.7.(월) 17:00"
+   }
+  },
+  {
+   "id": "R10",
    "category": "형식",
-   "text": "신청서 및 기획서 작성 시 참가자 가이드라인 참고",
+   "text": "온라인 접수(https://ai4scikorea.org/#competition) 또는 신청 QR로만 접수",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "온라인 접수(https://ai4scikorea.org/#competition) 또는 신청 QR"
+   }
+  },
+  {
+   "id": "R11",
+   "category": "기타",
+   "text": "신청서 및 기획서 작성 방법은 '붙임. 참가자 가이드라인' 참고",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 2,
@@ -131,19 +111,19 @@
    }
   },
   {
-   "id": "R14",
+   "id": "R12",
    "category": "제출서류",
-   "text": "예선 참가 시 참가신청서 및 프로젝트 기획서 제출",
+   "text": "프로젝트 기획서 제출",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
-    "quote": "예선 참가 : 참가신청서 및 프로젝트 기획서 제출"
+    "quote": "참가신청서 및 프로젝트 기획서 제출"
    }
   },
   {
-   "id": "R15",
+   "id": "R13",
    "category": "형식",
-   "text": "신청서 상에 참여하고자 하는 분야를 명확하게 표시",
+   "text": "참가분야를 명확하게 표시",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -151,7 +131,7 @@
    }
   },
   {
-   "id": "R16",
+   "id": "R14",
    "category": "형식",
    "text": "분야가 중복될 경우 비중이 높은 분야로 선택",
    "evidence": {
@@ -161,9 +141,9 @@
    }
   },
   {
-   "id": "R17",
+   "id": "R15",
    "category": "형식",
-   "text": "핵심 개발 주제가 명확히 드러나도록 주제명 기재",
+   "text": "핵심 개발 주제를 명확하게 기재",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -171,7 +151,7 @@
    }
   },
   {
-   "id": "R18",
+   "id": "R16",
    "category": "형식",
    "text": "팀명과 참가 인원 수 기재",
    "evidence": {
@@ -181,9 +161,9 @@
    }
   },
   {
-   "id": "R19",
+   "id": "R17",
    "category": "형식",
-   "text": "신청자 인적 사항 외 팀 정보를 정확하게 기재",
+   "text": "신청자(대표자) 인적 사항 및 팀 정보 정확하게 기재",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -191,9 +171,9 @@
    }
   },
   {
-   "id": "R20",
+   "id": "R18",
    "category": "형식",
-   "text": "신청자 및 팀원 자필 서명 후 신청서 스캔 첨부",
+   "text": "신청자 및 팀원 자필 서명, 신청서 스캔 후 첨부",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -201,9 +181,9 @@
    }
   },
   {
-   "id": "R21",
+   "id": "R19",
    "category": "형식",
-   "text": "기획서 내 연구 문제 및 제안 배경 항목 작성",
+   "text": "기획서에 연구 문제 및 연구 현장의 어려움 작성",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -211,9 +191,29 @@
    }
   },
   {
+   "id": "R20",
+   "category": "형식",
+   "text": "기획서에 기존 연구 방식의 한계와 AI Agent 필요성 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "기존 연구 방식의 한계와 AI Agent 필요성"
+   }
+  },
+  {
+   "id": "R21",
+   "category": "형식",
+   "text": "기획서에 제안 배경 및 기대하는 변화 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "제안 배경 및 기대하는 변화"
+   }
+  },
+  {
    "id": "R22",
    "category": "형식",
-   "text": "기획서 내 AI Agent 제안 및 차별성 항목 작성",
+   "text": "기획서에 AI Agent의 역할 및 핵심 기능 작성",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -223,7 +223,27 @@
   {
    "id": "R23",
    "category": "형식",
-   "text": "기획서 내 구현 방안 항목 작성",
+   "text": "기획서에 연구 과정에서의 활용 방식(활용 시나리오) 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "연구 과정에서의 활용 방식(활용 시나리오)"
+   }
+  },
+  {
+   "id": "R24",
+   "category": "형식",
+   "text": "기획서에 기존 방식 또는 유사 서비스 대비 차별성 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "기존 방식 또는 유사 서비스 대비 차별성"
+   }
+  },
+  {
+   "id": "R25",
+   "category": "형식",
+   "text": "기획서에 활용 AI 기술 및 데이터 활용 계획 작성",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -231,9 +251,29 @@
    }
   },
   {
-   "id": "R24",
+   "id": "R26",
    "category": "형식",
-   "text": "기획서 내 AI 윤리 및 신뢰성 항목 작성",
+   "text": "기획서에 시스템 구성 및 서비스 흐름 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "시스템 구성 및 서비스 흐름"
+   }
+  },
+  {
+   "id": "R27",
+   "category": "형식",
+   "text": "기획서에 해커톤 기간 내 구현 계획 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "해커톤 기간 내 구현 계획"
+   }
+  },
+  {
+   "id": "R28",
+   "category": "형식",
+   "text": "기획서에 개인정보·보안 및 AI 윤리 고려사항 작성",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -241,9 +281,19 @@
    }
   },
   {
-   "id": "R25",
+   "id": "R29",
    "category": "형식",
-   "text": "기획서 내 기대효과 및 활용 가능성 항목 작성",
+   "text": "기획서에 AI 결과의 신뢰성 및 안전성 확보 방안 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "AI 결과의 신뢰성 및 안전성 확보 방안"
+   }
+  },
+  {
+   "id": "R30",
+   "category": "형식",
+   "text": "기획서에 연구 생산성 및 연구 혁신 기여 효과 작성",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 4,
@@ -251,19 +301,39 @@
    }
   },
   {
-   "id": "R26",
-   "category": "제출서류",
-   "text": "본선 진출 10개 팀 대상 아이디어 포스터 제작",
+   "id": "R31",
+   "category": "형식",
+   "text": "기획서에 연구 현장 적용 및 확산 가능성 작성",
    "evidence": {
     "source": "nais-hackathon-2026",
-    "page": 5,
-    "quote": "사전과제 : 아이디어 포스터 제작"
+    "page": 4,
+    "quote": "연구 현장 적용 및 확산 가능성"
    }
   },
   {
-   "id": "R27",
+   "id": "R32",
    "category": "형식",
-   "text": "포스터는 세로형 이미지(JPG 또는 PNG 파일)로 구성",
+   "text": "기획서에 실증허브·후속 연구 연계 가능성 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "실증허브·후속 연구 연계 가능성"
+   }
+  },
+  {
+   "id": "R33",
+   "category": "제출서류",
+   "text": "아이디어 포스터 제출(본선 진출 10개 팀)",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "아이디어 포스터 제작"
+   }
+  },
+  {
+   "id": "R34",
+   "category": "형식",
+   "text": "포스터는 세로형 이미지(JPG 또는 PNG 파일)로 제출",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 5,
@@ -271,19 +341,19 @@
    }
   },
   {
-   "id": "R28",
-   "category": "제한",
-   "text": "실제 개발 전 과정은 반드시 본선 대회 기간 내 진행",
+   "id": "R35",
+   "category": "기타",
+   "text": "제출된 포스터는 대회장 내 전시 예정",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 5,
-    "quote": "실제 개발 수행 전 과정이 반드시 해커톤 본선 대회 기간 내에 진행"
+    "quote": "제출된 포스터는 대회장 내 전시 예정"
    }
   },
   {
-   "id": "R29",
+   "id": "R36",
    "category": "제출서류",
-   "text": "본선 결과물로 프로토타입, 발표자료, 소스코드 제출",
+   "text": "프로토타입, 발표자료(PPT 또는 PDF), 소스코드(GitHub) 제출",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 5,
@@ -291,9 +361,19 @@
    }
   },
   {
-   "id": "R30",
-   "category": "기타",
-   "text": "발표 시간 5분 내외 및 질의응답 3분 내외 준수",
+   "id": "R37",
+   "category": "기간",
+   "text": "실제 개발 수행 전 과정은 해커톤 본선 대회 기간 내에 진행",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "실제 개발 수행 전 과정이 반드시 해커톤 본선 대회 기간 내에 진행되어야 함"
+   }
+  },
+  {
+   "id": "R38",
+   "category": "형식",
+   "text": "발표시간 5분 내외, 질의응답 3분 내외",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 5,
@@ -301,43 +381,13 @@
    }
   },
   {
-   "id": "R31",
+   "id": "R39",
    "category": "형식",
-   "text": "발표자료는 최종 프로토타입에 반영 및 구현된 내용이어야 함",
+   "text": "발표자료(PPT)는 최종 프로토타입에 반영 및 구현된 내용이어야 함",
    "evidence": {
     "source": "nais-hackathon-2026",
     "page": 5,
-    "quote": "최종 프로토타입에 반영 및 구현되어야 함"
-   }
-  },
-  {
-   "id": "R32",
-   "category": "형식",
-   "text": "발표자료 내 서비스 단계별 흐름도 시각화",
-   "evidence": {
-    "source": "nais-hackathon-2026",
-    "page": 5,
-    "quote": "사용자 이용 흐름을 서비스 단계별로 시각화"
-   }
-  },
-  {
-   "id": "R33",
-   "category": "형식",
-   "text": "발표자료 내 AI 구성 및 활용 방안 제시",
-   "evidence": {
-    "source": "nais-hackathon-2026",
-    "page": 5,
-    "quote": "활용 AI 기술 및 데이터 활용 방안 제시"
-   }
-  },
-  {
-   "id": "R34",
-   "category": "형식",
-   "text": "발표자료 내 핵심 기능 중심의 UI/UX 구성 제시",
-   "evidence": {
-    "source": "nais-hackathon-2026",
-    "page": 5,
-    "quote": "구현된 주요 화면 및 핵심 기능 중심으로 설명"
+    "quote": "발표자료(PPT)는 단순 아이디어 제시가 아닌 최종 프로토타입에 반영 및 구현되어야 함"
    }
   }
  ],
@@ -463,5 +513,20 @@
    "stage": "본선"
   }
  ],
- "dropped": []
+ "dropped": [
+  {
+   "kind": "requirement",
+   "category": "제출서류",
+   "text": "기획서 제출",
+   "page": 2,
+   "quote": "기획서"
+  },
+  {
+   "kind": "requirement",
+   "category": "제출서류",
+   "text": "서약서 제출",
+   "page": 2,
+   "quote": "서약서"
+  }
+ ]
 }

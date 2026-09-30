@@ -29,20 +29,48 @@ def load_pdf(data: bytes, doc_id: str) -> Document:
     return Document(doc_id, pages)
 
 
+def hwpx_text(xml: str) -> list[str]:
+    """section XML → 문단 텍스트 목록. <hp:t> 안의 줄바꿈·탭·중첩 태그는 걷어낸다."""
+    out = []
+    for p in re.findall(r"<hp:p\b.*?</hp:p>", xml, re.S):
+        runs = []
+        for t in re.findall(r"<hp:t(?:\s[^>]*)?>(.*?)</hp:t>", p, re.S):
+            t = re.sub(r"<hp:lineBreak\s*/>", "\n", t)
+            t = re.sub(r"<hp:tab[^>]*/>", " ", t)
+            t = re.sub(r"<[^>]+>", "", t)
+            runs.append(t)
+        line = "".join(runs).replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").strip()
+        if line:
+            out.append(line)
+    return out
+
+
+def paginate(paras: list[str], size: int = 3000) -> list[str]:
+    """쪽 개념이 없는 문서(HWPX·텍스트)는 문단 경계에서 약 size자씩 끊어 「구간」을 쪽처럼 쓴다."""
+    pages, buf, n = [], [], 0
+    for para in paras:
+        if buf and n + len(para) > size:
+            pages.append("\n".join(buf))
+            buf, n = [], 0
+        buf.append(para)
+        n += len(para)
+    if buf:
+        pages.append("\n".join(buf))
+    return pages or [""]
+
+
 def load_hwpx(data: bytes, doc_id: str) -> Document:
     z = zipfile.ZipFile(io.BytesIO(data))
-    names = sorted(n for n in z.namelist() if re.match(r"Contents/section\d+\.xml", n))
-    pages = []
+    names = sorted((n for n in z.namelist() if re.match(r"Contents/section\d+\.xml", n)),
+                   key=lambda n: int(re.findall(r"\d+", n)[0]))
+    paras = []
     for n in names:
-        xml = z.read(n).decode("utf-8", "ignore")
-        paras = re.findall(r"<hp:p\b.*?</hp:p>", xml, re.S)
-        lines = ["".join(re.findall(r"<hp:t[^>]*>(.*?)</hp:t>", p, re.S)) for p in paras]
-        pages.append("\n".join(l for l in lines if l.strip()))
-    return Document(doc_id, pages)
+        paras += hwpx_text(z.read(n).decode("utf-8", "ignore"))
+    return Document(doc_id, paginate(paras))
 
 
 def load_text(data: bytes, doc_id: str) -> Document:
-    return Document(doc_id, [data.decode("utf-8", "ignore")])
+    return Document(doc_id, paginate(data.decode("utf-8", "ignore").split("\n")))
 
 
 def load_bytes(data: bytes, filename: str, doc_id: str | None = None) -> Document:

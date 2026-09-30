@@ -67,6 +67,7 @@ def run_numbers(run: dict) -> dict:
         "n_gaps": len(kinds.get("합의 결핍", [])),
         "n_contested": len(kinds.get("논쟁 지점", [])),
         "mcp_via": trace.get("선행 탐색", {}).get("via", ""),
+        "prior_n": len(run.get("prior_art", []) or []),
         "personas": [{"id": p["id"], "name": p["name"], "model": p["model"], "vendor": vendor(p["model"])} for p in run["personas"]],
         "answered": sorted({v["reviewer_id"] for v in run["verdicts"]}),
         "reviewers": review.get("reviewers", len({v["reviewer_id"] for v in run["verdicts"]})),

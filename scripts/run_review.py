@@ -31,7 +31,8 @@ else:
     items = build_rubric(ex.criteria, gemini, guide)
     rcache.write_text(json.dumps([i.__dict__ for i in items], ensure_ascii=False, indent=1))
 t = time.time()
-run = run_review(ex, Path(draft_path).read_text(), personas, gemini, llm_for, on_step=lambda n, r: print(" ", n, r), items=items, prior_search=prior_search())
+from rfp_to_fit.domain.privacy import mask_pii
+run = run_review(ex, mask_pii(Path(draft_path).read_text())[0], personas, gemini, llm_for, on_step=lambda n, r: print(" ", n, r), items=items, prior_search=prior_search())
 print(f"{time.time()-t:.0f}s expected {run.table.expected_total:.1f}/{run.table.total_points:g}")
 for r in run.table.rows:
     print(f" {r.criterion.name} {r.expected_points:.1f}/{r.criterion.points:g}", {k: round(v, 1) for k, v in r.per_reviewer.items()})

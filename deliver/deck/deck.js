@@ -134,7 +134,7 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
   const lw = 4.7;
   const mo = N.extract.find((e) => e.pages === N.motir.pages) || N.extract[0];
   const na = N.extract.find((e) => /nais/.test(e.id)) || mo;
-  numRow(s, "01", `요건 ${B.n_req}개 · 심사표 ${B.n_crit}개 자동 추출`, `공고 파싱은 처음 한 번(${na.pages}쪽 ${Math.round(na.seconds)}초·${mo.pages}쪽 ${Math.round(mo.seconds)}초)`, X0, 2.95, lw, { hSize: 16 });
+  numRow(s, "01", `요건 ${B.n_req}개 · 심사표 ${B.n_crit}개 자동 추출`, `파싱은 처음 한 번(${na.pages}쪽 ${Math.round(na.seconds)}초·${mo.pages}쪽 ${Math.round(mo.seconds)}초) · 시연은 저장본`, X0, 2.95, lw, { hSize: 16 });
   numRow(s, "02", `점검 질문 ${B.n_items}개를 ${NP}명에게 따로`, "서로의 답을 모른 채 판정 + 인용 + 마음속 등수", X0, 4.05, lw, { hSize: 16 });
   numRow(s, "03", "고칠 곳과 판단할 곳을 나눠 표시", "보완은 문장 대신 「무엇을·어디에」만 지정", X0, 5.15, lw, { hSize: 16 });
   const ix = 6.05, iw = R - ix;
@@ -147,7 +147,7 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
   let y = 2.95;
   if (N.img.input) y = put(N.img.input, y, 1.75) + 0.2;
   if (N.img.result) put(N.img.result, y, 6.8 - y - 0.2);
-  src(s, "라이브 앱 실제 화면(Streamlit) — 마지막 장의 주소에서 직접 눌러 볼 수 있습니다");
+  src(s, "라이브 앱 실제 화면(Streamlit) — 시연 공고는 저장된 파싱 결과(8장 재현율은 별도 측정 실행) · 마지막 장 주소에서 직접 눌러 볼 수 있습니다");
   s.addNotes(`[60초] 지금 보시는 건 이 대회 공고입니다. 공고에서 요건 ${B.n_req}개와 본선 심사표 ${B.n_crit}개를 스스로 찾아냈고, 저희 예선 기획서를 넣었습니다. 점검 질문 ${B.n_items}개가 ${KN} 명에게 따로 가고, 약 ${B.seconds}초 뒤 모두가 깎는 곳과 의견이 갈리는 곳이 나옵니다. 보완은 문장을 써 주지 않고 '어떤 근거를, 어느 절에'만 지정합니다.`);
 }
 
@@ -308,7 +308,7 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
     t(s, `${v1}${P.higher ? `지운 초안 ${P.n}개 중 ${P.lower}개만 근거 충족도가 원본(${P.base})보다 낮음 — 판정은 총점이 아니라 「짚은 곳」.` : `지운 초안의 점수는 원본 ${P.base}점보다 ${P.drop_min}~${P.drop_max}점 낮았습니다.`}`,
       { x: rx, y: 4.85, w: rw, h: 0.75, fontSize: 12, color: C.sub, lineSpacingMultiple: 1.15 });
   }
-  t(s, `③ 1건 채점 ${B.seconds}초 — 평가위원 ${B.reviewers}/${B.of}명 응답 · 선행연구 탐색 포함(공고 파싱 제외)`, { x: rx, y: 5.95, w: rw, h: 0.55, fontSize: 12, bold: true, color: C.ink, lineSpacingMultiple: 1.15 });
+  t(s, `③ 1건 채점 ${B.seconds}초 — 평가위원 ${B.reviewers}/${B.of}명 응답${B.prior_n ? " · 선행연구 탐색 포함" : ""}(공고 파싱 제외)`, { x: rx, y: 5.95, w: rw, h: 0.55, fontSize: 12, bold: true, color: C.ink, lineSpacingMultiple: 1.15 });
   src(s, `정답표: 다른 모델(Claude)이 쪽마다 판독 · 파싱 주 엔진 ${[...new Set(ex.map((e) => e.engine))].join(", ")} · 추출 수는 정답보다 많음(${ex.map((e) => e.n_extracted).join("·")}개 vs ${ex.map((e) => e.n_gold).join("·")}개) · 시연은 저장된 파싱 결과`);
   s.addNotes(`[25초] 정확도는 숫자로 보여 드립니다. 정답표 대비 요건을 놓치지 않은 비율이 ${ex.map((e) => `${nm(e)} ${e.recall}%`).join(", ")}입니다. 가장 약한 곳도 그대로 둡니다. 기획서에서 근거 블록을 일부러 하나씩 지운 초안 ${P.n}개 중 ${P.detect}를 짚었고, 지운 초안은 점수도 내려갔습니다.`);
 }
@@ -318,7 +318,7 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
   const s = pres.addSlide(); s.background = { color: C.white };
   eyebrow(s, "우리 자신에게 먼저 — 이 대회 본선 심사표로 예선 기획서를");
   const nonSel = B.stances.filter((x) => x.decision !== "선정");
-  title(s, `평가위원 ${KN} 명 중,\n**${nonSel.length}명**은 보류였습니다`);
+  title(s, B.n_gaps + B.n_contested === 0 ? `항목 판정은 모두 충족인데,\n**${nonSel.length}명**은 보류였습니다` : `평가위원 ${KN} 명 중,\n**${nonSel.length}명**은 보류였습니다`);
   const pname = Object.fromEntries(B.personas.map((q) => [q.id, q.name]));
   B.stances.forEach((x, i) => {
     const y = 2.9 + i * 0.5, sel = x.decision === "선정";

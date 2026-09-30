@@ -19,6 +19,7 @@ from rfp_to_fit.application.extract import Extraction, extract_rfp  # noqa: E402
 from rfp_to_fit.adapters.graph import run_graph  # noqa: E402
 from rfp_to_fit.application.serialize import extraction_from_dict, run_from_dict  # noqa: E402
 from rfp_to_fit.domain.model import FindingKind  # noqa: E402
+from rfp_to_fit.domain.privacy import mask_pii  # noqa: E402
 from rfp_to_fit.infrastructure.wiring import actual_models, make_llms, personas_with_models, prior_search  # noqa: E402
 
 DATA = ROOT / "data"
@@ -143,7 +144,11 @@ with tab_run:
         else:
             draft = st.text_area("초안 붙여넣기", height=180, label_visibility="collapsed",
                                  placeholder="제안서·기획서 본문을 붙여넣으세요. 저장되지 않습니다.")
-        st.markdown('<div class="muted">🔒 초안은 서버에 저장하지 않고 이 세션 메모리에서만 처리합니다.</div>', unsafe_allow_html=True)
+        pii = {}
+        if draft.strip():
+            draft, pii = mask_pii(draft)
+        note = " · 개인정보 " + ", ".join(f"{k} {v}건" for k, v in pii.items()) + "을 가린 뒤 AI에 보냅니다." if pii else ""
+        st.markdown(f'<div class="muted">🔒 초안은 서버에 저장하지 않고 이 세션 메모리에서만 처리합니다.{note}</div>', unsafe_allow_html=True)
 
     ex = extraction_from_dict(ex_dict) if ex_dict else None
     stage = None

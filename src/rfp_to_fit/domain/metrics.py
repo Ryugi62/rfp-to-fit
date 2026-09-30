@@ -42,8 +42,10 @@ def recall(matches) -> float:
 
 
 def criteria_agreement(gold: list[dict], extracted: list[dict]) -> float:
-    """정답 지표(이름·배점·단계)가 추출 결과에 있는 비율."""
-    def key(d):
-        return (normalize(d["name"]), float(d["points"]))
-    ex = {key(e) for e in extracted}
-    return sum(1 for g in gold if key(g) in ex) / len(gold) if gold else 0.0
+    """정답 지표가 추출 결과에 있는 비율 — 배점이 같고 이름이 서로 절반 이상 겹치면 일치
+    (표에서 두 항목이 한 칸에 합쳐진 경우 추출 이름이 정답 이름의 일부만 가질 수 있음)."""
+    def same(g, e):
+        if float(g["points"]) != float(e["points"]):
+            return False
+        return max(coverage(g["name"], e["name"]), coverage(e["name"], g["name"])) >= 0.5
+    return sum(1 for g in gold if any(same(g, e) for e in extracted)) / len(gold) if gold else 0.0

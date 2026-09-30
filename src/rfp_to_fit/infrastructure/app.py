@@ -66,6 +66,24 @@ def cached_extraction(rid: str) -> dict | None:
     return json.loads(p.read_text()) if p.exists() else None
 
 
+LINKS = [
+    ("NST 2026 NAIS AI 해커톤 공고(HWP 첨부)", "https://www.nst.re.kr/www/selectBbsNttView.do?key=54&bbsNo=1&nttNo=51734"),
+    ("과기정통부 국가과학자지원사업 공모", "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186880"),
+    ("산업통상부 산업집적지 R&D 공고(공고문 2개)", "https://www.motir.go.kr/kor/article/ATCL2826a2625/70794/view"),
+]
+
+
+@st.cache_data(show_spinner=False, max_entries=20)
+def extract_from_url(url: str):
+    from rfp_to_fit.adapters.fetch import fetch_url, load_fetched
+    from rfp_to_fit.application.serialize import extraction_to_dict
+    gemini, _ = llms()
+    f = fetch_url(url)
+    doc, spans = load_fetched(f, "url")
+    info = (f"첨부 {len(f.attachments)}개 중 공고문 {len(spans)}개: " + " + ".join(n for n, _, _ in spans)) if f.attachments else spans[0][0]
+    return extraction_to_dict(extract_rfp(doc, gemini)), len(doc.pages), info[:160]
+
+
 @st.cache_data(show_spinner=False, max_entries=20)
 def extract_uploaded(digest: str, data: bytes, name: str):
     from rfp_to_fit.application.serialize import extraction_to_dict
@@ -109,27 +127,44 @@ with tab_run:
     left, right = st.columns(2)
     with left:
         st.markdown("**1. 공고(RFP)**")
-        src = st.radio("공고", ["예시 공고", "직접 올리기(PDF·HWPX)"], horizontal=True, label_visibility="collapsed")
+        src = st.radio("공고", ["공고 링크 붙여넣기", "파일 올리기(PDF·HWPX·HWP)", "예시 공고"], horizontal=True,
+                       label_visibility="collapsed")
         ex_dict, rfp_label, n_pages, rid = None, "", None, None
-        if src == "예시 공고":
-            rid = st.selectbox("예시", list(EXAMPLES), format_func=lambda k: EXAMPLES[k], label_visibility="collapsed")
-            ex_dict = cached_extraction(rid)
-            rfp_label = EXAMPLES[rid]
-            if ex_dict is None:
-                st.info("이 공고는 아직 파싱 캐시가 없습니다. 실행 시 새로 파싱합니다.")
-                data = (DATA / "rfp" / f"{rid}.pdf").read_bytes()
-                ex_dict, n_pages = extract_uploaded(hashlib.sha256(data).hexdigest(), data, f"{rid}.pdf")
-        else:
-            up = st.file_uploader("공고 파일", type=["pdf", "hwpx"], label_visibility="collapsed")
+        if src == "공고 링크 붙여넣기":
+            url = st.text_input("공고 링크", value=st.session_state.get("url", ""), label_visibility="collapsed",
+                                placeholder="IRIS·과기정통부·기관 게시판 공지 주소 또는 공고 PDF 주소")
+            st.markdown('<div class="muted">예: ' + " · ".join(f'<a href="?u={i}">{n}</a>' for i, (n, _) in enumerate(LINKS)) +
+                        ' — 공지 페이지면 첨부 중 「공고문」을 골라 내려받습니다(스크립트 다운로드·여러 파일 공고문도 처리).</div>',
+                        unsafe_allow_html=True)
+            q = st.query_params.get("u")
+            if q is not None and not url:
+                url = LINKS[int(q)][1]
+                st.session_state["url"] = url
+                st.rerun()
+            if url.strip():
+                with st.status("링크에서 공고문을 찾는 중…", expanded=False) as s:
+                    ex_dict, n_pages, info = extract_from_url(url.strip())
+                    s.update(label=f"공고 파싱 완료 · {n_pages}쪽 · {info}", state="complete")
+                rfp_label = url
+        elif src.startswith("파일"):
+            up = st.file_uploader("공고 파일", type=["pdf", "hwpx", "hwp"], label_visibility="collapsed")
             if up:
                 data = up.getvalue()
                 with st.status("공고를 3쪽씩 나눠 병렬로 읽는 중… (쪽 수에 따라 20초~2분)", expanded=False) as s:
                     ex_dict, n_pages = extract_uploaded(hashlib.sha256(data).hexdigest(), data, up.name)
                     s.update(label=f"공고 파싱 완료 · {n_pages}쪽", state="complete")
                 rfp_label = up.name
+        else:
+            rid = st.selectbox("예시", list(EXAMPLES), format_func=lambda k: EXAMPLES[k], label_visibility="collapsed")
+            ex_dict = cached_extraction(rid)
+            rfp_label = EXAMPLES[rid]
+            if ex_dict is None:
+                data = (DATA / "rfp" / f"{rid}.pdf").read_bytes()
+                ex_dict, n_pages = extract_uploaded(hashlib.sha256(data).hexdigest(), data, f"{rid}.pdf")
     with right:
         st.markdown("**2. 연구자 초안**")
-        dsrc = st.radio("초안", ["예시: 우리 팀 예선 기획서", "직접 올리기", "붙여넣기"], horizontal=True, label_visibility="collapsed")
+        dsrc = st.radio("초안", ["내 초안 올리기(PDF·HWPX·HWP·TXT)", "붙여넣기", "예시: 우리 팀 예선 기획서"], horizontal=True,
+                        label_visibility="collapsed")
         draft = ""
         if dsrc.startswith("예시"):
             labels = {"original": "원본(예선 제출본)", "after": "보완본(본선 구현 결과 추가)",
@@ -138,8 +173,8 @@ with tab_run:
                       "drop2-problem": "결함 주입: 문제 정의 제거"}
             variant = st.selectbox("예시 초안", list(labels), format_func=labels.get, label_visibility="collapsed")
             draft = (DATA / "drafts" / "nais-hackathon-2026" / f"{variant}.md").read_text()
-        elif dsrc == "직접 올리기":
-            dup = st.file_uploader("초안 파일", type=["pdf", "hwpx", "md", "txt"], label_visibility="collapsed")
+        elif dsrc.startswith("내 초안"):
+            dup = st.file_uploader("초안 파일", type=["pdf", "hwpx", "hwp", "md", "txt"], label_visibility="collapsed")
             if dup:
                 draft = load_bytes(dup.getvalue(), dup.name, "draft").text
         else:

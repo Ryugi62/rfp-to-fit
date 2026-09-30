@@ -1,0 +1,39 @@
+[
+ {
+  "id": "msit-national-scientist-2026",
+  "model": "OpenAI gpt-4.1",
+  "recall": 0.9166666666666666,
+  "criteria_agreement": 1.0,
+  "n_gold": 36,
+  "n_extracted": 51,
+  "precision": 0.7450980392156863,
+  "n_hard": 44,
+  "precision_hard": 0.8181818181818182,
+  "recall_hard": 0.8888888888888888,
+  "dropped": 0,
+  "seconds": 19.7,
+  "missed": [
+   "R2 소속기관·국제적 석학(3인 이상)·데이터 기반 발굴위원회 추천 중 1가지 방법으로 주관연구",
+   "R4 국제적 석학 추천은 석학의 추천임을 증빙하는 근거자료를 함께 제출",
+   "R31 연구책임자의 특수관계자(배우자·직계존비속 등)는 참여연구원으로 등록 불가"
+  ]
+ },
+ {
+  "id": "msit-rising-star-2026",
+  "model": "OpenAI gpt-4.1",
+  "recall": 0.9459459459459459,
+  "criteria_agreement": 1.0,
+  "n_gold": 37,
+  "n_extracted": 58,
+  "precision": 0.6896551724137931,
+  "n_hard": 58,
+  "precision_hard": 0.6896551724137931,
+  "recall_hard": 0.9459459459459459,
+  "dropped": 0,
+  "seconds": 28.3,
+  "missed": [
+   "R26 발표평가의 발표는 대표자가 하는 것을 원칙으로 함",
+   "R28 부실위험 확인: '23~'25 결산 표준재무제표(국세청 발급) 또는 회계감사보고서"
+  ]
+ }
+]

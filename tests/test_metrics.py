@@ -24,3 +24,9 @@ def test_short_summary_candidate_counts_but_tiny_fragment_does_not():
     gold = "국가연구개발사업 참여제한 중인 자는 신청할 수 없음(연구개발계획서 제출마감일 전일에 참여제한이 종료되는 경우 신청 가능)"
     assert match_score(gold, "국가연구개발사업 참여제한 중인 자는 신청할 수 없음") >= 0.5
     assert match_score(gold, "신청 가능") < 0.5
+
+
+def test_criteria_agreement_accepts_partial_name_of_merged_cell_with_same_points():
+    gold = [{"name": "국제적 영향력 및 글로벌 학술 활동 · 과학기술계 리더십 및 사회적 공익 기여", "points": 20}]
+    assert criteria_agreement(gold, [{"name": "국제적 영향력 및 글로벌 학술 활동", "points": 20}]) == 1
+    assert criteria_agreement(gold, [{"name": "국제적 영향력 및 글로벌 학술 활동", "points": 30}]) == 0

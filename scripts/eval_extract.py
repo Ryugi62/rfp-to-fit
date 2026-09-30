@@ -9,18 +9,19 @@ from rfp_to_fit.application.extract import extract_rfp
 from rfp_to_fit.domain.metrics import criteria_agreement, match_requirements, recall
 
 which = sys.argv[1] if len(sys.argv) > 1 else "gemini"
-only = sys.argv[2:] 
+only = [a for a in sys.argv[2:] if not a.startswith("--")]
+HOLD = "--holdout" in sys.argv
 from rfp_to_fit.adapters.llm import FallbackLLM
 from rfp_to_fit.adapters.llm import OpenAILLM
 llm = {"gemini": lambda: FallbackLLM(GeminiLLM(), SolarLLM()),
        "solar": lambda: FallbackLLM(SolarLLM(temperature=0.0), GeminiLLM()),
        "openai": lambda: FallbackLLM(OpenAILLM(os.environ.get("RFP_OPENAI_MODEL", "gpt-4.1")), SolarLLM(temperature=0.0))}[which]()
-out, root = [], Path("data")
+out, root = [], Path("data/holdout" if HOLD else "data")
 for gold_path in sorted((root / "gold").glob("*.json")):
     gold = json.loads(gold_path.read_text())
     if only and gold["id"] not in only:
         continue
-    doc = load_path(root / "rfp" / f"{gold['id']}.pdf", gold["id"])
+    doc = load_path(next((root / "rfp").glob(f"{gold['id']}.*")), gold["id"])
     t = time.time()
     ex = extract_rfp(doc, llm)
     sec = time.time() - t
@@ -46,7 +47,7 @@ for gold_path in sorted((root / "gold").glob("*.json")):
                 "n_gold": len(m), "n_extracted": len(exr), "precision": prec_all, "n_hard": len(hard),
                 "precision_hard": prec_hard, "recall_hard": rec_hard, "dropped": len(ex.dropped), "seconds": round(sec, 1), "missed": missed})
 Path("data/eval").mkdir(parents=True, exist_ok=True)
-dst = Path(f"data/eval/extract-{which}.json")   # 일부만 다시 재면 기존 행과 합친다
+dst = Path(f"data/eval/extract-{which}{'-holdout' if HOLD else ''}.json")   # 일부만 다시 재면 기존 행과 합친다
 prev = {r["id"]: r for r in json.loads(dst.read_text())} if dst.exists() else {}
 prev.update({r["id"]: r for r in out})
 dst.write_text(json.dumps(list(prev.values()), ensure_ascii=False, indent=1))

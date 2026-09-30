@@ -113,7 +113,11 @@ class OpenAILLM:
         self.last_model = None
         self._key = os.environ["OPENAI_API_KEY"]
 
+    exhausted = False
+
     def complete_json(self, system: str, prompt: str):
+        if OpenAILLM.exhausted:
+            raise RuntimeError("OpenAI 크레딧 소진(이 프로세스에서 확인됨)")
         body = {"model": self.model, "response_format": {"type": "json_object"},
                 "messages": [{"role": "system", "content": system + " 반드시 JSON 객체로만 답한다."},
                              {"role": "user", "content": prompt}]}
@@ -125,10 +129,15 @@ class OpenAILLM:
         for attempt in range(4):
             try:
                 r = httpx.post(self.URL, json=body, headers={"Authorization": f"Bearer {self._key}"}, timeout=180)
+                if r.status_code == 429 and ("insufficient_quota" in r.text or "no credits" in r.text):
+                    OpenAILLM.exhausted = True   # 크레딧 소진은 재시도해도 안 된다 → 즉시 대체 모델로
+                    raise RuntimeError("OpenAI 크레딧 소진")
                 r.raise_for_status()
                 self.last_model = self.model
                 return parse_json(r.json()["choices"][0]["message"]["content"])
             except Exception as e:
                 last = e
+                if getattr(OpenAILLM, "exhausted", False):
+                    break
                 time.sleep(2 * (attempt + 1))
         raise RuntimeError(f"OpenAI 호출 실패: {last}")

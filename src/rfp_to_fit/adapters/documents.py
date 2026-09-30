@@ -69,17 +69,80 @@ def load_hwpx(data: bytes, doc_id: str) -> Document:
     return Document(doc_id, paginate(paras))
 
 
+def hwp5_paragraphs(data: bytes) -> list[str]:
+    """구형 한글(HWP 5.0, OLE 복합문서) 본문 — BodyText/SectionN 레코드 중 PARA_TEXT(태그 67)의 UTF-16 텍스트."""
+    import olefile
+    import struct
+    import zlib
+    ole = olefile.OleFileIO(io.BytesIO(data))
+    header = ole.openstream("FileHeader").read()
+    compressed = bool(header[36] & 1)
+    sections = sorted((e for e in ole.listdir() if e[0] == "BodyText"), key=lambda e: int(re.sub(r"\D", "", e[1]) or 0))
+    paras = []
+    for e in sections:
+        raw = ole.openstream("/".join(e)).read()
+        if compressed:
+            raw = zlib.decompress(raw, -15)
+        i = 0
+        while i + 4 <= len(raw):
+            h = struct.unpack_from("<I", raw, i)[0]
+            tag, size = h & 0x3FF, (h >> 20) & 0xFFF
+            i += 4
+            if size == 0xFFF:
+                size = struct.unpack_from("<I", raw, i)[0]
+                i += 4
+            if tag == 67:
+                chars, j, buf = raw[i:i + size], 0, []
+                while j + 2 <= len(chars):
+                    c = struct.unpack_from("<H", chars, j)[0]
+                    if c < 32:   # 제어 문자: 확장 제어는 16바이트(8글자) 차지
+                        j += 16 if c in (1, 2, 3, 11, 12, 14, 15, 16, 17, 18, 21, 22, 23) else 2
+                        if c in (10, 13):
+                            buf.append("\n")
+                        continue
+                    buf.append(chr(c))
+                    j += 2
+                line = "".join(buf).strip()
+                if line:
+                    paras.append(line)
+            i += size
+    return paras
+
+
+def load_hwp5(data: bytes, doc_id: str) -> Document:
+    return Document(doc_id, paginate(hwp5_paragraphs(data)))
+
+
+def sniff(data: bytes, filename: str = "") -> str:
+    """확장자가 아니라 내용으로 형식을 판별한다(실측: NST 첨부 .hwp가 실제로는 HWPX zip)."""
+    if data[:5] == b"%PDF-":
+        return "pdf"
+    if data[:4] == b"PK\x03\x04":
+        return "hwpx"
+    if data[:8] == bytes.fromhex("D0CF11E0A1B11AE1"):
+        return "hwp5"
+    head = data[:2048].lstrip().lower()
+    if head.startswith(b"<!doctype html") or head.startswith(b"<html"):
+        return "html"
+    return Path(filename).suffix.lower().lstrip(".") or "txt"
+
+
 def load_text(data: bytes, doc_id: str) -> Document:
     return Document(doc_id, paginate(data.decode("utf-8", "ignore").split("\n")))
 
 
 def load_bytes(data: bytes, filename: str, doc_id: str | None = None) -> Document:
     doc_id = doc_id or Path(filename).stem
-    ext = Path(filename).suffix.lower()
-    if ext == ".pdf":
+    kind = sniff(data, filename)
+    if kind == "pdf":
         return load_pdf(data, doc_id)
-    if ext == ".hwpx":
+    if kind == "hwpx":
         return load_hwpx(data, doc_id)
+    if kind == "hwp5":
+        return load_hwp5(data, doc_id)
+    if kind == "html":
+        from .fetch import html_text
+        return Document(doc_id, paginate(html_text(data.decode("utf-8", "ignore")).split("\n")))
     return load_text(data, doc_id)
 
 

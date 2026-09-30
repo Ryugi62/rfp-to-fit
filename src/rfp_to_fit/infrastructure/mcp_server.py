@@ -14,7 +14,10 @@ mcp = MCPServer("rfp-to-fit")
 @mcp.tool()
 def search_prior_art(query: str, n: int = 5) -> str:
     """영문 키워드로 OpenAlex에서 2019년 이후 선행연구를 찾아 제목·연도·DOI·피인용수를 JSON으로 돌려준다."""
-    return json.dumps(search_works(query, n), ensure_ascii=False)
+    try:
+        return json.dumps(search_works(query, n), ensure_ascii=False)
+    except Exception as e:   # 호출한 AI 비서가 원인을 알 수 있게 오류 원문을 돌려준다
+        return json.dumps({"error": f"{type(e).__name__}: {e}"}, ensure_ascii=False)
 
 
 @mcp.tool()

@@ -201,38 +201,38 @@ const REVM = (v) => [...new Set(B.personas.filter((q) => q.vendor === v).map((q)
   eyebrow(s, "AI 구성 · 데이터 — LangGraph 상태 그래프");
   title(s, "LLM은 판사가 아니라 **증인**입니다 —\n판정은 코드가 합니다", { fontSize: 32 });
   const nodes = [
-    ["rubric", "점검 질문", MAIN, "A"], ["prior", "선행 탐색", "MCP → OpenAlex/Crossref", "M"], ["review", "6명 독립 채점", "3사 모델 병렬", "A"],
-    ["check", "인용 실재 검사", "코드", "R"], ["recheck", "재질의(최대 1회)", "무효 판정만", "A"], ["aggregate", "합의·논쟁 집계", "코드", "R"], ["remedy", "보완 위치 지정", MAIN, "A"],
+    ["rubric", "점검 질문", MAIN, "A"], ["prior", "선행 탐색", "MCP → OpenAlex/Crossref", "M"], ["review", "관점 6개 채점", "3사 모델 병렬", "A"],
+    ["check", "인용 실재 검사", "코드", "R"], ["recheck", "재질의 1회", "무효 판정만", "A"], ["cross", "교차 신문", "다른 회사 모델", "A"], ["aggregate", "합의·논쟁 집계", "코드", "R"], ["remedy", "보완 위치 지정", MAIN, "A"],
   ];
-  const bw = 1.52, gap = (W - 7 * bw) / 6, y = 3.15, bh = 1.15;
+  const bw = 1.32, gap = (W - 8 * bw) / 7, y = 3.15, bh = 1.15;
   nodes.forEach(([id, name, sub, k], i) => {
     const x = X0 + i * (bw + gap), rule = k === "R";
     box(s, x, y, bw, bh, { fill: rule ? C.white : C.blueBg, lineColor: rule ? C.gray : C.blue, dash: rule ? "dash" : "solid", lineWidth: 1.25 });
     t(s, id, { x: x + 0.1, y: y + 0.1, w: bw - 0.2, h: 0.22, fontSize: 9, color: C.gray });
     t(s, name, { x: x + 0.1, y: y + 0.34, w: bw - 0.2, h: 0.42, fontSize: 13, bold: true, color: rule ? C.ink : C.blueInk });
     t(s, sub, { x: x + 0.1, y: y + 0.78, w: bw - 0.2, h: 0.32, fontSize: 9.5, color: C.sub });
-    if (i < 6 && i !== 3) arrow(s, x + bw + 0.02, y + bh / 2, x + bw + gap - 0.02, y + bh / 2);
+    if (i < 7 && i !== 3) arrow(s, x + bw + 0.02, y + bh / 2, x + bw + gap - 0.02, y + bh / 2);
   });
-  // 조건부 간선: check → recheck(무효 있음) / check → aggregate(없음), recheck → aggregate
+  // 조건부 간선: check → recheck(무효 있음) / check → cross(없음)
   const xc = X0 + 3 * (bw + gap), xr = X0 + 4 * (bw + gap), xa = X0 + 5 * (bw + gap);
   arrow(s, xc + bw + 0.02, y + bh / 2, xr - 0.02, y + bh / 2, C.blue);
   t(s, "무효 있음", { x: xc + bw - 0.1, y: y - 0.32, w: 1.2, h: 0.25, fontSize: 9.5, color: C.blue, bold: true });
   s.addShape(pres.shapes.LINE, { x: xc + bw / 2, y: y + bh + 0.05, w: 0, h: 0.35, line: { color: C.gray, width: 1.25 } });
   s.addShape(pres.shapes.LINE, { x: xc + bw / 2, y: y + bh + 0.4, w: xa + bw / 2 - (xc + bw / 2), h: 0, line: { color: C.gray, width: 1.25 } });
   s.addShape(pres.shapes.LINE, { x: xa + bw / 2, y: y + bh + 0.05, w: 0, h: 0.35, flipV: true, line: { color: C.gray, width: 1.25, endArrowType: "triangle" } });
-  t(s, "무효 없음 → 바로 집계", { x: xc + bw / 2 + 0.1, y: y + bh + 0.45, w: 3, h: 0.25, fontSize: 9.5, color: C.gray });
+  t(s, "무효 없음 → 바로 교차 신문", { x: xc + bw / 2 + 0.1, y: y + bh + 0.45, w: 3, h: 0.25, fontSize: 9.5, color: C.gray });
   const facts = [
     ["상태", "items · prior · verdicts · stances · failed · table · remedies — 노드는 상태를 읽고 자기 칸만 씀"],
     ["실패 처리", "평가위원 호출 실패는 순차 재시도, 그래도 실패하면 「응답 k/6」으로 화면에 표시(조용히 버리지 않음)"],
     ["모델 대체", `주 엔진·평가위원마다 대체 모델 사슬 — 한도·장애 시 자동 전환, 실제로 판정한 모델을 기록에 남김`],
-    ["RAG 대신", "공고·초안 원문을 통째로 넣고 인용으로 대조 — 조각 검색으로 문맥을 잃지 않게"],
+    ["교차 신문", "「충족」 인용을 다른 회사 모델이 반대 심문 — 무관·부정문·빈말이면 코드가 「부족」으로 내림(존재 ≠ 충족)"],
   ];
   facts.forEach(([h, d], i) => {
     const yy = 5.25 + i * 0.42;
     t(s, h, { x: X0, y: yy, w: 1.4, h: 0.32, fontSize: 12.5, bold: true, color: C.blueInk });
     t(s, d, { x: X0 + 1.5, y: yy, w: W - 1.5, h: 0.32, fontSize: 12, color: C.sub });
   });
-  s.addNotes(`[25초] 저희 구조의 핵심은 LLM을 판사로 쓰지 않는다는 겁니다. LLM은 증인처럼 증거, 즉 원문 인용만 냅니다. 채택할지, 몇 관점이 동의했는지, 판정을 보류할지는 결정론 코드가 정합니다. 흐름은 LangGraph 상태 그래프 한 장입니다. 점검 질문, 선행 탐색, 여섯 명 병렬 채점까지 가고, 인용 검사에서 원문에 없는 판정이 있으면 그 평가위원에게만 한 번 되돌아가 다시 묻습니다. 없으면 바로 집계로 갑니다. 한 회사 모델이 한도에 걸리거나 멈추면 다음 모델로 자동으로 넘어가고, 실제로 판정한 모델은 기록에 남깁니다.`);
+  s.addNotes(`[25초] 저희 구조의 핵심은 LLM을 판사로 쓰지 않는다는 겁니다. LLM은 증인처럼 증거, 즉 원문 인용만 냅니다. 인용이 원문에 있는지는 코드가 보고, 그 인용이 정말 근거가 되는지는 다른 회사 모델이 반대 심문합니다. 채택·집계·보류는 결정론 코드가 정합니다. 흐름은 LangGraph 상태 그래프 한 장입니다. 점검 질문, 선행 탐색, 여섯 명 병렬 채점까지 가고, 인용 검사에서 원문에 없는 판정이 있으면 그 평가위원에게만 한 번 되돌아가 다시 묻습니다. 없으면 바로 집계로 갑니다. 한 회사 모델이 한도에 걸리거나 멈추면 다음 모델로 자동으로 넘어가고, 실제로 판정한 모델은 기록에 남깁니다.`);
 }
 
 

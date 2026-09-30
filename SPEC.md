@@ -77,7 +77,7 @@
 
 | AC | 기준 | 목표 | 실측 | 판정 | 검사 위치 |
 |---|---|---|---|---|---|
-| AC-1 | 요건 추출 재현율(정답표 대비, 공고별 3회 평균) | 공고별 ≥90%, 개발 3건 중 2건 이상 | 개발 3건: 우주항공청 85% · 산업통상부 93% · NAIS 87%. 검증 2건(블라인드): 국가과학자 94% · 라이징스타 77% | × (개발 1/3 · 검증 1/2) | `extract-openai-3runs.json`, `extract-openai-holdout-3runs.json`, `holdout-summary.json` · 채점 로직 `tests/test_metrics.py` |
+| AC-1 | 요건 추출 재현율(정답표 대비, 공고별 3회 평균) | 공고별 ≥90%, 개발 3건 중 2건 이상 | 개발 3건: 우주항공청 85% · 산업통상부 93% · NAIS 87%. 검증 2건(블라인드): 국가과학자 94% · 라이징스타 78%(77.5) | × (개발 1/3 · 검증 1/2) | `extract-openai-3runs.json`, `extract-openai-holdout-3runs.json`, `holdout-summary.json` · 채점 로직 `tests/test_metrics.py` |
 | AC-1b | 주석 규칙 추가 뒤 검증 2건 재현율(블라인드 아님, 2회) | 참고 | 국가과학자 97 · 92% · 라이징스타 89 · 95% | 참고 | `holdout-summary.json` `after_footnote_rule` · 규칙 존재 `tests/test_extract.py::test_footnote_rule_is_in_extraction_prompt` |
 | AC-2 | 평가지표 이름·배점 일치 | 100% | 5건 모두 100%(3회 최솟값도 100%) | ○ | 같은 파일 `criteria_agreement` · `tests/test_metrics.py` |
 | AC-3 | 공고 인용 검증: 추출 항목은 그 쪽(±1, 또는 교정된 쪽) 원문 대조를 통과, 아니면 버림 | 100% | 테스트 통과. 처음 본 공고 51개 원문 대조: 원문에 없음·왜곡 0 · 신청 단계 요건 44(86%) · 안내·사후 의무 7 · 중복 5 (감사자는 다른 회사 모델, 사람 검수 아님) | ○ | `tests/test_extract.py` · `audit-national-scientist.json` |

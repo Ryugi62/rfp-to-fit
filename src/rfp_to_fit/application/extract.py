@@ -117,7 +117,7 @@ def extract_rfp(doc: Document, llm: LLM, extra_criteria: list[Criterion] | None 
     """쪽 묶음(3쪽)마다 병렬로 뽑아 합친다 — 긴 공고에서 뒤쪽 요건이 빠지는 문제를 막는다."""
     from concurrent.futures import ThreadPoolExecutor
     parts = _chunks(doc)
-    with ThreadPoolExecutor(max_workers=min(8, len(parts))) as ex:
+    with ThreadPoolExecutor(max_workers=max(1, min(8, len(parts)))) as ex:
         results = list(ex.map(lambda body: _safe(llm, body), parts))
     data = {"requirements": _dedupe([r for d in results for r in d.get("requirements", [])], lambda r: r.get("text", "")),
             "criteria": _dedupe([c for d in results for c in d.get("criteria", [])],

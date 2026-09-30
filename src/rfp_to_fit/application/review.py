@@ -80,13 +80,19 @@ reason은 심사위원 메모처럼 한 문장(40자 이내).
 _LABELS = {l.value: l for l in VerdictLabel}
 
 
+def rows_of(data, key: str) -> list[dict]:
+    """모델이 {key:[...]} 대신 [...]만 돌려줘도 받는다. dict가 아닌 원소는 버린다."""
+    rows = data.get(key, []) if isinstance(data, dict) else data
+    return [r for r in (rows or []) if isinstance(r, dict)]
+
+
 def review_one(persona: ReviewerPersona, criteria: list[Criterion], items: list[CheckItem], draft: str, llm: LLM) -> list[Verdict]:
     by_id = {c.id: c for c in criteria}
     listing = "\n".join(f"- {i.id} [{by_id[i.criterion_id].name} {by_id[i.criterion_id].points:g}점] {i.question}" for i in items)
     data = llm.complete_json(REVIEW_SYSTEM.format(lens=persona.lens), REVIEW_PROMPT.format(items=listing, draft=draft))
     valid_ids = {i.id for i in items}
     out = []
-    for v in data.get("verdicts", []):
+    for v in rows_of(data, "verdicts"):
         if v.get("item_id") not in valid_ids:
             continue
         label = _LABELS.get(str(v.get("label", "")).strip(), VerdictLabel.MISSING)
@@ -147,7 +153,7 @@ def remedy(findings: list[Finding], items: list[CheckItem], criteria: list[Crite
     data = llm.complete_json(REMEDY_SYSTEM, REMEDY_PROMPT.format(gaps=gaps, sections="\n".join(f"- {s}" for s in sections_of(draft))))
     ids = {f.item_id for f in targets}
     return [RemedyItem(r["item_id"], r.get("evidence_type", "기타"), r.get("location", "새 절"), r.get("why", ""))
-            for r in data.get("remedies", []) if r.get("item_id") in ids]
+            for r in rows_of(data, "remedies") if r.get("item_id") in ids]
 
 
 # ---------- 재질의(자기 교정) ----------
@@ -185,7 +191,7 @@ def recheck(personas: list[ReviewerPersona], criteria, items: list[CheckItem], v
         ids = {v.item_id for v in bad}
         return [Verdict(pid, x["item_id"], _LABELS.get(str(x.get("label", "")).strip(), VerdictLabel.MISSING),
                         str(x.get("quote", "") or ""), "[재질의] " + str(x.get("reason", "") or ""))
-                for x in data.get("verdicts", []) if x.get("item_id") in ids]
+                for x in rows_of(data, "verdicts") if x.get("item_id") in ids]
 
     fixed: dict[tuple[str, str], Verdict] = {}
     with ThreadPoolExecutor(max_workers=len(redo)) as ex:

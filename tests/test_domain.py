@@ -88,3 +88,10 @@ def test_rubric_accepts_both_json_shapes():
     b = {"items": [{"criterion_id": "C1", "questions": ["q1", "q2"]}]}
     assert _flatten_items(a) == [("C1", "q1")]
     assert _flatten_items(b) == [("C1", "q1"), ("C1", "q2")]
+
+
+def test_rows_of_accepts_bare_list_and_skips_junk():
+    from rfp_to_fit.application.review import rows_of
+    assert rows_of([{"item_id": "a"}, "x"], "remedies") == [{"item_id": "a"}]
+    assert rows_of({"remedies": [{"item_id": "b"}]}, "remedies") == [{"item_id": "b"}]
+    assert rows_of(None, "remedies") == []

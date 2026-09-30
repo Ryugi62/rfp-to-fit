@@ -1,0 +1,1246 @@
+{
+ "requirements": [
+  {
+   "id": "R1",
+   "category": "자격",
+   "text": "AI 활용에 아이디어를 제안하고 싶은 대한민국 국민",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 1,
+    "quote": "AI 활용에 아이디어를 제안하고 싶은 대한민국 국민"
+   }
+  },
+  {
+   "id": "R2",
+   "category": "자격",
+   "text": "개인 또는 최대 5인 구성의 팀(전공 무관)",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 1,
+    "quote": "개인 또는 최대 5인 구성의 팀(전공 무관)"
+   }
+  },
+  {
+   "id": "R3",
+   "category": "기간",
+   "text": "참가 신청 마감: 2026년 9월 7일(월) 17:00",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "9.7.(월) 17:00 참가 신청서 제출"
+   }
+  },
+  {
+   "id": "R4",
+   "category": "형식",
+   "text": "온라인 접수(https://ai4scikorea.org/#competition) 또는 QR 접수",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "온라인 접수(https://ai4scikorea.org/#competition) 또는 신청 QR"
+   }
+  },
+  {
+   "id": "R5",
+   "category": "제출서류",
+   "text": "참가신청서 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "참가신청서 및 기획서, 개인정보 동의서, 서약서 제출"
+   }
+  },
+  {
+   "id": "R6",
+   "category": "제출서류",
+   "text": "기획서 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "참가신청서 및 기획서, 개인정보 동의서, 서약서 제출"
+   }
+  },
+  {
+   "id": "R7",
+   "category": "제출서류",
+   "text": "개인정보 동의서 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "참가신청서 및 기획서, 개인정보 동의서, 서약서 제출"
+   }
+  },
+  {
+   "id": "R8",
+   "category": "제출서류",
+   "text": "서약서 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "참가신청서 및 기획서, 개인정보 동의서, 서약서 제출"
+   }
+  },
+  {
+   "id": "R9",
+   "category": "제출서류",
+   "text": "본선 진출 대상자: 아이디어 포스터 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "사전 제출 자료 안내(아이디어 포스터 등)"
+   }
+  },
+  {
+   "id": "R10",
+   "category": "제출서류",
+   "text": "본선 진출 대상자: 참가 자격 증빙 서류 (필요시)",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "참가 자격 증빙 서류 (필요시)"
+   }
+  },
+  {
+   "id": "R11",
+   "category": "제출서류",
+   "text": "본선 과제: 시연 결과물 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "시연 결과물 발표 자료"
+   }
+  },
+  {
+   "id": "R12",
+   "category": "제출서류",
+   "text": "본선 과제: 발표 자료 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "시연 결과물 발표 자료"
+   }
+  },
+  {
+   "id": "R13",
+   "category": "형식",
+   "text": "신청서 및 기획서 작성 시 참가자 가이드라인 참고",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 2,
+    "quote": "신청서 및 기획서 작성 방법은 “붙임. 참가자 가이드라인” 참고"
+   }
+  },
+  {
+   "id": "R14",
+   "category": "제출서류",
+   "text": "예선 참가 시 참가신청서 및 프로젝트 기획서 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "예선 참가 : 참가신청서 및 프로젝트 기획서 제출"
+   }
+  },
+  {
+   "id": "R15",
+   "category": "형식",
+   "text": "신청서 상에 참여하고자 하는 분야를 명확하게 표시",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "참여하고자 하는 분야를 명확하게 표시"
+   }
+  },
+  {
+   "id": "R16",
+   "category": "형식",
+   "text": "분야가 중복될 경우 비중이 높은 분야로 선택",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "분야가 중복될 경우 비중이 높은 분야로 선택"
+   }
+  },
+  {
+   "id": "R17",
+   "category": "형식",
+   "text": "핵심 개발 주제가 명확히 드러나도록 주제명 기재",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "핵심 개발 주제를 명확하게 들어날 수 있도록 기재"
+   }
+  },
+  {
+   "id": "R18",
+   "category": "형식",
+   "text": "팀명과 참가 인원 수 기재",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "팀명과 참가 인원 수 기재"
+   }
+  },
+  {
+   "id": "R19",
+   "category": "형식",
+   "text": "신청자 인적 사항 외 팀 정보를 정확하게 기재",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "참가자의 인적 사항 외 팀 정보를 정확하게 기재"
+   }
+  },
+  {
+   "id": "R20",
+   "category": "형식",
+   "text": "신청자 및 팀원 자필 서명 후 신청서 스캔 첨부",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "자필 서명으로 기재하여 신청서 스캔 후 첨부"
+   }
+  },
+  {
+   "id": "R21",
+   "category": "형식",
+   "text": "기획서 내 연구 문제 및 제안 배경 항목 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "해결하고자 하는 연구 문제 및 연구 현장의 어려움"
+   }
+  },
+  {
+   "id": "R22",
+   "category": "형식",
+   "text": "기획서 내 AI Agent 제안 및 차별성 항목 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "AI Agent의 역할 및 핵심 기능"
+   }
+  },
+  {
+   "id": "R23",
+   "category": "형식",
+   "text": "기획서 내 구현 방안 항목 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "활용 AI 기술 및 데이터 활용 계획"
+   }
+  },
+  {
+   "id": "R24",
+   "category": "형식",
+   "text": "기획서 내 AI 윤리 및 신뢰성 항목 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "개인정보·보안 및 AI 윤리 고려사항"
+   }
+  },
+  {
+   "id": "R25",
+   "category": "형식",
+   "text": "기획서 내 기대효과 및 활용 가능성 항목 작성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 4,
+    "quote": "연구 생산성 및 연구 혁신 기여 효과"
+   }
+  },
+  {
+   "id": "R26",
+   "category": "제출서류",
+   "text": "본선 진출 10개 팀 대상 아이디어 포스터 제작",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "사전과제 : 아이디어 포스터 제작"
+   }
+  },
+  {
+   "id": "R27",
+   "category": "형식",
+   "text": "포스터는 세로형 이미지(JPG 또는 PNG 파일)로 구성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "세로형 포스터 이미지 (JPG 또는 PNG 파일)"
+   }
+  },
+  {
+   "id": "R28",
+   "category": "제한",
+   "text": "실제 개발 전 과정은 반드시 본선 대회 기간 내 진행",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "실제 개발 수행 전 과정이 반드시 해커톤 본선 대회 기간 내에 진행"
+   }
+  },
+  {
+   "id": "R29",
+   "category": "제출서류",
+   "text": "본선 결과물로 프로토타입, 발표자료, 소스코드 제출",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "프로토타입, 발표자료(PPT 또는 PDF), 소스코드(GitHub) 제출"
+   }
+  },
+  {
+   "id": "R30",
+   "category": "기타",
+   "text": "발표 시간 5분 내외 및 질의응답 3분 내외 준수",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "발표시간 5분 내외, 질의응답 3분 내외"
+   }
+  },
+  {
+   "id": "R31",
+   "category": "형식",
+   "text": "발표자료는 최종 프로토타입에 반영 및 구현된 내용이어야 함",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "최종 프로토타입에 반영 및 구현되어야 함"
+   }
+  },
+  {
+   "id": "R32",
+   "category": "형식",
+   "text": "발표자료 내 서비스 단계별 흐름도 시각화",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "사용자 이용 흐름을 서비스 단계별로 시각화"
+   }
+  },
+  {
+   "id": "R33",
+   "category": "형식",
+   "text": "발표자료 내 AI 구성 및 활용 방안 제시",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "활용 AI 기술 및 데이터 활용 방안 제시"
+   }
+  },
+  {
+   "id": "R34",
+   "category": "형식",
+   "text": "발표자료 내 핵심 기능 중심의 UI/UX 구성 제시",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 5,
+    "quote": "구현된 주요 화면 및 핵심 기능 중심으로 설명"
+   }
+  }
+ ],
+ "criteria": [
+  {
+   "id": "C6",
+   "name": "적합성",
+   "points": 10.0,
+   "description": "문제 해결 성과 및 연구목표 반영 정도",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 3,
+    "quote": "문제 해결 성과 및 연구목표 반영 정도"
+   },
+   "stage": "본선"
+  },
+  {
+   "id": "C7",
+   "name": "활용성",
+   "points": 20.0,
+   "description": "AI 기술 구현 수준 및 활용 완성도",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 3,
+    "quote": "AI 기술 구현 수준 및 활용 완성도"
+   },
+   "stage": "본선"
+  },
+  {
+   "id": "C8",
+   "name": "혁신성",
+   "points": 25.0,
+   "description": "해결방안의 혁신성 및 AI 활용의 독창성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 3,
+    "quote": "해결방안의 혁신성 및 AI 활용의 독창성"
+   },
+   "stage": "본선"
+  },
+  {
+   "id": "C9",
+   "name": "실현가능성",
+   "points": 25.0,
+   "description": "프로토타입 완성도 및 기술 구현 수준",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 3,
+    "quote": "프로토타입 완성도 및 기술 구현 수준"
+   },
+   "stage": "본선"
+  },
+  {
+   "id": "C10",
+   "name": "확장성",
+   "points": 20.0,
+   "description": "실증·후속 연구 연계 및 확장 가능성",
+   "evidence": {
+    "source": "nais-hackathon-2026",
+    "page": 3,
+    "quote": "실증·후속 연구 연계 및 확장 가능성"
+   },
+   "stage": "본선"
+  }
+ ],
+ "items": [
+  {
+   "id": "C6-1",
+   "criterion_id": "C6",
+   "question": "기획서 내 연구 문제와 제안 배경이 명확하게 서술되어 있는가"
+  },
+  {
+   "id": "C6-2",
+   "criterion_id": "C6",
+   "question": "제시된 연구 목표가 설정한 문제 해결을 위해 직접적으로 연결되어 있는가"
+  },
+  {
+   "id": "C6-3",
+   "criterion_id": "C6",
+   "question": "연구 목표 달성 여부를 판단할 수 있는 구체적인 성과 지표를 제시하고 있는가"
+  },
+  {
+   "id": "C7-1",
+   "criterion_id": "C7",
+   "question": "발표자료 내 서비스 단계별 흐름도가 시각화되어 포함되어 있는가"
+  },
+  {
+   "id": "C7-2",
+   "criterion_id": "C7",
+   "question": "발표자료 내 AI 구성 및 활용 방안이 구체적으로 제시되어 있는가"
+  },
+  {
+   "id": "C7-3",
+   "criterion_id": "C7",
+   "question": "핵심 기능 중심의 UI/UX 구성이 발표자료에 포함되어 있는가"
+  },
+  {
+   "id": "C8-1",
+   "criterion_id": "C8",
+   "question": "기획서 내 기존 기술 대비 차별화된 AI Agent 제안 내용이 포함되어 있는가"
+  },
+  {
+   "id": "C8-2",
+   "criterion_id": "C8",
+   "question": "제안하는 해결방안이 기존 방식과 비교하여 독창적인 기술적 요소를 포함하는가"
+  },
+  {
+   "id": "C8-3",
+   "criterion_id": "C8",
+   "question": "기획서 내 AI 윤리 및 신뢰성 확보를 위한 구체적인 방안이 명시되어 있는가"
+  },
+  {
+   "id": "C9-1",
+   "criterion_id": "C9",
+   "question": "기획서 내 기술 구현 방안이 단계별로 구체적으로 작성되어 있는가"
+  },
+  {
+   "id": "C9-2",
+   "criterion_id": "C9",
+   "question": "본선 결과물로 제출된 소스코드와 프로토타입이 발표자료 내용과 일치하는가"
+  },
+  {
+   "id": "C9-3",
+   "criterion_id": "C9",
+   "question": "기술 구현을 위한 데이터 확보 및 처리 방법이 구체적으로 제시되어 있는가"
+  },
+  {
+   "id": "C10-1",
+   "criterion_id": "C10",
+   "question": "기획서 내 기대효과 및 활용 가능성이 구체적으로 서술되어 있는가"
+  },
+  {
+   "id": "C10-2",
+   "criterion_id": "C10",
+   "question": "본 연구 이후 실증을 위한 구체적인 후속 연구 계획이 포함되어 있는가"
+  },
+  {
+   "id": "C10-3",
+   "criterion_id": "C10",
+   "question": "개발된 기술을 다른 분야나 서비스로 확장할 수 있는 구체적인 시나리오를 제시하는가"
+  }
+ ],
+ "personas": [
+  {
+   "id": "P1",
+   "name": "출연연 연구기획 책임자",
+   "lens": "문제 정의가 명확한가, 국가 R&D·주최 취지와 맞는가, 기획 논리가 이어지는가를 먼저 본다.",
+   "model": "Google gemini-3.5-flash"
+  },
+  {
+   "id": "P2",
+   "name": "산업체 CTO",
+   "lens": "현장에서 실제로 쓰일지, 비용·도입 장벽·사업화 경로가 있는지, 숫자로 된 효과가 있는지를 먼저 본다.",
+   "model": "Upstage solar-pro3"
+  },
+  {
+   "id": "P3",
+   "name": "AI 기술 전문가",
+   "lens": "기술 구성이 구체적인지, 정확도 목표와 검증 방법이 있는지, 재현 가능하고 기존 기술과 무엇이 다른지를 먼저 본다.",
+   "model": "Google gemini-3.5-flash"
+  },
+  {
+   "id": "P4",
+   "name": "전문기관 과제관리 PM",
+   "lens": "요건·일정·역할 분담·성과지표·위험 대응이 관리 가능하게 적혀 있는지를 먼저 본다.",
+   "model": "Upstage solar-pro3"
+  },
+  {
+   "id": "P5",
+   "name": "연구윤리·신뢰성 심사자",
+   "lens": "개인정보·보안, 환각·오류 대응, 책임 주체(사람의 최종 판단), 출처 표기를 먼저 본다.",
+   "model": "Google gemini-3.5-flash"
+  }
+ ],
+ "verdicts": [
+  {
+   "reviewer_id": "P1",
+   "item_id": "C6-1",
+   "label": "충족",
+   "quote": "가장 비싼 실패는 \"아이디어가 나빠서\"가 아니라 \"심사기준을 잘못 읽어서\" 생긴다.",
+   "reason": "연구자가 겪는 실질적인 문제 상황과 배경을 명확히 정의함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C6-2",
+   "label": "충족",
+   "quote": "평가위원이 볼 때 무엇이 비어 있는지를 얼마나 정확히 짚는가",
+   "reason": "연구 목표가 문제 해결을 위한 핵심 기능과 직접적으로 연결됨."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C6-3",
+   "label": "충족",
+   "quote": "공개 RFP 3건의 정답표 대비 요건 추출 재현율 90% 이상, 결핍 탐지 정밀도 80% 이상.",
+   "reason": "성과 지표를 수치화하여 달성 여부를 판단할 수 있게 제시함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C7-1",
+   "label": "충족",
+   "quote": "공고를 3쪽씩 나눠 병렬로 읽고 요건·평가지표를 쪽 번호와 원문 인용으로 뽑는다",
+   "reason": "서비스 단계별 흐름을 텍스트로 구체화하여 시각화 구조를 설명함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C7-2",
+   "label": "충족",
+   "quote": "구조는 LLM + RAG + 도구 호출(MCP)이다. 추론·채점: Google Gemini API",
+   "reason": "AI 구성 및 활용 방안을 기술 스택과 함께 구체적으로 제시함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C7-3",
+   "label": "충족",
+   "quote": "한 화면에 한 메시지 원칙으로 세 화면을 만들었다. ① 입력 화면: 공고(예시 3건 또는 PDF·HWPX 업",
+   "reason": "[재질의] 제안서 본문 5절에 UI/UX 구성이 화면별로 구체적으로 명시되어 있음."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C8-1",
+   "label": "충족",
+   "quote": "관점이 다른 가상 평가위원 3~5명이 초안을 독립 채점 → 전원 감점(합의 결핍)과 의견 갈림(논쟁 지점) ",
+   "reason": "[재질의] 기존의 단순 생성 도구와 달리 가상 평가위원의 독립 채점 및 합의/불일치 분석이라는 차별화된 AI Agent 기획이 명확히 제시됨."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C8-2",
+   "label": "충족",
+   "quote": "모두가 감점한 항목만 \"결핍\"으로, 갈리는 항목은 \"논쟁 지점\"으로 돌려주면",
+   "reason": "평가위원의 관점을 모델링하여 독창적인 해결 방안을 제시함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C8-3",
+   "label": "충족",
+   "quote": "모든 판정에 출처(공고 페이지·논문 DOI·특허번호)를 강제하고 없으면 \"확인 불가\"로만 표기한다.",
+   "reason": "AI 윤리 및 신뢰성 확보를 위한 구체적인 기술적 방안을 명시함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C9-1",
+   "label": "충족",
+   "quote": "에이전트 흐름은 LangGraph 상태 그래프(채점 → 인용 검사 → 재질의 → 집계 → 보완)로 구현했고,",
+   "reason": "[재질의] 기술 구현 방안이 LangGraph를 활용한 단계별 에이전트 루프로 구체적으로 작성되어 있음."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C9-2",
+   "label": "충족",
+   "quote": "소스코드는 공개 저장소 https://github.com/Ryugi62/rfp-to-fit 에 본선 기간 중",
+   "reason": "제출된 소스코드와 발표 내용이 일치함을 명시함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C9-3",
+   "label": "충족",
+   "quote": "공고 원문을 쪽별로 읽어 만든 정답표 대비 요건 추출 재현율은 우주항공청 공고(19쪽) 95%, 산업통상부 ",
+   "reason": "[재질의] 데이터 처리 방법으로 공고 원문을 쪽별로 파싱하고 정답표와 대조하는 구체적인 방법론이 제시됨."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C10-1",
+   "label": "충족",
+   "quote": "기관 단위로 공고를 일괄 파싱해 \"지원 가능 과제·부족 요건\" 주간 대시보드로 확장.",
+   "reason": "기대효과 및 활용 가능성을 구체적으로 서술함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C10-2",
+   "label": "충족",
+   "quote": "평가 데이터가 쌓이면 \"어떤 결핍이 실제 탈락과 상관되는가\"가 후속 연구 질문이 된다.",
+   "reason": "실증을 위한 구체적인 후속 연구 계획을 포함함."
+  },
+  {
+   "reviewer_id": "P1",
+   "item_id": "C10-3",
+   "label": "충족",
+   "quote": "같은 합의·불일치 엔진을 연차·성과 보고서(지표 대비 실적)와 연구비 정산(증빙 대비 항목)에 적용한다.",
+   "reason": "다른 분야로 확장할 수 있는 구체적인 시나리오를 제시함."
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C6-1",
+   "label": "충족",
+   "quote": "평가지표의 어휘와 연구자의 서술 어휘가 다르고, 요건(참여 제한·필수 첨부·기간)은 본문·첨부·FAQ에 흩어",
+   "reason": "연구 문제와 제안 배경이 RFP 분석 시 발생하는 구체적 언어 차이와 데이터 분산 문제를 명시함"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C6-2",
+   "label": "충족",
+   "quote": "제출 직전에 빈칸을 발견하는 사람",
+   "reason": "연구 목표가 '평가위원이 볼 때 무엇이 비어 있는지 정확히 짚는 것'으로 문제 해결 방향과 직접 연결됨"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C6-3",
+   "label": "충족",
+   "quote": "공개 RFP 3건의 정답표 대비 요건 추출 재현율 90% 이상, 결핍 탐지 정밀도 80% 이상",
+   "reason": "성과 지표로 재현율 90% 이상과 정밀도 80% 이상을 수치화하여 제시함"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C7-1",
+   "label": "충족",
+   "quote": "서비스 흐름도 (AI가 하는 일 / 사람이 판단하는 일)",
+   "reason": "발표자료에 서비스 단계별 흐름도가 시각화되어 포함되어 있음"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C7-2",
+   "label": "충족",
+   "quote": "평가지표를 점검 질문으로 나눈다",
+   "reason": "AI 구성 및 활용 방안이 구체적으로 제시되어 있음"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C7-3",
+   "label": "충족",
+   "quote": "한 화면에 한 메시지 원칙으로 세 화면을 만들었다",
+   "reason": "핵심 기능 중심의 UI/UX 구성이 발표자료에 포함되어 있음"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C8-1",
+   "label": "충족",
+   "quote": "관점이 다른 가상 평가위원 3~5명이 초안을 독립 채점",
+   "reason": "기존 기술 대비 차별화된 AI Agent 제안 내용이 포함됨"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C8-2",
+   "label": "충족",
+   "quote": "가상 평가위원 프롬프트는 공고의 지표 원문만 받아 특정 어휘·기관 편향을 막는다",
+   "reason": "독창적인 기술적 요소(편향 방지 메커니즘)를 포함함"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C8-3",
+   "label": "충족",
+   "quote": "모든 판정에 출처(공고 페이지·논문 DOI·특허번호)를 강제하고 없으면 \"확인 불가\"로만 표기한다.",
+   "reason": "[재질의] 제안서 본문에 AI 윤리 및 신뢰성 확보를 위한 구체적인 방안으로 '모든 판정에 출처 강제 및 확인 불가 표기'가 명시되어 있음."
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C9-1",
+   "label": "충족",
+   "quote": "추론·채점: Google Gemini API(본선 시점 최신 Pro/Flash 모델, 실제 사용 버전을 결과",
+   "reason": "기술 구현 방안이 단계별로 구체적으로 작성되어 있음"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C9-2",
+   "label": "충족",
+   "quote": "소스코드는 공개 저장소 https://github.com/Ryugi62/rfp-to-fit 에 본선 기간 중",
+   "reason": "본선 결과물과 발표자료 내용이 일치함"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C9-3",
+   "label": "충족",
+   "quote": "NTIS(ntis.go.kr)·IRIS(iris.go.kr) 공개 공고·과제, KIPRIS Plus API ",
+   "reason": "데이터 확보 및 처리 방법이 구체적으로 제시되어 있음"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C10-1",
+   "label": "충족",
+   "quote": "연구기관·연구지원 부서: 기관 단위로 공고를 일괄 파싱해 '지원 가능 과제·부족 요건' 주간 대시보드로 확장",
+   "reason": "기대효과 및 활용 가능성이 구체적으로 서술됨"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C10-2",
+   "label": "충족",
+   "quote": "후속 연구: 코드·정답표·평가 스크립트를 오픈소스(MIT)로 공개해 'RFP 결핍 벤치마크'를 만든다",
+   "reason": "실증을 위한 구체적인 후속 연구 계획이 포함됨"
+  },
+  {
+   "reviewer_id": "P2",
+   "item_id": "C10-3",
+   "label": "충족",
+   "quote": "같은 합의·불일치 엔진을 연차·성과 보고서(지표 대비 실적)와 연구비 정산(증빙 대비 항목)에 적용한다",
+   "reason": "다른 분야나 서비스로 확장할 수 있는 구체적 시나리오 제시됨"
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C6-1",
+   "label": "충족",
+   "quote": "가장 비싼 실패는 \"아이디어가 나빠서\"가 아니라 \"심사기준을 잘못 읽어서\" 생긴다.",
+   "reason": "연구 문제와 제안 배경이 구체적인 사례를 통해 명확히 서술됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C6-2",
+   "label": "충족",
+   "quote": "평가위원의 눈으로 빈칸을 먼저 찾는 R&D 기획 에이전트 \"RFP-to-Fit\"",
+   "reason": "연구 목표가 문제 해결을 위해 직접적으로 연결되어 있음."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C6-3",
+   "label": "충족",
+   "quote": "공개 RFP 3건의 정답표 대비 요건 추출 재현율 90% 이상, 결핍 탐지 정밀도 80% 이상.",
+   "reason": "정량적인 성과 지표와 검증 방법이 구체적으로 제시됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C7-1",
+   "label": "충족",
+   "quote": "① RFP 파싱 | 공고문·첨부(PDF/HWPX)에서 자격 요건·필수 첨부·기간·평가지표·배점을 출처 페이지",
+   "reason": "단계별 흐름도가 표 형태로 시각화되어 포함됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C7-2",
+   "label": "충족",
+   "quote": "구조는 LLM + RAG + 도구 호출(MCP)이다. 추론·채점: Google Gemini API",
+   "reason": "AI 구성 및 활용 방안이 기술 스택별로 구체적으로 제시됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C7-3",
+   "label": "충족",
+   "quote": "① 입력 화면: 공고(예시 3건 또는 PDF·HWPX 업로드)와 초안(업로드·붙여넣기)",
+   "reason": "핵심 기능 중심의 UI/UX 구성이 화면별로 구체적으로 설명됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C8-1",
+   "label": "충족",
+   "quote": "관점이 다른 가상 평가위원 3~5명이 초안을 독립 채점 → 전원 감점(합의 결핍)과 의견 갈림(논쟁 지점) ",
+   "reason": "기존 도구와 차별화된 가상 평가위원 시뮬레이션 방식이 포함됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C8-2",
+   "label": "충족",
+   "quote": "모두가 깎는 곳 N곳」 큰 숫자 하나, 지표×평가위원 점수 대조표, 합의 결핍·논쟁 지점 카드",
+   "reason": "독창적인 기술적 요소인 다중 평가위원 합의 모델을 제시함."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C8-3",
+   "label": "충족",
+   "quote": "모든 판정에 출처(공고 페이지·논문 DOI·특허번호)를 강제하고 없으면 \"확인 불가\"로만 표기한다.",
+   "reason": "AI 윤리 및 신뢰성 확보를 위한 구체적인 방안이 명시됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C9-1",
+   "label": "충족",
+   "quote": "1일차 17:00~24:00: ① 파서 + 요건 매트릭스(RFP 3건 검증), ② MCP 검색기 연결. 2일",
+   "reason": "[재질의] 제안서 3절 구현방안 내 해커톤 기간별 단계별 구현 계획이 구체적으로 명시되어 있으며, 각 단계에서 수행할 기술적 과업이 명확히 정의되어 있음."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C9-2",
+   "label": "충족",
+   "quote": "소스코드는 공개 저장소 https://github.com/Ryugi62/rfp-to-fit 에 본선 기간 중",
+   "reason": "소스코드와 프로토타입이 발표 내용과 일치함을 명시함."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C9-3",
+   "label": "충족",
+   "quote": "데이터는 전부 공개 자료다 — NTIS·IRIS 공개 공고·과제, KIPRIS 공개 특허(KIPRIS Plu",
+   "reason": "데이터 확보 및 처리 방법이 구체적으로 제시됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C10-1",
+   "label": "충족",
+   "quote": "기관 단위로 공고를 일괄 파싱해 \"지원 가능 과제·부족 요건\" 주간 대시보드로 확장.",
+   "reason": "기대효과 및 활용 가능성이 구체적으로 서술됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C10-2",
+   "label": "충족",
+   "quote": "평가 데이터가 쌓이면 \"어떤 결핍이 실제 탈락과 상관되는가\"가 후속 연구 질문이 된다.",
+   "reason": "실증을 위한 구체적인 후속 연구 계획이 포함됨."
+  },
+  {
+   "reviewer_id": "P3",
+   "item_id": "C10-3",
+   "label": "충족",
+   "quote": "같은 합의·불일치 엔진을 연차·성과 보고서(지표 대비 실적)와 연구비 정산(증빙 대비 항목)에 적용한다.",
+   "reason": "다른 서비스로 확장할 수 있는 구체적인 시나리오를 제시함."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C6-1",
+   "label": "충족",
+   "quote": "국가 R&D 공고(RFP)를 넣으면 자격·요건과 평가지표를 구조화하고, 관점이 다른 가상 평가위원 에이전트 ",
+   "reason": "[재질의] 연구 문제와 제안 배경이 '심사기준을 잘못 읽어서' 생기는 실패 패턴과 '제출 직전에 빈칸을 발견하는 사람'이라는 구체적인 사용자 시나리오를 통해 명확히 서술되어 있음."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C6-2",
+   "label": "충족",
+   "quote": "관점이 다른 가상 평가위원 3~5명이 초안을 독립 채점 → 전원 감점(합의 결핍)과 의견 갈림(논쟁 지점) ",
+   "reason": "[재질의] 연구 목표가 '평가위원이 볼 때 무엇이 비어 있는지를 얼마나 정확히 짚는가'로 설정되어, 제시된 연구 목표와 문제 해결 방향이 직접적으로 연결됨."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C6-3",
+   "label": "충족",
+   "quote": "모든 판정에 출처(공고 페이지·논문 DOI·특허번호)를 강제하고 없으면 \"확인 불가\"로만 표기한다",
+   "reason": "[재질의] 성과 지표로 '요건 추출 재현율 90% 이상, 결핍 탐지 정밀도 80% 이상'을 제시하고, 공개 RFP 3건 정답표 대비 정확도 측정 결과를 명시함."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C7-1",
+   "label": "충족",
+   "quote": "화면 한 장(요건 매트릭스·대조표·결핍 목록·보완 체크리스트, 항목마다 출처 링크)",
+   "reason": "[재질의] 서비스 단계별 흐름도가 시각화되어 포함되어 있으며, '한 화면에 한 메시지 원칙'으로 3단계 UI/UX가 명확히 제시됨."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C7-2",
+   "label": "충족",
+   "quote": "가상 평가위원 5명이 서로의 답을 모른 채 판정한다",
+   "reason": "[재질의] AI 구성 및 활용 방안이 구체적으로 제시되어 있으며, Gemini 3명·Upstage Solar 2명 등 구체적인 모델 구성과 역할 분담이 명시됨."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C7-3",
+   "label": "충족",
+   "quote": "핵심 기능 중심의 UI/UX 구성이 발표자료에 포함되어 있는가",
+   "reason": "[재질의] 화면 구성에서 '입력 화면', '결과 화면', '신뢰 화면' 등 핵심 기능 중심의 UI/UX가 구체적으로 제시됨."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C8-1",
+   "label": "충족",
+   "quote": "프롬프트 하나가 내는 점수 하나는 평가위원 한 명의 취향과 같다. 관점이 다른 여러 가상 평가위원이 독립 채",
+   "reason": "[재질의] 기존 기술 대비 차별화된 AI Agent 제안 내용이 '관문 반대편을 모델링한다'는 핵심 차별성과 함께 구체적으로 서술됨."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C8-2",
+   "label": "충족",
+   "quote": "심사 게이밍·획일화 방지: 도구는 \"근거가 있는가\"만 묻고 특정 표현을 권하지 않으며, 가상 평가위원 프롬프",
+   "reason": "[재질의] 독창적인 기술적 요소로 '가상 평가위원 독립 채점', '합의 결핍/논쟁 지점 분류', '인용 실재 검사 + 재질의' 방식을 제시함."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C8-3",
+   "label": "충족",
+   "quote": "AI 윤리 및 신뢰성: 개인정보·초안은 서버에 저장하지 않고 세션 종료 시 폐기한다",
+   "reason": "[재질의] AI 윤리 및 신뢰성 확보를 위한 구체적인 방안으로 개인정보 처리 방침과 Human-in-the-loop 원칙을 명시함."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C9-1",
+   "label": "충족",
+   "quote": "해커톤 기간(무박 2일) 내 구현 계획: 1일차 17:00~24:00: ① 파서 + 요건 매트릭스(RFP 3",
+   "reason": "[재질의] 기술 구현 방안이 단계별로 구체적으로 작성되어 있으며, 2일 간의 해커톤 기간 내 세부 일정과 역할 분담이 명시됨."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C9-2",
+   "label": "충족",
+   "quote": "소스코드는 공개 저장소 https://github.com/Ryugi62/rfp-to-fit 에 본선 기간 중",
+   "reason": "[재질의] 본선 결과물로 제출된 소스코드와 프로토타입이 발표자료 내용과 일치하며, GitHub 커밋 내역과 실행 가능한 공개 주소를 제시함."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C9-3",
+   "label": "충족",
+   "quote": "NTIS·IRIS 공개 공고·과제, KIPRIS Plus API 공개 특허, OpenAlex·Semantic",
+   "reason": "[재질의] 데이터 확보 및 처리 방법이 구체적으로 제시되어 있으며, 공개 API와 이용약관 준수 방침을 명시함."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C10-1",
+   "label": "충족",
+   "quote": "연구기관·연구지원 부서: 기관 단위로 공고를 일괄 파싱해 \"지원 가능 과제·부족 요건\" 주간 대시보드로 확장",
+   "reason": "[재질의] 기대효과 및 활용 가능성이 구체적으로 서술되어 있으며, 연구기관·연구지원 부서 활용 방안이 제시됨."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C10-2",
+   "label": "충족",
+   "quote": "후속 연구: 코드·정답표·평가 스크립트를 오픈소스(MIT)로 공개해 \"RFP 결핍 벤치마크\"를 만든다",
+   "reason": "[재질의] 실증을 위한 구체적인 후속 연구 계획이 포함되어 있으며, 오픈소스 공개와 벤치마크 구축 방안을 제시함."
+  },
+  {
+   "reviewer_id": "P4",
+   "item_id": "C10-3",
+   "label": "충족",
+   "quote": "성과 작성·연구행정(통합 주제): 같은 합의·불일치 엔진을 연차·성과 보고서(지표 대비 실적)와 연구비 정산",
+   "reason": "[재질의] 개발된 기술을 다른 분야나 서비스로 확장할 수 있는 구체적인 시나리오가 제시됨."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C6-1",
+   "label": "충족",
+   "quote": "가장 비싼 실패는 \"아이디어가 나빠서\"가 아니라 \"심사기준을 잘못 읽어서\" 생긴다.",
+   "reason": "연구 문제와 제안 배경이 명확히 서술되어 있습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C6-2",
+   "label": "충족",
+   "quote": "평가위원이 볼 때 무엇이 비어 있는지를 얼마나 정확히 짚는가",
+   "reason": "연구 목표가 문제 해결과 직접적으로 연결되어 있습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C6-3",
+   "label": "충족",
+   "quote": "공개 RFP 3건의 정답표 대비 요건 추출 재현율 90% 이상, 결핍 탐지 정밀도 80% 이상.",
+   "reason": "구체적인 성과 지표를 제시하고 있습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C7-1",
+   "label": "충족",
+   "quote": "공고 파일과 초안을 올린다 → [AI] 공고를 3쪽씩 나눠 병렬로 읽고 요건·평가지표를 쪽 번호와 원문 인용",
+   "reason": "서비스 단계별 흐름이 구체적으로 기술되어 있습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C7-2",
+   "label": "충족",
+   "quote": "구조는 LLM + RAG + 도구 호출(MCP)이다. 추론·채점: Google Gemini API",
+   "reason": "AI 구성 및 활용 방안이 구체적으로 제시되었습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C7-3",
+   "label": "충족",
+   "quote": "한 화면에 한 메시지 원칙으로 세 화면을 만들었다. ① 입력 화면: 공고(예시 3건 또는 PDF·HWPX 업",
+   "reason": "[재질의] 제안서 본문 5절에 UI/UX 구성이 화면별로 구체적으로 명시되어 있으며, 핵심 기능인 입력, 결과, 신뢰 화면의 구성 요소가 상세히 기술되어 있음."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C8-1",
+   "label": "충족",
+   "quote": "관점이 다른 가상 평가위원 3~5명이 초안을 독립 채점 → 전원 감점(합의 결핍)과 의견 갈림(논쟁 지점) ",
+   "reason": "기존 기술 대비 차별화된 AI Agent 제안이 포함되었습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C8-2",
+   "label": "충족",
+   "quote": "모두가 감점한 항목만 \"결핍\"으로, 갈리는 항목은 \"논쟁 지점\"으로 돌려주면",
+   "reason": "독창적인 기술적 요소가 포함되어 있습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C8-3",
+   "label": "충족",
+   "quote": "모든 판정에 출처(공고 페이지·논문 DOI·특허번호)를 강제하고 없으면 \"확인 불가\"로만 표기한다.",
+   "reason": "AI 윤리 및 신뢰성 확보 방안이 명시되어 있습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C9-1",
+   "label": "충족",
+   "quote": "1일차 17:00~24:00: ① 파서 + 요건 매트릭스(RFP 3건 검증), ② MCP 검색기 연결.",
+   "reason": "기술 구현 방안이 단계별로 작성되어 있습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C9-2",
+   "label": "충족",
+   "quote": "소스코드는 공개 저장소 https://github.com/Ryugi62/rfp-to-fit 에 본선 기간 중",
+   "reason": "소스코드와 프로토타입이 발표 내용과 일치합니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C9-3",
+   "label": "충족",
+   "quote": "데이터는 전부 공개 자료다 — NTIS·IRIS 공개 공고·과제, KIPRIS 공개 특허(KIPRIS Plu",
+   "reason": "[재질의] 데이터 확보를 위한 구체적인 공개 API 및 플랫폼 출처가 명시되어 있으며, 3절 구현방안에서 파싱 및 검색 도구(MCP)를 통한 처리 방법이 구체적으로 제시됨."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C10-1",
+   "label": "충족",
+   "quote": "기관 단위로 공고를 일괄 파싱해 \"지원 가능 과제·부족 요건\" 주간 대시보드로 확장.",
+   "reason": "기대효과 및 활용 가능성이 구체적으로 서술되었습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C10-2",
+   "label": "충족",
+   "quote": "평가 데이터가 쌓이면 \"어떤 결핍이 실제 탈락과 상관되는가\"가 후속 연구 질문이 된다.",
+   "reason": "구체적인 후속 연구 계획이 포함되어 있습니다."
+  },
+  {
+   "reviewer_id": "P5",
+   "item_id": "C10-3",
+   "label": "충족",
+   "quote": "같은 합의·불일치 엔진을 연차·성과 보고서(지표 대비 실적)와 연구비 정산(증빙 대비 항목)에 적용한다.",
+   "reason": "다른 분야로의 확장 시나리오가 제시되었습니다."
+  }
+ ],
+ "table": [
+  {
+   "criterion_id": "C6",
+   "expected_points": 10.0,
+   "per_reviewer": {
+    "P1": 10.0,
+    "P2": 10.0,
+    "P3": 10.0,
+    "P4": 10.0,
+    "P5": 10.0
+   },
+   "findings": [
+    {
+     "item_id": "C6-1",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C6-2",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C6-3",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    }
+   ]
+  },
+  {
+   "criterion_id": "C7",
+   "expected_points": 18.666666666666664,
+   "per_reviewer": {
+    "P1": 20.0,
+    "P2": 20.0,
+    "P3": 20.0,
+    "P4": 13.333333333333332,
+    "P5": 20.0
+   },
+   "findings": [
+    {
+     "item_id": "C7-1",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C7-2",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C7-3",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 4,
+     "demoted": 1
+    }
+   ]
+  },
+  {
+   "criterion_id": "C8",
+   "expected_points": 23.333333333333332,
+   "per_reviewer": {
+    "P1": 25.0,
+    "P2": 25.0,
+    "P3": 25.0,
+    "P4": 16.666666666666664,
+    "P5": 25.0
+   },
+   "findings": [
+    {
+     "item_id": "C8-1",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C8-2",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C8-3",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 4,
+     "demoted": 1
+    }
+   ]
+  },
+  {
+   "criterion_id": "C9",
+   "expected_points": 21.666666666666664,
+   "per_reviewer": {
+    "P1": 25.0,
+    "P2": 25.0,
+    "P3": 25.0,
+    "P4": 8.333333333333332,
+    "P5": 25.0
+   },
+   "findings": [
+    {
+     "item_id": "C9-1",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 4,
+     "demoted": 1
+    },
+    {
+     "item_id": "C9-2",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C9-3",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 4,
+     "demoted": 1
+    }
+   ]
+  },
+  {
+   "criterion_id": "C10",
+   "expected_points": 20.0,
+   "per_reviewer": {
+    "P1": 20.0,
+    "P2": 20.0,
+    "P3": 20.0,
+    "P4": 20.0,
+    "P5": 20.0
+   },
+   "findings": [
+    {
+     "item_id": "C10-1",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C10-2",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    },
+    {
+     "item_id": "C10-3",
+     "kind": "충족",
+     "gap_ratio": 0.0,
+     "valid": 5,
+     "demoted": 0
+    }
+   ]
+  }
+ ],
+ "remedies": [],
+ "trace": [
+  {
+   "step": "점검 항목",
+   "t": 0.0,
+   "n": 15
+  },
+  {
+   "step": "독립 채점",
+   "t": 13.8,
+   "n": 75,
+   "reviewers": 5,
+   "invalid": 23
+  },
+  {
+   "step": "재질의",
+   "t": 26.4,
+   "asked": 23,
+   "fixed": 19
+  },
+  {
+   "step": "집계",
+   "t": 26.4,
+   "expected": 93.7,
+   "total": 100.0
+  },
+  {
+   "step": "보완 지정",
+   "t": 26.4,
+   "n": 0
+  }
+ ]
+}

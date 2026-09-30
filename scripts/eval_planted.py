@@ -1,7 +1,7 @@
 """결함 주입 실험: python scripts/eval_planted.py → data/eval/planted.json"""
 import json, statistics
 from pathlib import Path
-from rfp_to_fit.infrastructure.wiring import make_llms, personas_with_models
+from rfp_to_fit.infrastructure.wiring import examiners, make_llms, personas_with_models
 from rfp_to_fit.application.extract import Extraction
 from rfp_to_fit.application.serialize import extraction_from_dict
 from rfp_to_fit.adapters.graph import run_graph
@@ -29,7 +29,7 @@ if MODE != "panel":
     llm_for = lambda p: one.setdefault(p.id, OpenAILLM("gpt-5.4-mini"))  # noqa: E731
 
 def ratios(text):
-    run = run_graph(ex, text, personas, gemini, llm_for, items=items)
+    run = run_graph(ex, text, personas, gemini, llm_for, items=items, examiner_for=examiners() if MODE == "panel-cross" else None)
     return {f.item_id: f.gap_ratio for r in run.table.rows for f in r.findings}, run.table.expected_total, \
            {r.criterion.name: r.expected_points for r in run.table.rows}
 

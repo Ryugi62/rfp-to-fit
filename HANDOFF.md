@@ -3,20 +3,21 @@
 브랜치: **main에 직접**(현장 심사위원이 main 커밋 과정을 본다 — 9/30 19:14 공지. day/laptop·night/imac은 쓰지 않음)
 목표 1개: 10/1 09:00~09:20 제출 = 발표자료(PDF/PPTX) + 프로토타입(라이브 주소·저장소) + 데모 영상, 09:30 발표 5분+질의 3분.
 
-## 상태 (21:00)
-- 라이브: https://invisible-sail-shame-preliminary.trycloudflare.com (iMac `streamlit` :8501 + `cloudflared` 퀵 터널, `caffeinate`로 잠자기 막음). 터널이 죽으면 주소가 바뀐다 → 아래 「복구」.
-- 발표자료: `deliver/deck/RFP-to-Fit_루미아.pdf`·`.pptx`(11장, 숫자는 data/ JSON에서 빌드, 발표 노트 포함). 재빌드 `bash deliver/deck/build.sh`(주소 바뀌면 `LIVE_URL=https://새주소 bash deliver/deck/build.sh`).
-- 데모 영상: `deliver/demo/RFP-to-Fit_demo.mp4`(114초, 실제 앱 녹화 + edge-tts 내레이션).
-- 대본·예상 질문 10: `deliver/발표-대본.md`(덱 노트가 최신 — 대본 숫자는 덱 기준으로 읽을 것).
-- 측정(정본): 공고 파싱 `data/eval/extract-openai.json`(재현율 90/97/85%, 지표 100%) · 결함 주입 `data/eval/planted.json`(v2 절제, 탐지 4/5·정밀도 100%) · 1·2차 이력 `planted-v1*.json`.
-- 엔진: 주 엔진 OpenAI gpt-4.1(장애 시 Solar) · 평가위원 6유형(현장 멘토링 반영) × 3사 모델(OpenAI gpt-5.4-mini 2 · Gemini 2(무료 20회/일, 소진 시 gpt-4.1-mini) · Upstage Solar 2). 키는 `.env`(커밋 금지).
-- 테스트 29개 초록(`uv run pytest`).
+## 상태 (10/1 01:4x)
+- 라이브: 고정 주소 https://ryugi62.github.io/rfp-to-fit/ → 터널 https://invisible-sail-shame-preliminary.trycloudflare.com (iMac `streamlit` :8501 + `cloudflared`). 터널이 죽으면 주소가 바뀐다 → 아래 「복구」.
+- 발표자료: `deliver/deck/RFP-to-Fit_루미아.pdf`·`.pptx`(13장, 13장은 부록·발표 안 함). 숫자는 data/ JSON과 pytest 수집 결과에서 빌드. 재빌드 `bash deliver/deck/build.sh`.
+- 데모 영상: `deliver/demo/RFP-to-Fit_demo.mp4`(95초, 링크 입력 → 채점(실제 71초, 5배속 표기) → 원문 보기 → ✓ 맞음 → 집계).
+- 대본·질의응답 14: `deliver/발표-대본-노트.md`(덱 노트에서 추출 + 4장 라이브 동선).
+- 스펙·테스트: `SPEC.md`(UC 14·AC 18·UI 수용기준 10) · `uv run pytest` 98개 초록.
+- 화면: 공고 파싱 직후 요건 목록·원문 강조·맞음/틀림 · 390/1280 넘침 0(`scripts/responsive.py`, `data/eval/ui-responsive.json`).
+- 엔진: 주 엔진 OpenAI gpt-4.1(장애 시 Solar) · 관점 6개 = OpenAI gpt-5.4-mini P1·P4 · Gemini P2·P6(소진 시 gpt-4.1-mini) · Upstage Solar P3·P5. 키는 `.env`(커밋 금지).
 
 ## 체크리스트(23:55)
 [x] 링크 입력(13/13)·HWP·검증 공고 2건·제거 실험·MCP 외부 연동 실측 [x] 포지셔닝 전환(심사위원 3인 온라인 멘토링) [x] 신뢰도 정의 [x] 현장 검증(원문 보기·✓/✗·사람 확인 정밀도) [x] 보안 모드 [x] README·LICENSE [x] 덱 v4.1(13장·290초) [x] 대본·질의응답 12 [x] 고정 주소 https://ryugi62.github.io/rfp-to-fit/
 [x] (OpenAI 크레딧 충전 뒤) 주 엔진 복구 확인 — `source .env; curl https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY"` 200
 [x] 4장 화면 캡처를 링크 입력·현장 검증 화면으로 교체 → `bash deliver/deck/build.sh`
-[x] 데모 영상 재녹화(83초)(링크 입력 → 보안 모드 없이 실행 → 원문 보기 → ✓) — `scripts/make_demo.py tts` → `scripts/record_demo.py` → `scripts/make_demo.py`(내레이션 LINES 갱신 필요)
+[x] 데모 영상 재녹화(95초, 10/1 01:38 현재 화면)(링크 입력 → 보안 모드 없이 실행 → 원문 보기 → ✓) — `scripts/make_demo.py tts` → `scripts/record_demo.py` → `scripts/make_demo.py`(내레이션 LINES 갱신 필요)
+[x] 10/1 01시 반응형·SPEC·테스트 98·README 모델 표 정정·대본 재생성
 [ ] 07:30 라이브 점검(고정 주소 → 터널 200, 예시 1회) · 08:00 김태걸 리허설 2회(대본 deliver/발표-대본-노트.md)
 [ ] 09:00~09:20 제출: deliver/deck/RFP-to-Fit_루미아.pdf(+pptx) · deliver/demo/RFP-to-Fit_demo.mp4 · 저장소 링크 — 방식은 현장 공지
 

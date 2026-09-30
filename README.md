@@ -19,10 +19,15 @@
 ## 실행
 ```
 cp .env.example .env   # OPENAI_API_KEY, GEMINI_API_KEY, UPSTAGE_API_KEY
-uv sync && uv run pytest            # 테스트 34개
+uv sync && uv run pytest            # 테스트 98개(네트워크·LLM 없이)
 uv run streamlit run src/rfp_to_fit/infrastructure/app.py
 ```
 사용: ① 공고 링크 붙여넣기(부처·기관 공지 주소 또는 PDF 주소 — 첨부 중 공고문 자동 선택, HWP·HWPX·PDF) ② 내 초안 올리기 ③ 고칠 곳(모든 관점이 근거 못 찾음)·판단할 곳(갈림)·관점별로 걸리는 점·보완 위치.
+
+## 개발 방식 (SDD · TDD · DDD · 클린 아키텍처)
+- **스펙 먼저**: [`SPEC.md`](SPEC.md) — 유비쿼터스 언어(코드 이름과 1:1), 유스케이스 14개(Given/When/Then), 수용기준 18개(목표 대비 실측, 미달도 그대로), UI 수용기준 10개(390·1280 실측).
+- **테스트**: `uv run pytest` 98개. 레이어 규칙도 테스트가 검사한다(`tests/test_architecture.py`: domain·application은 표준 라이브러리와 안쪽 레이어만 import).
+- **화면 실측**: `scripts/responsive.py`(5화면 × 390·1280 가로 넘침·잘림), `scripts/e2e_mobile.py`·`scripts/e2e_verify.py`·`scripts/e2e_link.py`(실제 브라우저로 끝까지).
 
 ## 구조 — LLM은 증인, 판정은 코드 (LangGraph 상태 그래프)
 ```
@@ -46,7 +51,7 @@ uv run streamlit run src/rfp_to_fit/infrastructure/app.py
 | 무엇 | 결과 | 파일 |
 |---|---|---|
 | 공고 파싱 — 개발 공고 3건(3회 평균) | 요건 재현율 85%·93%·87%, 심사표 배점 100%, 추출 정밀도 45~84% | `data/eval/extract-openai-3runs.json` |
-| 공고 파싱 — **처음 보는 공고 2건**(링크로 수집, 정답표 측정 전 커밋 430ea7d) | 94%·77%(블라인드), 심사표 100% → ※주석 조건 규칙 추가 후 89~95%(따로 표기) | `data/eval/holdout-summary.json` |
+| 공고 파싱 — **처음 보는 공고 2건**(링크로 수집, 정답표 측정 전 커밋 430ea7d) | 94%·78%(블라인드, 77.5%), 심사표 100% → ※주석 조건 규칙 추가 후 89~95%(따로 표기) | `data/eval/holdout-summary.json` |
 | 링크 입력 | 실제 공지 13건 중 13건 공고문 선택·판독(IRIS 상세 미실측) | `data/eval/link-fetch.json` |
 | 일부러 지운 근거 탐지(5개) | 6관점 탐지 4/5·오탐 0 | `data/eval/planted.json` |
 | 제거 실험 | 관점 1개 오탐 3 → 관점 6개 오탐 0 (3사 섞기 효과는 미확인) | `data/eval/planted-ablation-*.json` |
@@ -54,27 +59,13 @@ uv run streamlit run src/rfp_to_fit/infrastructure/app.py
 | 추출 원문 대조 감사(처음 본 공고, 51개) | 지어낸 요건 0 · 신청 요건 맞음 44(86%) · 안내·사후 의무 7 · 중복 5 — 독립 모델(Claude) 감사, 사람 검수 아님 | `data/eval/audit-national-scientist.json` |
 | 교차 신문(엄격 모드) | 켜면 탐지 4/5 동일 · 오탐 0→2 → 기본 끔 | `data/eval/planted-cross.json` |
 
-## 예선 약속 → 본선 구현 (그대로 대조)
-| 예선 기획서·포스터 약속 | 본선 | 비고 |
-|---|---|---|
-| 공고 URL/PDF/HWPX 입력 | ✅ + HWP | 링크 13/13 |
-| 요건·평가지표 구조화(출처 쪽) | ✅ | 모든 항목 쪽·원문 인용 |
-| 가상 평가위원 독립 채점 → 합의/논쟁/확인 불가 | ✅ | 관점 6개(멘토링 반영) |
-| 보완 지정(문장 미생성) | ✅ | |
-| 선행 탐색(논문·NTIS 과제·KIPRIS 특허, MCP) | △ 논문만 | 축소 규칙 적용 — NTIS·KIPRIS는 API 키 미확보 |
-| RAG(bge-m3+FAISS) | ✗ → 원문 전체 + 인용 대조 | 조각 검색보다 판정 근거 추적이 직접적이라 교체 |
-| 요건 재현율 ≥90% | △ 개발 85~93 · 검증 77~94 | 약한 곳 공개 |
-| 결핍 탐지 정밀도 ≥80% | ✅ 100%(오탐 0) · 탐지 4/5 | 표본 5 |
-| 초안 비저장 | ✅ + 개인정보 가림 | |
-| 오픈소스(MIT) | ✅ `LICENSE` | |
-
 ## 사용 모델·라이브러리·데이터 출처
 
 | 구분 | 이름 | 버전·출처 | 용도 |
 |---|---|---|---|
-| 생성형 AI | OpenAI API (gpt-4.1 주 엔진, gpt-5.4-mini 관점 2, gpt-4.1-mini 대체) | REST · platform.openai.com | 공고 파싱·점검 질문·보완·관점 P1·P4 |
-| 생성형 AI | Google Gemini API (gemini-3.5-flash 기본, 한도 소진 시 gemini-3-flash-preview·gemini-2.5-flash·gemini-3.8-flash·gemini-3.7-flash·gemini-3.1-flash-lite·gemini-3.5-flash-lite 순) | google-genai 2.25.0 · ai.google.dev | 공고 파싱, 점검 질문, 평가위원 P1·P3·P5, 보완 지정 |
-| 생성형 AI | Upstage Solar (solar-pro3) | OpenAI 호환 REST · console.upstage.ai | 평가위원 P2·P4(국산 모델, 모델 다양성), Gemini 장애 시 대체 |
+| 생성형 AI | OpenAI API (gpt-4.1 주 엔진, gpt-5.4-mini 관점 P1·P4, gpt-4.1-mini 대체·교차 신문) | REST · platform.openai.com | 공고 파싱·점검 질문·보완 지정·검색어, 관점 P1·P4 판정 |
+| 생성형 AI | Google Gemini API (gemini-3.6-flash 기본, 한도 소진 시 gemini-3.5-flash-lite·gemini-3.1-flash-lite·gemini-3.5-flash·gemini-3-flash-preview·gemini-2.5-flash 순, 모두 막히면 OpenAI gpt-4.1-mini) | google-genai 2.25.0 · ai.google.dev | 관점 P2·P6 판정, 교차 신문 대체 |
+| 생성형 AI | Upstage Solar (solar-pro3) | OpenAI 호환 REST · console.upstage.ai | 관점 P3·P5 판정(국산 모델), 주 엔진 장애 시 대체, 보안 모드에서는 초안이 닿는 모든 호출 |
 | 에이전트 | LangGraph | 1.2.12 · MIT | 채점→인용 검사→재질의→집계→보완 상태 그래프 |
 | 문서 파싱 | pdfplumber | 0.11.10 · MIT | PDF 쪽별 텍스트·표 |
 | 문서 파싱 | HWPX 직접 파싱 | Python 표준 zipfile·re | HWPX 본문 |

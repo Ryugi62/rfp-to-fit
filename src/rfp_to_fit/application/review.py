@@ -11,29 +11,46 @@ from .ports import LLM
 
 # ---------- 점검 항목 ----------
 RUBRIC_SYSTEM = "너는 국가 R&D 평가위원 교육 담당자다. 평가지표 원문만 근거로 점검 질문을 만든다. 특정 표현·어휘를 권하지 않는다. JSON만 출력한다."
-RUBRIC_PROMPT = """아래 평가지표마다 심사위원이 제안서에서 확인할 점검 질문을 2~3개 만들어라.
-- 질문은 지표 설명 원문에서 나온 것이어야 하고, 제안서 본문을 읽으면 예/아니오로 확인할 수 있어야 한다.
-- 질문은 「~이 있는가」 형태의 한 문장.
+RUBRIC_PROMPT = """아래 평가지표마다 심사위원이 제안서에서 확인할 점검 질문을 3개 만들어라.
+- 질문은 지표 설명 원문과 공고의 작성 요건에서 나온 것이어야 하고, 제안서 본문을 읽으면 있다/없다로 확인할 수 있을 만큼 구체적이어야 한다.
+  나쁜 예: 「혁신성을 확인할 수 있는 근거가 있는가」(막연함). 좋은 예: 「기존 도구·방법과 무엇이 다른지 비교 대상을 들어 제시하는가」.
+- 가능하면 수치·방법·일정·주체·비교 대상처럼 확인 가능한 요소를 묻는다.
+- 질문은 「~이 있는가/~하는가」 형태의 한 문장.
 
 평가지표:
 {criteria}
 
+공고의 작성 요건(참고):
+{guide}
+
 출력: {{"items":[{{"criterion_id":"C1","question":""}}]}}"""
 
 
-def build_rubric(criteria: list[Criterion], llm: LLM) -> list[CheckItem]:
+def _flatten_items(data) -> list[tuple[str, str]]:
+    """모델마다 모양이 다르다: {items:[{criterion_id, question}]} 또는 {items:[{criterion_id, questions:[...]}]}."""
+    rows = data.get("items", []) if isinstance(data, dict) else data
+    out = []
+    for it in rows or []:
+        if not isinstance(it, dict):
+            continue
+        cid = str(it.get("criterion_id", "")).strip()
+        qs = it.get("questions") or ([it["question"]] if it.get("question") else [])
+        out += [(cid, q) for q in qs if isinstance(q, str) and q.strip()]
+    return out
+
+
+def build_rubric(criteria: list[Criterion], llm: LLM, guide: str = "") -> list[CheckItem]:
     listing = "\n".join(f"- {c.id} {c.name}({c.points:g}점): {c.description}" for c in criteria)
-    data = llm.complete_json(RUBRIC_SYSTEM, RUBRIC_PROMPT.format(criteria=listing))
+    data = llm.complete_json(RUBRIC_SYSTEM, RUBRIC_PROMPT.format(criteria=listing, guide=guide or "(없음)"))
     ids = {c.id for c in criteria}
     items, count = [], {}
-    for it in data.get("items", []):
-        cid = it.get("criterion_id")
-        if cid not in ids or not it.get("question"):
+    for cid, q in _flatten_items(data):
+        if cid not in ids:
             continue
         count[cid] = count.get(cid, 0) + 1
         if count[cid] > 3:
             continue
-        items.append(CheckItem(f"{cid}-{count[cid]}", cid, it["question"].strip()))
+        items.append(CheckItem(f"{cid}-{count[cid]}", cid, q.strip()))
     return items
 
 

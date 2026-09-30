@@ -38,7 +38,8 @@ def run_review(extraction: Extraction, draft: str, personas: list[ReviewerPerson
     t0 = time.time()
     criteria = extraction.criteria
     if items is None:
-        items = build_rubric(criteria, llm)
+        guide = "\n".join(f"- {r.text}" for r in extraction.requirements if r.category in ("형식", "제출서류"))[:3000]
+        items = build_rubric(criteria, llm, guide)
     step("점검 항목", n=len(items), model=llm.name)
     verdicts = review_all(personas, criteria, items, draft, llm_for)
     step("독립 채점", n=len(verdicts), reviewers=len({v.reviewer_id for v in verdicts}))

@@ -80,3 +80,11 @@ def test_loose_quote_accepts_table_cells_split_across_lines():
     page = "§ 문제 정의의 명확성 및 대회 § 문제 해결 성과\n적합성 20 10\n취지와의 부합성"
     assert verify_quote_loose("적합성 20 § 문제 정의의 명확성 및 대회 취지와의 부합성", page)
     assert not verify_quote_loose("적합성 30 연구비 집행의 투명성", page)
+
+
+def test_rubric_accepts_both_json_shapes():
+    from rfp_to_fit.application.review import _flatten_items
+    a = {"items": [{"criterion_id": "C1", "question": "q1"}]}
+    b = {"items": [{"criterion_id": "C1", "questions": ["q1", "q2"]}]}
+    assert _flatten_items(a) == [("C1", "q1")]
+    assert _flatten_items(b) == [("C1", "q1"), ("C1", "q2")]

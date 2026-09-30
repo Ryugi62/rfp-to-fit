@@ -19,7 +19,7 @@ uv run streamlit run src/rfp_to_fit/infrastructure/app.py
 ## 무엇을 하나 (에이전트 흐름 — LangGraph)
 ```
 공고 PDF/HWPX ─▶ ① 3쪽 묶음 병렬 파싱(요건·평가지표, 쪽 번호+원문 인용 필수) ─▶ 공고 인용 검사(없는 인용은 버림)
-초안 ─────────▶ ② 평가지표 → 점검 질문 ─▶ ③ 가상 평가위원 5명 독립 채점(Gemini 3 · Solar 2, 서로의 답 모름)
+초안 ─────────▶ ② 평가지표 → 점검 질문 ─▶ 선행 탐색(MCP 도구 서버 → OpenAlex, 관련성 선별) ─▶ ③ 가상 평가위원 5명 독립 채점(Gemini 3 · Solar 2, 서로의 답 모름)
                ─▶ 인용 실재 검사(초안 원문과 글자 대조) ─▶ ↺ 무효 판정만 그 평가위원에게 재질의(1회)
                ─▶ ④ 집계: 합의 결핍(≥80% 감점) / 논쟁 지점 / 충족 / 확인 불가 ─▶ ⑤ 보완 지정(근거 종류·위치만, 문장 미생성)
 ```
@@ -39,6 +39,8 @@ uv run streamlit run src/rfp_to_fit/infrastructure/app.py
 | 문서 파싱 | pdfplumber | 0.11.10 · MIT | PDF 쪽별 텍스트·표 |
 | 문서 파싱 | HWPX 직접 파싱 | Python 표준 zipfile·re | HWPX 본문 |
 | 화면 | Streamlit | 1.64.0 · Apache-2.0 | 웹 화면 |
+| MCP | Model Context Protocol Python SDK (mcp 2.2.0, MIT) | | 선행 탐색 도구 서버(search_prior_art·check_quote) + 에이전트 쪽 stdio 클라이언트 |
+| 데이터 | OpenAlex 공개 학술 API (api.openalex.org, CC0 메타데이터) | | 선행연구 검색 |
 | 기타 | httpx 0.28.1(BSD) · pandas 3.0.6(BSD) · python-dotenv 1.2.3(BSD) · pytest(MIT) · Playwright(Apache-2.0, 화면 실측 캡처) | | |
 | 배포 | Cloudflare Tunnel (cloudflared 2026.9.3, Apache-2.0) | | 시연용 공개 주소 |
 | 데이터 | 2026 NAIS AI 해커톤 모집 공고(NST·NAIS) | nst.re.kr | 예시 공고·정답표 |

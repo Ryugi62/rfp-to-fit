@@ -39,6 +39,7 @@ def run_to_dict(run: ReviewRun) -> dict:
                                  "demoted": f.demoted} for f in r.findings]} for r in run.table.rows],
         "remedies": [asdict(x) for x in run.remedies],
         "trace": run.trace,
+        "prior_art": run.prior_art,
     }
 
 
@@ -55,4 +56,5 @@ def run_from_dict(d: dict) -> ReviewRun:
                       [v for v in verdicts if v.item_id == f["item_id"]]) for f in r["findings"]]
         rows.append(FitRow(by_c[r["criterion_id"]], r["expected_points"], r["per_reviewer"], fs))
     reqs = [Requirement(r["id"], r["category"], r["text"], Evidence(**r["evidence"])) for r in d["requirements"]]
-    return ReviewRun(reqs, crits, items, personas, verdicts, FitTable(rows), [RemedyItem(**x) for x in d["remedies"]], d.get("trace", []))
+    return ReviewRun(reqs, crits, items, personas, verdicts, FitTable(rows), [RemedyItem(**x) for x in d["remedies"]], d.get("trace", []),
+                     d.get("prior_art", []))

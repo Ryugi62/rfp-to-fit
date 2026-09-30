@@ -22,3 +22,8 @@ def personas_with_models(gemini, solar):
     assign = {"P1": gemini, "P2": solar, "P3": gemini, "P4": solar, "P5": gemini}
     ps = [replace(p, model=assign[p.id].name) for p in DEFAULT_PERSONAS]
     return ps, (lambda p: assign[p.id])
+
+
+def prior_search():
+    from ..adapters.mcp_client import McpPriorArt
+    return McpPriorArt()

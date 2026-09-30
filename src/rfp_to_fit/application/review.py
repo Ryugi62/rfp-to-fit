@@ -86,10 +86,12 @@ def rows_of(data, key: str) -> list[dict]:
     return [r for r in (rows or []) if isinstance(r, dict)]
 
 
-def review_one(persona: ReviewerPersona, criteria: list[Criterion], items: list[CheckItem], draft: str, llm: LLM) -> list[Verdict]:
+def review_one(persona: ReviewerPersona, criteria: list[Criterion], items: list[CheckItem], draft: str, llm: LLM,
+               context: str = "") -> list[Verdict]:
     by_id = {c.id: c for c in criteria}
     listing = "\n".join(f"- {i.id} [{by_id[i.criterion_id].name} {by_id[i.criterion_id].points:g}점] {i.question}" for i in items)
-    data = llm.complete_json(REVIEW_SYSTEM.format(lens=persona.lens), REVIEW_PROMPT.format(items=listing, draft=draft))
+    prompt = REVIEW_PROMPT.format(items=listing + (f"\n\n[참고 자료 — 인용 금지]\n{context}" if context else ""), draft=draft)
+    data = llm.complete_json(REVIEW_SYSTEM.format(lens=persona.lens), prompt)
     valid_ids = {i.id for i in items}
     out = []
     for v in rows_of(data, "verdicts"):
@@ -100,10 +102,10 @@ def review_one(persona: ReviewerPersona, criteria: list[Criterion], items: list[
     return out
 
 
-def review_all(personas: list[ReviewerPersona], criteria, items, draft: str, llm_for) -> list[Verdict]:
+def review_all(personas: list[ReviewerPersona], criteria, items, draft: str, llm_for, context: str = "") -> list[Verdict]:
     """평가위원마다 따로 호출한다(서로의 답을 입력으로 받지 않음 — SPEC S2). llm_for(persona) → LLM."""
     with ThreadPoolExecutor(max_workers=len(personas) or 1) as ex:
-        futs = [ex.submit(review_one, p, criteria, items, draft, llm_for(p)) for p in personas]
+        futs = [ex.submit(review_one, p, criteria, items, draft, llm_for(p), context) for p in personas]
         results = []
         for f in futs:
             try:

@@ -1,0 +1,94 @@
+{
+ "n": 5,
+ "detect_rate": 0.2,
+ "precision": 1.0,
+ "base_total": 81.4,
+ "rows": [
+  {
+   "variant": "drop-ai-ethics",
+   "expected": [
+    "활용성"
+   ],
+   "detected": false,
+   "new_gaps": 0,
+   "hits": 0,
+   "total": 82.0,
+   "per": {
+    "적합성": 10.0,
+    "활용성": 12.0,
+    "혁신성": 21.7,
+    "실현가능성": 18.3,
+    "확장성": 20.0
+   }
+  },
+  {
+   "variant": "drop-accuracy-target",
+   "expected": [
+    "적합성"
+   ],
+   "detected": false,
+   "new_gaps": 0,
+   "hits": 0,
+   "total": 78.8,
+   "per": {
+    "적합성": 10.0,
+    "활용성": 9.2,
+    "혁신성": 22.9,
+    "실현가능성": 16.7,
+    "확장성": 20.0
+   }
+  },
+  {
+   "variant": "drop-hackathon-plan",
+   "expected": [
+    "실현가능성"
+   ],
+   "detected": false,
+   "new_gaps": 0,
+   "hits": 0,
+   "total": 85.7,
+   "per": {
+    "적합성": 9.7,
+    "활용성": 12.7,
+    "혁신성": 23.3,
+    "실현가능성": 20.0,
+    "확장성": 20.0
+   }
+  },
+  {
+   "variant": "drop-comparison-table",
+   "expected": [
+    "혁신성"
+   ],
+   "detected": false,
+   "new_gaps": 0,
+   "hits": 0,
+   "total": 84.5,
+   "per": {
+    "적합성": 10.0,
+    "활용성": 12.0,
+    "혁신성": 23.3,
+    "실현가능성": 19.2,
+    "확장성": 20.0
+   }
+  },
+  {
+   "variant": "drop-impact-pilot",
+   "expected": [
+    "확장성"
+   ],
+   "detected": true,
+   "new_gaps": 1,
+   "hits": 1,
+   "total": 75.8,
+   "per": {
+    "적합성": 9.7,
+    "활용성": 10.7,
+    "혁신성": 25.0,
+    "실현가능성": 19.2,
+    "확장성": 11.3
+   }
+  }
+ ],
+ "rule": "원본 2회 평균 대비 점검 항목 감점 비율 +0.4 이상(5명 중 2명 이상) = 새 결핍"
+}

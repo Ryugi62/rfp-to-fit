@@ -9,19 +9,22 @@ from langgraph.graph import END, StateGraph
 
 from ..application.extract import Extraction
 from ..application.pipeline import ReviewRun
+from ..application.prior_art import as_context, find_prior_art
 from ..application.review import build_rubric, recheck, remedy, review_all
 from ..domain.aggregate import build_fit_table, effective_label
 
 
 class S(TypedDict, total=False):
     items: list
+    prior: list
     verdicts: list
     rechecked: int
     table: Any
     remedies: list
 
 
-def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Callable | None = None, items=None):
+def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Callable | None = None, items=None,
+                prior_search=None):
     t0 = time.time()
     trace: list[dict] = []
 
@@ -41,8 +44,18 @@ def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Cal
         step("점검 항목", n=len(its))
         return {"items": its}
 
+    def n_prior(s: S):
+        if prior_search is None:
+            return {"prior": []}
+        try:
+            qs, works = find_prior_art(draft, llm, prior_search)
+        except Exception:
+            qs, works = [], []
+        step("선행 탐색", queries=qs, n=len(works), via=getattr(prior_search, "name", ""))
+        return {"prior": works}
+
     def n_review(s: S):
-        vs = review_all(personas, ex.criteria, s["items"], draft, llm_for)
+        vs = review_all(personas, ex.criteria, s["items"], draft, llm_for, as_context(s.get("prior", [])))
         bad = sum(1 for v in vs if invalid(v))
         step("독립 채점", n=len(vs), reviewers=len({v.reviewer_id for v in vs}), invalid=bad)
         return {"verdicts": vs, "rechecked": 0}
@@ -68,11 +81,12 @@ def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Cal
         return {"remedies": rem}
 
     g = StateGraph(S)
-    for name, fn in [("rubric", n_rubric), ("review", n_review), ("recheck", n_recheck),
+    for name, fn in [("rubric", n_rubric), ("prior", n_prior), ("review", n_review), ("recheck", n_recheck),
                      ("aggregate", n_aggregate), ("remedy", n_remedy)]:
         g.add_node(name, fn)
     g.set_entry_point("rubric")
-    g.add_edge("rubric", "review")
+    g.add_edge("rubric", "prior")
+    g.add_edge("prior", "review")
     g.add_conditional_edges("review", route, {"recheck": "recheck", "aggregate": "aggregate"})
     g.add_edge("recheck", "aggregate")
     g.add_edge("aggregate", "remedy")
@@ -80,7 +94,8 @@ def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Cal
     return g.compile(), trace
 
 
-def run_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step=None, items=None) -> ReviewRun:
-    app, trace = build_graph(ex, draft, personas, llm, llm_for, on_step, items)
+def run_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step=None, items=None, prior_search=None) -> ReviewRun:
+    app, trace = build_graph(ex, draft, personas, llm, llm_for, on_step, items, prior_search)
     s = app.invoke({})
-    return ReviewRun(ex.requirements, ex.criteria, s["items"], personas, s["verdicts"], s["table"], s["remedies"], trace)
+    return ReviewRun(ex.requirements, ex.criteria, s["items"], personas, s["verdicts"], s["table"], s["remedies"], trace,
+                     s.get("prior", []))

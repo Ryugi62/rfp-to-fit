@@ -19,7 +19,7 @@ from rfp_to_fit.application.extract import Extraction, extract_rfp  # noqa: E402
 from rfp_to_fit.adapters.graph import run_graph  # noqa: E402
 from rfp_to_fit.application.serialize import extraction_from_dict, run_from_dict  # noqa: E402
 from rfp_to_fit.domain.model import FindingKind  # noqa: E402
-from rfp_to_fit.infrastructure.wiring import make_llms, personas_with_models  # noqa: E402
+from rfp_to_fit.infrastructure.wiring import make_llms, personas_with_models, prior_search  # noqa: E402
 
 DATA = ROOT / "data"
 st.set_page_config(page_title="RFP-to-Fit · 평가위원의 눈으로 빈칸 찾기", page_icon="🔎", layout="wide")
@@ -27,7 +27,7 @@ st.set_page_config(page_title="RFP-to-Fit · 평가위원의 눈으로 빈칸 �
 st.markdown("""
 <style>
 html, body, [class*="css"] { font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif; }
-.block-container { padding-top: 2.2rem; max-width: 1180px; }
+.block-container { padding-top: 3.4rem; max-width: 1180px; }
 .big { font-size: 56px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.05; color: #191F28; }
 .sub { color: #6B7684; font-size: 15px; }
 .pill { display:inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; margin-right: 6px; }
@@ -171,6 +171,7 @@ with tab_run:
 
             def on_step(name, rec):
                 fmt = {"점검 항목": lambda r: f"② 점검 질문 {r.get('n')}개 → 평가위원 5명에게 **따로** 보냄(서로의 답을 모름)",
+                       "선행 탐색": lambda r: f"② 선행 탐색(MCP → OpenAlex) 검색어 {r.get('queries')} → 선행연구 {r.get('n')}편을 평가위원 참고 자료로",
                        "독립 채점": lambda r: f"③ 판정 {r.get('n')}개 수신 · 인용 실재 검사 탈락 {r.get('invalid')}건",
                        "재질의": lambda r: f"↺ 탈락 판정 {r.get('asked')}건을 그 평가위원에게 다시 물음 → {r.get('fixed')}건 원문 인용으로 교정",
                        "집계": lambda r: f"④ 예상 점수 {r.get('expected')} / {r.get('total')} → 결핍마다 보완 위치 지정",
@@ -178,7 +179,8 @@ with tab_run:
                 msg = fmt[name](rec) if name in fmt else name
                 st.write(msg)
 
-            run = run_graph(sub, draft, personas, gemini, llm_for, on_step=on_step, items=cached_rubric(rubric_key, sub))
+            run = run_graph(sub, draft, personas, gemini, llm_for, on_step=on_step, items=cached_rubric(rubric_key, sub),
+                            prior_search=prior_search())
             status.update(label=f"완료 · {time.time() - t0:.0f}초", state="complete", expanded=False)
         st.session_state["run"] = run
         st.session_state["rfp_label"] = rfp_label
@@ -248,6 +250,10 @@ with tab_run:
             for f in unk:
                 finding_card(f)
 
+        if run.prior_art:
+            with st.expander(f"선행연구 {len(run.prior_art)}편 — MCP 도구 서버 경유 OpenAlex 검색(혁신성 판정 참고)"):
+                for w in run.prior_art:
+                    st.markdown(f"- [{w['title']}]({w.get('doi') or '#'}) · {w.get('year')} · 피인용 {w.get('cited_by')} · 검색어 `{w.get('query')}`")
         with st.expander(f"공고 요건 매트릭스 ({len(run.requirements)}개) — 모두 공고 쪽 번호·원문 인용 포함"):
             import pandas as pd
             st.dataframe(pd.DataFrame([{"분류": r.category, "요건": r.text, "쪽": r.evidence.page, "원문 인용": r.evidence.quote}
@@ -273,6 +279,23 @@ with tab_ba:
         items_b = {i.id: i for i in rb.items}
         cols[-1].markdown("**전: 합의 결핍**<br>" + "<br>".join(f"· {items_b[f.item_id].question}"
                                                             for f in rb.table.findings(FindingKind.CONSENSUS_GAP)), unsafe_allow_html=True)
+        if ra:
+            st.markdown("#### 점검 항목별로 무엇이 바뀌었나")
+            fa = {f.item_id: f for r in ra.table.rows for f in r.findings}
+            crit_b = {c.id: c for c in rb.criteria}
+            rows = []
+            for r in rb.table.rows:
+                for f in r.findings:
+                    a2 = fa.get(f.item_id)
+                    rows.append({"지표": f"{r.criterion.name} ({r.criterion.points:g})", "점검 질문": items_b[f.item_id].question,
+                                 "전": f"{f.kind.value} ({round(f.gap_ratio * 5)}/5 감점)",
+                                 "후": f"{a2.kind.value} ({round(a2.gap_ratio * 5)}/5 감점)" if a2 else "-"})
+            import pandas as pd
+            df = pd.DataFrame(rows)
+            changed = df[df["전"] != df["후"]]
+            st.dataframe(changed if len(changed) else df, use_container_width=True, hide_index=True)
+            st.markdown('<div class="muted">보완 = 기획서에 「본선 구현 결과」 절(서비스 흐름도·UI 구성·저장소·측정 결과)을 사람이 직접 추가. '
+                        '에이전트는 위치와 근거 종류만 지정했고 문장은 쓰지 않았습니다.</div>', unsafe_allow_html=True)
     else:
         st.info("전·후 실행 기록이 아직 없습니다.")
 

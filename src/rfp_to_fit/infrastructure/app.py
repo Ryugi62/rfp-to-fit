@@ -83,14 +83,15 @@ def cached_rubric(key, sub):
 
 
 def accuracy_panel():
-    p = DATA / "eval" / "extract-openai.json"
+    p = DATA / "eval" / "extract-openai-3runs.json"
     if not p.exists():
         return
     rows = json.loads(p.read_text())
-    st.markdown("**공고 파싱 정확도** — 사람이 쪽마다 읽어 만든 정답표 대비(모델과 독립)")
+    st.markdown("**공고 파싱 정확도** — 정답표(파이프라인과 다른 모델이 쪽마다 판독) 대비, 3회 평균")
     cols = st.columns(len(rows))
     for c, r in zip(cols, rows):
-        c.metric(EXAMPLES.get(r["id"], r["id"])[:18], f'{r["recall"] * 100:.0f}%', f'지표 일치 {r["criteria_agreement"] * 100:.0f}%')
+        c.metric(EXAMPLES.get(r["id"], r["id"])[:18], f'재현율 {r["recall"] * 100:.0f}%',
+                 f'지표 일치 {r["criteria_agreement"] * 100:.0f}% · 정밀도 {r.get("precision", 0) * 100:.0f}%')
 
 
 # ---------------- 머리 ----------------
@@ -305,8 +306,8 @@ with tab_ba:
         st.markdown("#### 그래서 오늘 목표치 대신 실측치를 가져왔습니다")
         ev = DATA / "eval"
         rows = []
-        if (ev / "extract-openai.json").exists():
-            for r in json.loads((ev / "extract-openai.json").read_text()):
+        if (ev / "extract-openai-3runs.json").exists():
+            for r in json.loads((ev / "extract-openai-3runs.json").read_text()):
                 rows.append({"측정": f"공고 파싱 — {EXAMPLES.get(r['id'], r['id'])}", "결과": f"요건 재현율 {r['recall'] * 100:.0f}% · 지표 일치 {r['criteria_agreement'] * 100:.0f}% · {r['seconds']:.0f}초"})
         if (ev / "planted.json").exists():
             pl = json.loads((ev / "planted.json").read_text())
@@ -328,6 +329,19 @@ with tab_trust:
 - **초안 비저장**: 초안은 세션 메모리에서만 처리합니다.
 """)
     accuracy_panel()
+    ab = [(DATA / "eval" / f, lab) for f, lab in [("planted-ablation-single.json", "평가위원 1명(단일 LLM)"),
+                                                  ("planted-ablation-roles-one-model.json", "6역할 · 한 회사 모델"),
+                                                  ("planted.json", "6역할 · 3사 모델(현재)")]]
+    rows = []
+    for f, lab in ab:
+        if f.exists():
+            q = json.loads(f.read_text())
+            rows.append({"구성": lab, "짚은 수": f"{sum(r['detected'] for r in q['rows'])}/{q['n']}",
+                         "정확도": f"{(q.get('precision') or 0) * 100:.0f}%", "오탐": sum(r['new_gaps'] - r['hits'] for r in q['rows'])})
+    if rows:
+        import pandas as pd
+        st.markdown("**제거 실험 — 평가위원 여러 명이 정말 필요한가** (근거 블록을 지운 초안 5개, 각 1회)")
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
     p = DATA / "eval" / "planted.json"
     if p.exists():
         d = json.loads(p.read_text())

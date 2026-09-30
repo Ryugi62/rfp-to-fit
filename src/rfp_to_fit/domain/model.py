@@ -18,6 +18,7 @@ class Requirement:
     category: str        # 자격|제출서류|기간|형식|제한|기타
     text: str
     evidence: Evidence
+    consequence: str = ""   # 어기면: 탈락|감점|불이익|해당없음(안내·권고)
 
 
 @dataclass(frozen=True)

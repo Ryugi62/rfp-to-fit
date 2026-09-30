@@ -131,7 +131,8 @@ def qr(url: str, name: str) -> str:
 
 def main():
     OUT.mkdir(exist_ok=True)
-    ext_file = "data/eval/extract-openai.json" if (ROOT / "data/eval/extract-openai.json").exists() else "data/eval/extract-gemini.json"
+    ext_file = next(f for f in ("data/eval/extract-openai-3runs.json", "data/eval/extract-openai.json", "data/eval/extract-gemini.json")
+                    if (ROOT / f).exists())
     ext = {e["id"]: e for e in load(ext_file)}
     gold = {k: load(f"data/gold/{k}.json") for k in ext}
     pages = {k: len(pypdfium2.PdfDocument(str(ROOT / f"data/rfp/{k}.pdf"))) for k in ext}
@@ -139,10 +140,13 @@ def main():
     for k, e in ext.items():
         extract.append({"id": k, "agency": gold[k]["agency"].split(" ")[0].split("/")[0],
                         "recall": pct(e["recall"]), "n_gold": e["n_gold"],
-                        "hit": e["n_gold"] - len(e["missed"]), "pages": pages[k], "model": e["model"],
-                        "seconds": e["seconds"], "n_extracted": e["n_extracted"], "engine": e["model"].split(" ")[-1],
-                        "missed_form": sum("기획서 항목" in m for m in e["missed"]),
-                        "crit_agree": pct(e.get("criteria_agreement", 0))})
+                        "hit": round(e["recall"] * e["n_gold"]), "pages": pages[k], "model": e.get("model", ""),
+                        "seconds": e["seconds"], "n_extracted": e["n_extracted"], "engine": str(e.get("model", "")).split(" ")[-1],
+                        "missed_form": sum("기획서 항목" in m for m in e.get("missed", [])),
+                        "crit_agree": pct(e.get("criteria_agreement", 0)),
+                        "runs": e.get("runs", 1),
+                        "rmin": pct(e.get("recall_min", e["recall"])), "rmax": pct(e.get("recall_max", e["recall"])),
+                        "prec": pct(e["precision"]) if "precision" in e else None})
     motir = gold["motir-industrial-cluster-rnd-2026"]
     tracks = {c.get("track") for c in motir["criteria"] if c.get("track")}
 
@@ -166,6 +170,16 @@ def main():
         planted.update({"v1": v1, "base": p["base_total"], "drop_min": round(p["base_total"] - max(totals), 1),
                         "drop_max": round(p["base_total"] - min(totals), 1),
                         "lower": sum(t < p["base_total"] for t in totals), "higher": sum(t > p["base_total"] for t in totals)})
+    ablation = []
+    for mode, label, f in [("single", "평가위원 1명(단일 LLM)", "data/eval/planted-ablation-single.json"),
+                           ("roles", "6역할 · 한 회사 모델", "data/eval/planted-ablation-roles-one-model.json"),
+                           ("panel", "6역할 · 3사 모델(현재)", "data/eval/planted.json")]:
+        if (ROOT / f).exists():
+            q = load(f)
+            if q.get("stage") == "예선":
+                ablation.append({"mode": mode, "label": label, "detect": f"{sum(r['detected'] for r in q['rows'])}/{q['n']}",
+                                 "precision": pct(q["precision"]) if q.get("precision") is not None else None,
+                                 "fp": sum(r["new_gaps"] - r["hits"] for r in q["rows"])})
     before = run_numbers(load(f"data/runs/{RID}--original.json"))
     after = run_numbers(load(f"data/runs/{RID}--after.json"))
     tests = sum(l.lstrip().startswith("def test_") for f in (ROOT / "tests").glob("test_*.py")
@@ -177,6 +191,7 @@ def main():
         "extract": extract,
         "extract_file": ext_file,
         "planted": planted,
+        "ablation": ablation,
         "before": before,
         "after": after,
         "git": git_facts(),

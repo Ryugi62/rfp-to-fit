@@ -19,11 +19,12 @@ PROMPT = """아래는 공고문을 쪽 단위로 표시한 텍스트다. [p.N] �
    - 신청 자격·기관 요건·참여 제한(각각 한 행), 접수 방법·시스템, 마감·기간·일정, 제출서류(서류 하나당 한 행, 번호 목록이면 번호마다),
      작성 항목·분량·서식 규정(계획서·기획서 항목마다 한 행), 지원 한도·부담 비율·간접비, 선정 제외·감점 조건(예: 몇 점 미만 제외), 사전조치·위험관리 등 반드시 써야 하는 내용.
    - category는 자격|제출서류|기간|형식|제한|기타 중 하나.
+   - consequence: 이 요건을 어기면 원문상 어떻게 되는가 — 탈락|감점|불이익|해당없음. 사업 소개·일반 안내·권고·선정 후 의무처럼 신청 단계에서 어겨도 탈락·감점이 없는 문장은 해당없음.
 2) criteria: 평가항목(심사기준) 표의 대항목 행. name은 표 맨 왼쪽 항목명 열의 2~8자 짧은 이름(예: 적합성·혁신성·연구역량) 그대로 — 설명 문구(「~의 명확성 및 ~」)를 name에 넣지 말고 description에 넣는다. points(배점 숫자), description(원문 설명), stage. stage 규칙: 평가 단계가 나뉘면 예선|본선|서면|발표, **평가표가 과제 유형(트랙·분야)별로 따로 있으면 그 유형 이름**(예: 「공동비즈니스형」), 평가표가 하나뿐이면 단일. 한 stage 안의 배점 합은 그 표의 총점과 같아야 한다.
    [표] 아래 행 단위 표가 있으면 그것을 우선 읽는다.
 
 출력 형식:
-{{"requirements":[{{"category":"","text":"","page":1,"quote":""}}],
+{{"requirements":[{{"category":"","consequence":"탈락","text":"","page":1,"quote":""}}],
   "criteria":[{{"name":"","points":0,"description":"","stage":"단일","page":1,"quote":""}}]}}
 
 {extra}
@@ -127,7 +128,7 @@ def extract_rfp(doc: Document, llm: LLM, extra_criteria: list[Criterion] | None 
             dropped.append({"kind": "requirement", **r})
             continue
         reqs.append(Requirement(f"R{len(reqs) + 1}", r.get("category", "기타"), r.get("text", ""),
-                                Evidence(doc.id, page, r.get("quote", ""))))
+                                Evidence(doc.id, page, r.get("quote", "")), str(r.get("consequence", "") or "").strip()))
     for c in data.get("criteria", []):
         page = _quote_ok(doc, c.get("page"), c.get("quote", ""))
         if page is None:

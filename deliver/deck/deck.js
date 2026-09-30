@@ -285,9 +285,9 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
   title(s, "정답표를 먼저 만들고,\n**숫자**로 쟀습니다");
   const ex = N.extract;
   const nm = (e) => e.agency.replace("국가과학기술연구회", "NAIS 해커톤");
-  t(s, "① 공고 파싱 — 정답표 요건을 놓치지 않은 비율(재현율, 목표 90%)", { x: X0, y: 2.85, w: 6.6, h: 0.35, fontSize: 13, bold: true, color: C.sub });
+  t(s, "① 공고 파싱 — 정답표 요건을 놓치지 않은 비율(재현율, 목표 90%)", { x: X0, y: 2.85, w: 6.4, h: 0.35, fontSize: 13, bold: true, color: C.sub });
   s.addChart(pres.charts.BAR, [{ name: "재현율", labels: ex.map((e) => `${nm(e)} · ${e.pages}쪽`), values: ex.map((e) => e.recall) }], {
-    x: X0 - 0.1, y: 3.2, w: 6.5, h: 2.45, barDir: "bar", chartColors: [C.blue],
+    x: X0 - 0.1, y: 3.2, w: 6.3, h: 2.45, barDir: "bar", chartColors: [C.blue],
     catAxisLabelColor: C.ink, catAxisLabelFontSize: 12, catAxisLabelFontFace: F, catAxisOrientation: "maxMin",
     valAxisHidden: true, valAxisMinVal: 0, valAxisMaxVal: 100, valGridLine: { style: "none" }, catGridLine: { style: "none" },
     showValue: true, dataLabelFormatCode: '0"%"', dataLabelColor: C.ink, dataLabelFontSize: 13, dataLabelFontBold: true, dataLabelFontFace: F,
@@ -297,20 +297,26 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
   const ca = [...new Set(ex.map((e) => e.crit_agree))];
   const catxt = ca.length === 1 ? `심사표 이름·배점 일치 ${ex.length}건 모두 ${ca[0]}%` : `심사표 일치 ${ex.map((e) => `${nm(e)} ${e.crit_agree}%`).join(" · ")}`;
   const secs = ex.map((e) => Math.round(e.seconds));
-  t(s, `${ex.map((e) => `${nm(e)} ${e.hit}/${e.n_gold}`).join(" · ")}${weak.length ? `(가장 약한 곳: ${weak.map(nm).join("·")})` : ""}\n${catxt} · 1건 ${Math.min(...secs)}~${Math.max(...secs)}초`,
-    { x: X0, y: 5.75, w: 6.6, h: 0.6, fontSize: 11.5, color: C.gray, lineSpacingMultiple: 1.15 });
-  const rx = 8.1, rw = R - rx;
-  t(s, `② 일부러 지운 초안 시험${P.stage ? ` (${P.stage} 심사표)` : ""}`, { x: rx, y: 2.85, w: rw, h: 0.35, fontSize: 13, bold: true, color: C.sub });
-  bigNum(s, P.detect, `근거 블록을 하나씩 지운 초안 ${P.n}개 중 짚은 수\n짚은 곳의 정확도 ${P.precision}`,
-    rx, 3.2, rw, { size: 44, gap: 0.95, lSize: 12.5, color: C.blue });
-  if (P.ready) {
-    const v1 = P.v1 && P.v1.length ? `첫 초안 세트 ${Math.min(...P.v1)}~${Math.max(...P.v1)}/${P.n} → 블록 재설계 후 결과(사전 등록 아님). ` : "";
-    t(s, `${v1}${P.higher ? `지운 초안 ${P.n}개 중 ${P.lower}개만 근거 충족도가 원본(${P.base})보다 낮음 — 판정은 총점이 아니라 「짚은 곳」.` : `지운 초안의 점수는 원본 ${P.base}점보다 ${P.drop_min}~${P.drop_max}점 낮았습니다.`}`,
-      { x: rx, y: 4.85, w: rw, h: 0.75, fontSize: 12, color: C.sub, lineSpacingMultiple: 1.15 });
-  }
-  t(s, `③ 1건 채점 ${B.seconds}초 — 평가위원 ${B.reviewers}/${B.of}명 응답${B.prior_n ? " · 선행연구 탐색 포함" : ""}(공고 파싱 제외)`, { x: rx, y: 5.95, w: rw, h: 0.55, fontSize: 12, bold: true, color: C.ink, lineSpacingMultiple: 1.15 });
+  t(s, `${ex[0].runs}회 평균 · 범위 ${ex.map((e) => `${nm(e)} ${e.rmin}~${e.rmax}%`).join(" · ")}${weak.length ? ` (목표 미달: ${weak.map(nm).join("·")})` : ""}\n${catxt} · 추출 정밀도 ${ex.map((e) => `${e.prec}%`).join("·")} · 1건 ${Math.min(...secs)}~${Math.max(...secs)}초`,
+    { x: X0, y: 5.75, w: 6.4, h: 0.6, fontSize: 11.5, color: C.gray, lineSpacingMultiple: 1.15 });
+  const rx = 7.75, rw = R - rx;
+  t(s, `② 일부러 지운 초안 ${P.n}개 — 누가 더 정확히 짚나${P.stage ? ` (${P.stage} 심사표)` : ""}`, { x: rx, y: 2.85, w: rw, h: 0.35, fontSize: 13, bold: true, color: C.sub });
+  const AB = N.ablation || [];
+  t(s, "구성", { x: rx, y: 3.3, w: 2.4, h: 0.3, fontSize: 11, color: C.gray });
+  t(s, "짚은 수", { x: rx + 2.55, y: 3.3, w: 0.9, h: 0.3, fontSize: 11, color: C.gray, align: "right" });
+  t(s, "정확도(오탐)", { x: rx + 3.5, y: 3.3, w: rw - 3.5, h: 0.3, fontSize: 11, color: C.gray, align: "right" });
+  AB.forEach((a, i) => {
+    const y = 3.7 + i * 0.52, hi = a.mode !== "single";
+    t(s, a.label, { x: rx, y, w: 2.5, h: 0.36, fontSize: 13, bold: true, color: C.ink });
+    t(s, a.detect, { x: rx + 2.55, y, w: 0.9, h: 0.36, fontSize: 15, bold: true, align: "right" });
+    t(s, `${a.precision}%  (${a.fp})`, { x: rx + 3.5, y, w: rw - 3.5, h: 0.36, fontSize: 15, bold: true, align: "right", color: hi ? C.blue : C.ink });
+    if (i < AB.length - 1) hline(s, y + 0.44, rx, rw);
+  });
+  t(s, "역할 6개가 오탐을 없앴습니다. 회사 모델 섞기의 추가 효과는 이 표본(5개·각 1회)에선 확인 안 됨 — 섞는 이유는 가용성·국산 모델 선택지.",
+    { x: rx, y: 5.3, w: rw, h: 0.62, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.15 });
+  t(s, `③ 1건 채점 ${B.seconds}초 — 평가위원 ${B.reviewers}/${B.of}명 응답${B.prior_n ? " · 선행연구 탐색 포함" : ""}(공고 파싱 제외)`, { x: rx, y: 6.05, w: rw, h: 0.5, fontSize: 12, bold: true, color: C.ink, lineSpacingMultiple: 1.15 });
   src(s, `정답표: 다른 모델(Claude)이 쪽마다 판독 · 파싱 주 엔진 ${[...new Set(ex.map((e) => e.engine))].join(", ")} · 추출 수는 정답보다 많음(${ex.map((e) => e.n_extracted).join("·")}개 vs ${ex.map((e) => e.n_gold).join("·")}개) · 시연은 저장된 파싱 결과`);
-  s.addNotes(`[25초] 정확도는 숫자로 보여 드립니다. 정답표 대비 요건을 놓치지 않은 비율이 ${ex.map((e) => `${nm(e)} ${e.recall}%`).join(", ")}입니다. 가장 약한 곳도 그대로 둡니다. 기획서에서 근거 블록을 일부러 하나씩 지운 초안 ${P.n}개 중 ${P.detect}를 짚었고, 지운 초안은 점수도 내려갔습니다.`);
+  s.addNotes(`[25초] 정확도는 숫자로 보여 드립니다. 정답표 대비 요건을 놓치지 않은 비율이 세 번 평균 ${ex.map((e) => `${nm(e)} ${e.recall}%`).join(", ")}입니다. 목표에 못 미친 곳도 그대로 둡니다. 그리고 "평가위원 여러 명이 정말 필요하냐"를 직접 쟀습니다. 근거를 일부러 지운 초안 ${P.n}개에서, 평가위원 한 명은 다 짚었지만 엉뚱한 곳도 ${(AB.find((a) => a.mode === "single") || {}).fp}곳 짚었습니다. 역할 여섯 개로 나누자 오탐이 0이 됐습니다.`);
 }
 
 // ---------- 9. 심사위원의 마음 ----------
@@ -377,7 +383,7 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
   eyebrow(s, "지금 직접 눌러 보세요", 1.15);
   title(s, `${KN} 명의 평가위원이,\n**먼저** 읽어 드립니다.`, { y: 1.8, h: 2.3, fontSize: 46 });
   t(s, `커밋 ${N.git.commits}개 · 코드는 전부 본선 중 커밋(첫 코드 커밋 ${N.git.first_code}, 그 전엔 문서뿐)\nSPEC → 테스트 → 구현 순서 · 코딩 에이전트 활용 규칙까지 공개(AGENTS.md)`, { x: X0, y: 4.45, w: 6.6, h: 0.8, fontSize: 14, color: C.sub, lineSpacingMultiple: 1.25 });
-  t(s, "라이브가 끊기면 — 앱의 「② 우리 기획서 전·후」 탭이 저장된 실행 기록으로 같은 결과를 보여 줍니다", { x: X0, y: 5.45, w: 6.6, h: 0.6, fontSize: 12, color: C.gray, lineSpacingMultiple: 1.2 });
+  t(s, "라이브가 끊기면 — 앱의 「② 우리 기획서 먼저 채점」 탭이 저장된 실행 기록으로 같은 결과를 보여 줍니다", { x: X0, y: 5.45, w: 6.6, h: 0.6, fontSize: 12, color: C.gray, lineSpacingMultiple: 1.2 });
   t(s, "팀 루미아 · 김태걸 · 박세훈", { x: X0, y: 6.4, w: 6, h: 0.45, fontSize: 16, bold: true });
   const qs = [["라이브 앱", N.qr_live, N.live_url.replace(/^https?:\/\//, "")], ["GitHub", N.qr_repo, N.repo_url.replace(/^https?:\/\//, "")]];
   qs.forEach(([k, img, url], i) => {

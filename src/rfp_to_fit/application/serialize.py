@@ -17,7 +17,7 @@ def extraction_to_dict(ex: Extraction) -> dict:
 
 
 def extraction_from_dict(d: dict) -> Extraction:
-    reqs = [Requirement(r["id"], r["category"], r["text"], Evidence(**r["evidence"])) for r in d["requirements"]]
+    reqs = [Requirement(r["id"], r["category"], r["text"], Evidence(**r["evidence"]), r.get("consequence", "")) for r in d["requirements"]]
     crits = [Criterion(c["id"], c["name"], c["points"], c["description"], Evidence(**c["evidence"]), c.get("stage", "단일"))
              for c in d["criteria"]]
     return Extraction(reqs, crits, d.get("dropped", []))
@@ -57,6 +57,6 @@ def run_from_dict(d: dict) -> ReviewRun:
         fs = [Finding(f["item_id"], FindingKind(f["kind"]), f["gap_ratio"], f["valid"], f["demoted"],
                       [v for v in verdicts if v.item_id == f["item_id"]]) for f in r["findings"]]
         rows.append(FitRow(by_c[r["criterion_id"]], r["expected_points"], r["per_reviewer"], fs))
-    reqs = [Requirement(r["id"], r["category"], r["text"], Evidence(**r["evidence"])) for r in d["requirements"]]
+    reqs = [Requirement(r["id"], r["category"], r["text"], Evidence(**r["evidence"]), r.get("consequence", "")) for r in d["requirements"]]
     return ReviewRun(reqs, crits, items, personas, verdicts, FitTable(rows), [RemedyItem(**x) for x in d["remedies"]], d.get("trace", []),
                      d.get("prior_art", []), [ReviewerStance(**x) for x in d.get("stances", [])], d.get("failed", []))

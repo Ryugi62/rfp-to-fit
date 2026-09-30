@@ -19,6 +19,14 @@ items = [CheckItem(**i) for i in json.loads(Path(f"data/cache/{rid}.{STAGE}.rubr
 cname = {c.id: c.name for c in ex.criteria}
 item_crit = {i.id: cname[i.criterion_id] for i in items}
 gemini, solar = make_llms(); personas, llm_for = personas_with_models(gemini, solar)
+MODE = sys.argv[4] if len(sys.argv) > 4 else "panel"   # panel | single | roles-one-model (제거 실험)
+if MODE != "panel":
+    from rfp_to_fit.adapters.llm import OpenAILLM
+    from rfp_to_fit.domain.model import ReviewerPersona
+    one = {}
+    if MODE == "single":
+        personas = [ReviewerPersona("S1", "단일 평가위원", "국가 R&D 과제 평가위원으로서 평가지표 전반을 균형 있게 본다.", "OpenAI gpt-5.4-mini")]
+    llm_for = lambda p: one.setdefault(p.id, OpenAILLM("gpt-5.4-mini"))  # noqa: E731
 
 def ratios(text):
     run = run_graph(ex, text, personas, gemini, llm_for, items=items)
@@ -42,6 +50,6 @@ n = len(rows)
 new_total = sum(x["new_gaps"] for x in rows); hit_total = sum(x["hits"] for x in rows)
 out = {"n": n, "detect_rate": sum(x["detected"] for x in rows) / n,
        "precision": hit_total / new_total if new_total else None,
-       "base_total": round(base_total, 1), "stage": STAGE, "planted": PLANTED, "rows": rows, "rule": "원본 2회 평균 대비 점검 항목 감점 비율 +0.4 이상(5명 중 2명 이상) = 새 결핍"}
+       "base_total": round(base_total, 1), "stage": STAGE, "planted": PLANTED, "mode": MODE, "rows": rows, "rule": "원본 2회 평균 대비 점검 항목 감점 비율 +0.4 이상(5명 중 2명 이상) = 새 결핍"}
 Path(OUT).write_text(json.dumps(out, ensure_ascii=False, indent=1))
 print("detect", out["detect_rate"], "precision", out["precision"])

@@ -1,0 +1,97 @@
+{
+ "n": 5,
+ "detect_rate": 1.0,
+ "precision": 1.0,
+ "base_total": 93.3,
+ "stage": "예선",
+ "planted": "planted2.json",
+ "mode": "roles-one-model",
+ "rows": [
+  {
+   "variant": "drop2-ethics",
+   "expected": [
+    "활용성"
+   ],
+   "detected": true,
+   "new_gaps": 1,
+   "hits": 1,
+   "total": 89.6,
+   "per": {
+    "적합성": 16.7,
+    "활용성": 16.7,
+    "혁신성": 26.2,
+    "실현가능성": 10.0,
+    "확장성": 20.0
+   }
+  },
+  {
+   "variant": "drop2-comparison",
+   "expected": [
+    "혁신성"
+   ],
+   "detected": true,
+   "new_gaps": 1,
+   "hits": 1,
+   "total": 84.6,
+   "per": {
+    "적합성": 15.8,
+    "활용성": 20.0,
+    "혁신성": 18.8,
+    "실현가능성": 10.0,
+    "확장성": 20.0
+   }
+  },
+  {
+   "variant": "drop2-plan",
+   "expected": [
+    "실현가능성"
+   ],
+   "detected": true,
+   "new_gaps": 2,
+   "hits": 2,
+   "total": 87.5,
+   "per": {
+    "적합성": 16.7,
+    "활용성": 20.0,
+    "혁신성": 27.5,
+    "실현가능성": 3.3,
+    "확장성": 20.0
+   }
+  },
+  {
+   "variant": "drop2-impact",
+   "expected": [
+    "확장성"
+   ],
+   "detected": true,
+   "new_gaps": 3,
+   "hits": 3,
+   "total": 76.7,
+   "per": {
+    "적합성": 16.7,
+    "활용성": 20.0,
+    "혁신성": 25.0,
+    "실현가능성": 10.0,
+    "확장성": 5.0
+   }
+  },
+  {
+   "variant": "drop2-problem",
+   "expected": [
+    "적합성"
+   ],
+   "detected": true,
+   "new_gaps": 1,
+   "hits": 1,
+   "total": 90.8,
+   "per": {
+    "적합성": 13.3,
+    "활용성": 20.0,
+    "혁신성": 27.5,
+    "실현가능성": 10.0,
+    "확장성": 20.0
+   }
+  }
+ ],
+ "rule": "원본 2회 평균 대비 점검 항목 감점 비율 +0.4 이상(5명 중 2명 이상) = 새 결핍"
+}

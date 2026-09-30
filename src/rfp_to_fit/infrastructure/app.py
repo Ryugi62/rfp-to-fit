@@ -321,14 +321,14 @@ with tab_ba:
     before, after = DATA / "runs" / "nais-hackathon-2026--original.json", DATA / "runs" / "nais-hackathon-2026--after.json"
     st.markdown("### 이 대회의 공고와 본선 심사표로 우리 예선 기획서를 먼저 채점했습니다")
     st.markdown('<div class="sub">심사표: 적합성 10 · 활용성 20 · 혁신성 25 · 실현가능성 25 · 확장성 20 (공고 p.3). '
-                '항목 근거는 거의 다 채워져 있었지만, 평가위원 절반이 「보류」였습니다 — 결정 포인트가 우리가 오늘 준비할 것을 알려 줬습니다.</div>',
+                '항목 근거는 거의 다 있었지만, 관점 절반이 전체 인상을 「보류」로 적었습니다 — 결과 예측이 아니라, 대비할 질문을 먼저 받은 것입니다.</div>',
                 unsafe_allow_html=True)
     if before.exists():
         rb = run_from_dict(json.loads(before.read_text()))
         pn = {p.id: p.name for p in rb.personas}
         cnt = {d: sum(1 for x in rb.stances if x.decision == d) for d in ("선정", "보류", "탈락")}
         c1, c2 = st.columns([1, 2])
-        c1.markdown('<div class="sub">예선 기획서에 대한 심사위원의 마음</div>'
+        c1.markdown('<div class="sub">예선 기획서 — 관점별 전체 인상(예측 아님)</div>'
                     f'<div class="big">선정 {cnt["선정"]} · 보류 {cnt["보류"]}</div>'
                     f'<div class="muted">근거 충족도 {rb.table.expected_total:.1f} / {rb.table.total_points:g} · 합의 결핍 '
                     f'{len(rb.table.findings(FindingKind.CONSENSUS_GAP))} · 논쟁 {len(rb.table.findings(FindingKind.CONTESTED))}</div>',

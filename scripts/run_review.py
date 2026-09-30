@@ -4,7 +4,7 @@ from pathlib import Path
 from rfp_to_fit.infrastructure.wiring import make_llms, personas_with_models
 from rfp_to_fit.adapters.documents import load_path
 from rfp_to_fit.application.extract import extract_rfp, Extraction
-from rfp_to_fit.application.pipeline import run_review
+from rfp_to_fit.adapters.graph import run_graph as run_review
 from rfp_to_fit.application.serialize import extraction_to_dict, extraction_from_dict, run_to_dict
 
 rid, draft_path = sys.argv[1], sys.argv[2]

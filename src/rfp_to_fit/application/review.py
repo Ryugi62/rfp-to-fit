@@ -58,7 +58,7 @@ def build_rubric(criteria: list[Criterion], llm: LLM, guide: str = "") -> list[C
 REVIEW_SYSTEM = (
     "너는 국가 R&D 과제 평가위원이다. 너의 관점: {lens}\n"
     "규칙: (1) 다른 평가위원의 의견은 모른다. 너 혼자 판단한다. (2) 판정은 제안서 본문에 실제로 적힌 것만 근거로 한다. "
-    "(3) 충족·부족 판정에는 제안서에서 그대로 복사한 인용(quote, 10~60자)을 반드시 단다. 인용할 문장이 없으면 누락이다. "
+    "(3) 충족·부족 판정에는 제안서 본문에서 한 글자도 바꾸지 않고 복사한 연속 구간(quote, 10~40자)을 단다. 줄이거나 이어 붙이거나 질문 문장을 인용하면 무효다. 인용할 곳이 없으면 누락이다. "
     "(4) 관대하지 않게, 실제 심사처럼 판정한다. JSON만 출력한다."
 )
 REVIEW_PROMPT = """평가지표와 점검 질문:
@@ -148,3 +148,51 @@ def remedy(findings: list[Finding], items: list[CheckItem], criteria: list[Crite
     ids = {f.item_id for f in targets}
     return [RemedyItem(r["item_id"], r.get("evidence_type", "기타"), r.get("location", "새 절"), r.get("why", ""))
             for r in data.get("remedies", []) if r.get("item_id") in ids]
+
+
+# ---------- 재질의(자기 교정) ----------
+RECHECK_PROMPT = """너의 이전 판정 중 아래 항목은 인용이 제안서 원문에서 확인되지 않아 무효 처리되었다.
+각 항목을 다시 판정하라. 충족·부족이면 제안서 본문에서 한 글자도 바꾸지 않은 연속 구간(10~40자)을 인용하라. 그런 구간이 없으면 누락이다.
+
+항목:
+{items}
+
+출력: {{"verdicts":[{{"item_id":"","label":"충족","quote":"","reason":""}}]}}
+
+제안서 본문:
+<<<
+{draft}
+>>>"""
+
+
+def recheck(personas: list[ReviewerPersona], criteria, items: list[CheckItem], verdicts: list[Verdict], draft: str, llm_for,
+            is_invalid) -> list[Verdict]:
+    """인용 검사에 걸린 판정만 그 평가위원에게 다시 묻는다(최대 1회). 다른 평가위원의 답은 여전히 보여주지 않는다."""
+    by_item = {i.id: i for i in items}
+    by_crit = {c.id: c for c in criteria}
+    redo: dict[str, list[Verdict]] = {}
+    for v in verdicts:
+        if is_invalid(v):
+            redo.setdefault(v.reviewer_id, []).append(v)
+    if not redo:
+        return verdicts
+    pmap = {p.id: p for p in personas}
+
+    def ask(pid: str, bad: list[Verdict]) -> list[Verdict]:
+        p = pmap[pid]
+        listing = "\n".join(f"- {v.item_id} [{by_crit[by_item[v.item_id].criterion_id].name}] {by_item[v.item_id].question}" for v in bad)
+        data = llm_for(p).complete_json(REVIEW_SYSTEM.format(lens=p.lens), RECHECK_PROMPT.format(items=listing, draft=draft))
+        ids = {v.item_id for v in bad}
+        return [Verdict(pid, x["item_id"], _LABELS.get(str(x.get("label", "")).strip(), VerdictLabel.MISSING),
+                        str(x.get("quote", "") or ""), "[재질의] " + str(x.get("reason", "") or ""))
+                for x in data.get("verdicts", []) if x.get("item_id") in ids]
+
+    fixed: dict[tuple[str, str], Verdict] = {}
+    with ThreadPoolExecutor(max_workers=len(redo)) as ex:
+        for fut in [ex.submit(ask, pid, bad) for pid, bad in redo.items()]:
+            try:
+                for v in fut.result():
+                    fixed[(v.reviewer_id, v.item_id)] = v
+            except Exception:
+                continue
+    return [fixed.get((v.reviewer_id, v.item_id), v) for v in verdicts]

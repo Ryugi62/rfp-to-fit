@@ -12,8 +12,8 @@ load_dotenv()
 
 
 def make_llms():
-    gemini = FallbackLLM(GeminiLLM(), SolarLLM())
-    solar = FallbackLLM(SolarLLM(), GeminiLLM())
+    gemini = FallbackLLM(GeminiLLM(temperature=0.0), SolarLLM(temperature=0.0))
+    solar = FallbackLLM(SolarLLM(temperature=0.0), GeminiLLM(temperature=0.0))
     return gemini, solar
 
 

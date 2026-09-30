@@ -130,6 +130,9 @@ st.write("")
 secure = st.toggle("🔒 보안 모드 — 초안을 국산 모델(Upstage Solar)에만 보내고, 해외 학술 DB 검색도 끕니다", value=False,
                    help="기관 도입 시 기본값. 공고(공개 문서) 파싱은 그대로 두고, 초안이 닿는 판정·보완만 국산 모델로 돌립니다.")
 
+strict = st.toggle("⚖ 엄격 모드 — 교차 신문(「충족」 인용을 다른 회사 모델이 반대 심문)", value=False,
+                   help="제출 직전 최종 점검용. 결함 주입 실험에서 켜면 탐지 4/5 동일·오탐 0→2여서 기본은 끔(data/eval/planted-cross.json).")
+
 tab_run, tab_ba, tab_trust = st.tabs(["① 실행", "② 우리 기획서 먼저 채점", "③ 신뢰 장치·정확도"])
 
 # ---------------- ① 실행 ----------------
@@ -232,7 +235,7 @@ with tab_run:
                 st.write(msg)
 
             run = run_graph(sub, draft, personas, gemini, llm_for, on_step=on_step, items=cached_rubric(rubric_key, sub),
-                            prior_search=None if secure else prior_search(), examiner_for=examiners(secure))
+                            prior_search=None if secure else prior_search(), examiner_for=examiners(secure) if strict else None)
             used = actual_models(personas, llm_for)
             run.trace.append({"step": "실제 판정 모델", **used})
             status.update(label=f"완료 · {time.time() - t0:.0f}초", state="complete", expanded=False)

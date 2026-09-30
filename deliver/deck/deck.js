@@ -289,54 +289,68 @@ const REVM = (v) => [...new Set(B.personas.filter((q) => q.vendor === v).map((q)
   s.addNotes("[20초] 검사 도구 두 개를 MCP 서버로 감쌌습니다. 선행연구 검색과 인용 검사입니다. 실제로 다른 AI 비서인 Codex에 이 서버를 붙여 호출해 봤고, 원문에 있는 인용은 참, 없는 인용은 거짓이 나왔습니다. OpenAlex를 쓴 이유는 무료이고 키가 필요 없어서인데, 오늘 밤 실측 중에 OpenAlex가 장애를 냈고 도구 뒤에서 Crossref로 바뀌었습니다. MCP로 감싼 이유가 바로 이겁니다. 국내 DB도 같은 자리에 꽂으면 됩니다.");
 }
 
-// ---------- 8. 검증 — 처음 보는 공고 ----------
+// ---------- 측정 — 잴 수 있는 것만 ----------
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "검증 — 예시 공고에만 맞춘 게 아닌지");
-  title(s, "정답표를 먼저 고정하고,\n**처음 보는 공고**로 쟀습니다");
+  eyebrow(s, "측정 — 잴 수 있는 것만 숫자로");
+  title(s, "정답표를 먼저 고정하고,\n**처음 보는 공고**와 제거 실험으로 쟀습니다");
   const ex = N.extract;
   const nm = (e) => e.agency.replace("국가과학기술연구회", "NAIS 해커톤");
-  t(s, "① 개발에 쓴 공고 3건 — 요건 재현율(3회 평균)", { x: X0, y: 2.85, w: 5.4, h: 0.32, fontSize: 13, bold: true, color: C.sub });
-  ex.forEach((e, i) => {
-    const y = 3.3 + i * 0.52;
-    t(s, `${nm(e)} · ${e.pages}쪽`, { x: X0, y, w: 3.2, h: 0.36, fontSize: 13.5, bold: true });
-    t(s, `${e.recall}%`, { x: X0 + 3.2, y, w: 1.0, h: 0.36, fontSize: 16, bold: true, align: "right" });
-    t(s, `${e.rmin}~${e.rmax}`, { x: X0 + 4.3, y: y + 0.05, w: 1.1, h: 0.3, fontSize: 11, color: C.gray });
+  const hn = { "msit-national-scientist-2026": "과기정통부 국가과학자", "msit-rising-star-2026": "과기정통부 라이징스타" };
+  t(s, "① 공고 파싱 — 요건 재현율(심사표 배점은 5건 모두 100%)", { x: X0, y: 2.85, w: 6.2, h: 0.3, fontSize: 12.5, bold: true, color: C.sub });
+  const rows = ex.map((e) => [`${nm(e)} · 개발용`, `${e.recall}%`, `${e.rmin}~${e.rmax}`, false])
+    .concat(hb.map((r, i) => [`${hn[Object.keys(HO.blind)[i]] || ""} · 처음 봄`, `${pct0(r.recall)}%`, `${pct0(r.recall_min)}~${pct0(r.recall_max)}`, true]));
+  rows.forEach(([a1, b1, c1, hold], i) => {
+    const y = 3.25 + i * 0.42;
+    t(s, a1, { x: X0, y, w: 3.6, h: 0.32, fontSize: 13, bold: hold, color: hold ? C.blueInk : C.ink });
+    t(s, b1, { x: X0 + 3.6, y, w: 0.95, h: 0.32, fontSize: 14, bold: true, align: "right", color: hold ? C.blueInk : C.ink });
+    t(s, c1, { x: X0 + 4.7, y: y + 0.03, w: 1.3, h: 0.28, fontSize: 10.5, color: C.gray });
   });
-  t(s, `심사표 배점 일치 ${ex.length}건 모두 100% · 1건 ${Math.round(Math.min(...ex.map((e) => e.seconds)))}~${Math.round(Math.max(...ex.map((e) => e.seconds)))}초`, { x: X0, y: 4.95, w: 5.4, h: 0.3, fontSize: 11.5, color: C.gray });
-  const rx = 6.9, rw = R - rx;
-  t(s, "② 처음 보는 공고 2건 — 링크로 새로 가져와, 정답표를 측정 전에 커밋", { x: rx, y: 2.85, w: rw, h: 0.32, fontSize: 13, bold: true, color: C.blue });
-  const hn = { "msit-national-scientist-2026": "과기정통부 국가과학자 공모", "msit-rising-star-2026": "과기정통부 라이징스타 지정" };
-  hb.forEach((r, i) => {
-    const k = Object.keys(HO.blind)[i], y = 3.3 + i * 0.52;
-    t(s, hn[k] || k, { x: rx, y, w: 3.4, h: 0.36, fontSize: 13.5, bold: true });
-    t(s, `${pct0(r.recall)}%`, { x: rx + 3.4, y, w: 1.0, h: 0.36, fontSize: 16, bold: true, align: "right", color: C.blueInk });
-    t(s, `${pct0(r.recall_min)}~${pct0(r.recall_max)} · 심사표 ${pct0(r.criteria)}%`, { x: rx + 4.5, y: y + 0.05, w: rw - 4.5, h: 0.3, fontSize: 11, color: C.gray });
+  t(s, "「처음 봄」= 개발에 안 쓴 공고를 링크로 새로 가져와 정답표를 측정 전에 커밋(3회). 라이징스타에서 놓친 9개 중 6개가 ※주석 조건 → 규칙 1줄 후 89~95%(따로 표기)",
+    { x: X0, y: 5.4, w: 6.1, h: 0.62, fontSize: 10.5, color: C.sub, lineSpacingMultiple: 1.15 });
+  const rx = 7.35, rw = R - rx;
+  t(s, `② 제거 실험 — 근거를 지운 초안 ${P.n}개에서 오탐(안 지운 곳을 짚음)`, { x: rx, y: 2.85, w: rw, h: 0.3, fontSize: 12.5, bold: true, color: C.sub });
+  const cw = (rw - 0.3) / 3;
+  AB.forEach((a, i) => {
+    const x = rx + i * (cw + 0.15), hi = a.mode !== "single";
+    box(s, x, 3.25, cw, 1.95, { fill: hi ? C.blueBg : C.white, lineColor: hi ? C.blue : C.line });
+    t(s, a.label.replace("(단일 LLM)", "").replace("(현재)", ""), { x: x + 0.15, y: 3.35, w: cw - 0.3, h: 0.5, fontSize: 11, bold: true, lineSpacingMultiple: 1.05 });
+    t(s, `${a.fp}`, { x: x + 0.15, y: 3.85, w: cw - 0.3, h: 0.75, fontSize: 40, bold: true, color: hi ? C.blueInk : C.ink });
+    t(s, `짚은 ${a.detect}`, { x: x + 0.15, y: 4.72, w: cw - 0.3, h: 0.3, fontSize: 11, color: C.sub });
   });
-  t(s, "라이징스타에서 놓친 9개 중 6개가 ※주석 속 조건(「증빙 시에만 인정」 등) → 일반 규칙 1줄 추가 후 89~95%\n(검증 공고를 본 뒤의 수정이라 위 블라인드 숫자와 따로 표기)", { x: rx, y: 4.45, w: rw, h: 0.75, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.2 });
-  hline(s, 5.55);
-  t(s, `링크 입력 실측: 실제 공지 주소 ${LK ? `${LK.n}건 중 ${LK.ok}건` : "-"}에서 공고문을 골라 읽음(HWP 첨부·스크립트 다운로드·공고문 2개 합치기 포함) · IRIS 상세 페이지는 미실측`, { x: X0, y: 5.75, w: W, h: 0.35, fontSize: 13, bold: true });
-  src(s, "정답표: 파이프라인(OpenAI)과 다른 회사 모델(Claude)이 원문을 읽어 작성 · 검증 정답표 커밋 430ea7d(21:37) 뒤에 측정 · 정밀도(추출 중 정답 비율) 45~84%는 다음 개선 대상");
-  s.addNotes(`[25초] 예시 공고에만 맞춘 게 아닌지 의심하실 수 있어서, 개발에 한 번도 안 쓴 과기정통부 공고 두 건을 링크로 새로 가져와 쟀습니다. 정답표는 측정 전에 먼저 커밋해 고정했습니다. 국가과학자 공모는 평균 ${hb[0] ? pct0(hb[0].recall) : "-"}%, 라이징스타는 ${hb[1] ? pct0(hb[1].recall) : "-"}%였고, 심사표 배점은 둘 다 100% 맞혔습니다. 라이징스타에서 놓친 건 대부분 주석 속 조건이어서 규칙 한 줄을 넣었고, 이건 블라인드 숫자와 따로 표기했습니다.`);
+  t(s, "관점을 나누자 오탐이 0 — 세 회사 모델을 섞는 효과는 이 표본(5개·각 1회)에선 확인 안 됨(섞는 이유는 가용성)", { x: rx, y: 5.4, w: rw, h: 0.62, fontSize: 10.5, color: C.sub, lineSpacingMultiple: 1.15 });
+  hline(s, 6.2);
+  t(s, `링크 입력: 실제 공지 주소 ${LK ? `${LK.n}건 중 ${LK.ok}건` : "-"}에서 공고문을 골라 읽음(HWP 첨부·스크립트 다운로드·공고문 2개 합치기) · IRIS 상세는 미실측`, { x: X0, y: 6.35, w: W, h: 0.32, fontSize: 12.5, bold: true });
+  src(s, "정답표: 파이프라인(OpenAI)과 다른 회사 모델(Claude)이 원문을 읽어 작성 · 검증 정답표 커밋 430ea7d(21:37) 뒤 측정 · 추출 정밀도 45~84%는 다음 개선 대상");
+  s.addNotes(`[30초] 잴 수 있는 것만 숫자로 말씀드립니다. 예시 공고에만 맞춘 게 아닌지 보려고, 개발에 안 쓴 과기정통부 공고 두 건을 링크로 가져와 정답표를 먼저 고정하고 쟀습니다. 94%와 77%, 심사표 배점은 다섯 건 모두 맞혔습니다. 그리고 관점을 여러 개로 나눌 필요가 있는지 제거 실험을 했습니다. 관점 하나는 안 지운 곳을 ${single.fp}곳 잘못 짚었고, 여섯으로 나누자 0이었습니다. 회사 모델을 섞는 효과는 확인되지 않았다고 그대로 말씀드립니다.`);
 }
 
-// ---------- 9. 6명이 필요한가 ----------
+// ---------- 예선 약속 → 본선 구현 ----------
 {
   const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "제거 실험 — 관점을 여러 개로 나눌 필요가 있나");
-  title(s, "관점 하나로는 엉뚱한 곳도 짚고,\n**역할을 나누면** 오탐이 사라졌습니다");
-  t(s, `근거 블록을 일부러 하나씩 지운 초안 ${P.n}개(예선 심사표) — 지운 곳을 짚었나, 안 지운 곳을 잘못 짚었나`, { x: X0, y: 2.85, w: W, h: 0.32, fontSize: 13, bold: true, color: C.sub });
-  const cw = (W - 0.6) / 3;
-  AB.forEach((a, i) => {
-    const x = X0 + i * (cw + 0.3), hi = a.mode !== "single";
-    box(s, x, 3.35, cw, 2.35, { fill: hi ? C.blueBg : C.white, lineColor: hi ? C.blue : C.line });
-    t(s, a.label, { x: x + 0.25, y: 3.5, w: cw - 0.5, h: 0.35, fontSize: 14, bold: true });
-    t(s, `오탐 ${a.fp}`, { x: x + 0.25, y: 4.0, w: cw - 0.5, h: 0.8, fontSize: 40, bold: true, color: hi ? C.blueInk : C.ink });
-    t(s, `짚은 수 ${a.detect} · 정확도 ${a.precision}%`, { x: x + 0.25, y: 4.95, w: cw - 0.5, h: 0.35, fontSize: 13, color: C.sub });
+  eyebrow(s, "예선 약속 → 본선 구현 — 포스터와 현실의 거리");
+  title(s, "예선 때 약속한 것을,\n**그대로** 대조했습니다");
+  const rows = [
+    ["공고 URL·PDF·HWPX 입력", "✓", "+HWP, 실제 공지 13/13"],
+    ["요건·평가지표 구조화(출처 쪽)", "✓", "모든 항목에 쪽·원문 인용"],
+    ["가상 평가위원 독립 채점 → 합의/논쟁/확인 불가", "✓", "관점 6개(현장 멘토링 반영)"],
+    ["보완 지정 — 문장은 쓰지 않음", "✓", "근거 종류·넣을 위치만"],
+    ["선행 탐색(논문·NTIS 과제·KIPRIS 특허, MCP)", "△", "논문만 — 축소 규칙 적용, NTIS·KIPRIS는 키 미확보"],
+    ["RAG(bge-m3 + FAISS)", "✕", "원문 전체 + 인용 대조로 교체 — 판정 근거 추적이 더 직접적"],
+    ["요건 재현율 ≥ 90%", "△", "개발 85~93% · 처음 본 공고 77~94%"],
+    ["결핍 탐지 정밀도 ≥ 80%", "✓", "오탐 0(100%) · 탐지 4/5, 표본 5"],
+    ["초안 비저장 · 오픈소스(MIT)", "✓", "+개인정보 가림 · LICENSE 공개"],
+  ];
+  rows.forEach(([a1, mark, note], i) => {
+    const y = 2.85 + i * 0.43;
+    const col = mark === "✓" ? C.blueInk : mark === "△" ? "B7791F" : "C0392B";
+    t(s, a1, { x: X0, y, w: 6.2, h: 0.34, fontSize: 13.5, bold: true });
+    t(s, mark, { x: X0 + 6.3, y, w: 0.5, h: 0.34, fontSize: 16, bold: true, color: col, align: "center" });
+    t(s, note, { x: X0 + 7.0, y: y + 0.02, w: W - 7.0, h: 0.32, fontSize: 12, color: C.sub });
+    if (i < rows.length - 1) hline(s, y + 0.39);
   });
-  hline(s, 6.0);
-  t(s, "역할 6개가 오탐을 없앴습니다. 세 회사 모델을 섞는 효과는 이 표본(5개·각 1회)에서 확인되지 않았고 — 섞는 이유는 한도·장애에도 멈추지 않는 가용성과 국산 모델 선택지입니다.", { x: X0, y: 6.15, w: W, h: 0.7, fontSize: 14, bold: true, lineSpacingMultiple: 1.2 });
-  s.addNotes(`[20초] 평가위원이 정말 여러 명 필요한지 직접 쟀습니다. 근거를 일부러 지운 초안 ${P.n}개에서 한 명짜리는 지운 곳을 다 짚었지만 안 지운 곳도 ${single.fp}곳 잘못 짚었습니다. 역할을 여섯으로 나누자 오탐이 0이 됐습니다. 세 회사 모델을 섞는 효과는 이 표본에선 확인되지 않았고, 그렇게 말씀드립니다. 섞는 이유는 가용성입니다.`);
+  src(s, "기획서 v2(9/5 제출)·아이디어 포스터(9/15 제출) 대비 — 못 한 것도 지우지 않았습니다 · 전체 표는 저장소 README");
+  s.addNotes("[20초] 예선 때 약속한 것을 그대로 대조했습니다. 링크 입력, 구조화, 독립 채점, 보완 지정은 했습니다. 특허·과제 탐색은 논문만 했고, RAG는 원문 인용 대조로 바꿨고, 재현율 90%는 공고에 따라 못 미친 곳이 있습니다. 못 한 것도 지우지 않았습니다.");
 }
 
 // ---------- 10. 우리 자신에게 먼저 ----------
@@ -347,7 +361,7 @@ const REVM = (v) => [...new Set(B.personas.filter((q) => q.vendor === v).map((q)
   t(s, "각 관점이 쓴 「가장 걸리는 점」(원문)", { x: X0, y: 2.85, w: 6, h: 0.3, fontSize: 12.5, bold: true, color: C.blue });
   t(s, "그래서 오늘 가져온 것", { x: 7.35, y: 2.85, w: 5, h: 0.3, fontSize: 12.5, bold: true, color: C.blue });
   const answer = {
-    "세부 전문형": `목표치 대신 실측치 — 처음 보는 공고 재현율·제거 실험(9·10장)`,
+    "세부 전문형": `목표치 대신 실측치 — 처음 보는 공고 재현율·제거 실험(9장)`,
     "사업성·시장형": "첫 실증 대상 — 전문기관 접수 후 요건 사전검토(12장)",
     "행정·관리형": `검증 가능한 과정 — 커밋 ${N.git.commits}개·테스트 ${N.tests}개·측정 스크립트 공개`,
   };
@@ -384,11 +398,13 @@ const REVM = (v) => [...new Set(B.personas.filter((q) => q.vendor === v).map((q)
     if (i < 2) arrow(s, x + cw + 0.03, 4.1, x + cw + 0.27, 4.1, C.blue);
   });
   t(s, [
+    { text: "NAIS 비전과의 연결 — ", options: { bold: true } },
+    { text: "「가설부터 실험·분석까지 스스로 하는 AI 사이언티스트, 1인 1연구소」에서 빠진 순간이 과제 신청입니다 — 그 자리를 채우는 도구입니다.", options: { breakLine: true } },
     { text: "데이터가 쌓이는 방향 — ", options: { bold: true } },
     { text: "실제 심사 의견은 평가기관에 있습니다(멘토링). 전문기관과 연계하면 가상 평가위원을 실제 심사 의견 유형으로 보정합니다.", options: { breakLine: true } },
     { text: "연결 — ", options: { bold: true } },
     { text: "MCP 도구로 NAIS 플랫폼·연구자 AI 비서에 그대로 꽂히고, 같은 엔진이 연차·성과보고서(지표 대비 실적)와 연구비 정산(증빙 대비 항목)으로 넓어집니다.", options: {} },
-  ], { x: X0, y: 5.65, w: W, h: 1.1, fontSize: 12.5, color: C.sub, lineSpacingMultiple: 1.3 });
+  ], { x: X0, y: 5.55, w: W, h: 1.4, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.25 });
   s.addNotes("[15초] 같은 엔진이 세 시점으로 이어집니다. 지금은 연구자의 제출 전 셀프 점검이고, 첫 실증 목표는 전문기관의 접수 후 요건 사전검토, 그다음은 심사 중 평가위원에게 근거 위치를 띄워 주는 보조입니다. 실제 심사 의견 데이터는 평가기관에 있으니, 연계하면 가상 평가위원을 실제 유형으로 보정할 수 있습니다.");
 }
 

@@ -21,7 +21,7 @@ OUT = DECK / "build"
 IMG = OUT / "img"
 PENDING = "측정 중"
 
-LIVE_URL = os.environ.get("LIVE_URL", "https://invisible-sail-shame-preliminary.trycloudflare.com")
+LIVE_URL = os.environ.get("LIVE_URL", "https://ryugi62.github.io/rfp-to-fit/")   # 고정 주소 → docs/index.html이 현재 터널로 넘김
 REPO_URL = "https://github.com/Ryugi62/rfp-to-fit"
 RID = "nais-hackathon-2026"
 

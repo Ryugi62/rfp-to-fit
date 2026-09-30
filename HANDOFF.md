@@ -27,7 +27,7 @@
 cd ~/dev/rfp-to-fit
 pgrep -fl "streamlit run" || (nohup uv run streamlit run src/rfp_to_fit/infrastructure/app.py --server.port 8501 --server.headless true > /tmp/streamlit.log 2>&1 &)
 pgrep -fl cloudflared || (nohup ~/.local/bin/cloudflared tunnel --url http://localhost:8501 --no-autoupdate > /tmp/cf.log 2>&1 &); sleep 8; grep -o "https://[a-z0-9-]*\.trycloudflare\.com" /tmp/cf.log | head -1
-LIVE_URL=<새 주소> bash deliver/deck/build.sh   # 덱 QR·주소 갱신
+# 덱 QR은 고정 주소 https://ryugi62.github.io/rfp-to-fit/ — 터널이 바뀌면 docs/index.html의 주소 2곳만 새 주소로 바꿔 commit·push(덱 재빌드 불필요)
 ```
 노트북 단독 실행(인터넷만 되면): `git clone https://github.com/Ryugi62/rfp-to-fit && cd rfp-to-fit && cp <키 파일> .env && uv sync && uv run streamlit run src/rfp_to_fit/infrastructure/app.py`
 

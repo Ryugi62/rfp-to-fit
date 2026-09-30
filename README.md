@@ -19,14 +19,14 @@
 ## 실행
 ```
 cp .env.example .env   # OPENAI_API_KEY, GEMINI_API_KEY, UPSTAGE_API_KEY
-uv sync && uv run pytest            # 테스트 98개(네트워크·LLM 없이)
+uv sync && uv run pytest            # 테스트 99개(네트워크·LLM 없이)
 uv run streamlit run src/rfp_to_fit/infrastructure/app.py
 ```
 사용: ① 공고 링크 붙여넣기(부처·기관 공지 주소 또는 PDF 주소 — 첨부 중 공고문 자동 선택, HWP·HWPX·PDF) ② 내 초안 올리기 ③ 고칠 곳(모든 관점이 근거 못 찾음)·판단할 곳(갈림)·관점별로 걸리는 점·보완 위치.
 
 ## 개발 방식 (SDD · TDD · DDD · 클린 아키텍처)
 - **스펙 먼저**: [`SPEC.md`](SPEC.md) — 유비쿼터스 언어(코드 이름과 1:1), 유스케이스 14개(Given/When/Then), 수용기준 18개(목표 대비 실측, 미달도 그대로), UI 수용기준 10개(390·1280 실측).
-- **테스트**: `uv run pytest` 98개. 레이어 규칙도 테스트가 검사한다(`tests/test_architecture.py`: domain·application은 표준 라이브러리와 안쪽 레이어만 import).
+- **테스트**: `uv run pytest` 99개. 레이어 규칙도 테스트가 검사한다(`tests/test_architecture.py`: domain·application은 표준 라이브러리와 안쪽 레이어만 import).
 - **화면 실측**: `scripts/responsive.py`(5화면 × 390·1280 가로 넘침·잘림), `scripts/e2e_mobile.py`·`scripts/e2e_verify.py`·`scripts/e2e_link.py`(실제 브라우저로 끝까지).
 
 ## 구조 — LLM은 증인, 판정은 코드 (LangGraph 상태 그래프)

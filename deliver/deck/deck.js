@@ -173,7 +173,7 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
       t(s, d, { x: x + 0.05, y: y + 0.42, w: cw - 0.1, h: 0.5, fontSize: 12, color: C.sub });
     });
   });
-  s.addNotes("[25초] 역할은 이렇게 나눴습니다. 사람은 판단만 합니다. 어디에 낼지, 갈린 곳을 고칠지, 그리고 문장은 직접 씁니다. AI는 공고를 정리하고 관점별로 근거를 찾습니다. 코드는 확인합니다. 근거 문장이 초안에 정말 있는지, 몇 관점이 동의했는지, 개인정보를 가렸는지.");
+  s.addNotes("[15초] 역할은 이렇게 나눴습니다. 사람은 판단하고 문장은 직접 씁니다. AI는 공고를 정리하고 근거를 찾습니다. 코드는 그 근거가 초안에 정말 있는지, 몇 관점이 동의했는지 확인합니다.");
 }
 
 // 6. 구조
@@ -203,7 +203,53 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
     t(s, d, { x: X0 + 3.8, y: yy + 0.02, w: W - 3.8, h: 0.34, fontSize: 13, color: C.sub });
     if (i < 2) hline(s, yy + 0.5);
   });
-  s.addNotes("[25초] 핵심은 AI를 판사로 쓰지 않는다는 겁니다. AI는 증인처럼 근거 문장만 냅니다. 그 문장이 초안에 정말 있는지, 몇 관점이 동의했는지는 코드가 판정합니다. 없는 문장을 댄 판정은 그 관점에게만 한 번 다시 묻습니다. 한 회사 모델이 막히면 다른 모델로 넘어가고, 실패는 숨기지 않고 화면에 띄웁니다.");
+  s.addNotes("[20초] 핵심은 AI를 판사로 쓰지 않는다는 겁니다. AI는 증인처럼 근거 문장만 내고, 판정은 코드가 합니다. 한 회사 모델이 막히면 다른 모델로 넘어가고, 실패는 숨기지 않고 화면에 띄웁니다.");
+}
+
+// 6-2. 관점 6개와 심사 방식
+{
+  const s = pres.addSlide(); s.background = { color: C.white };
+  eyebrow(s, "관점 6개");
+  title(s, "여섯 관점은,\n**같은 질문**에 따로 답합니다");
+  const LENS = [
+    ["기술 타당성 검증형", "방법·수치·검증이 실제로 성립하는가"],
+    ["기술 큰그림형", "기존 방법과 비교해 무엇이 새로운가"],
+    ["세부 전문형", "핵심 기술 하나가 설계·구현·측정됐는가"],
+    ["사업성·시장형", "누가 쓰고, 누가 돈을 내는가"],
+    ["행정·관리형", "예산·인력·일정·위험 관리가 채워졌는가"],
+    ["사업 취지형", "공고의 취지와 제안의 목표가 이어지는가"],
+  ];
+  const lw = 5.3;
+  t(s, "누가 보나 · 먼저 보는 것", { x: X0, y: 2.75, w: lw, h: 0.3, fontSize: 13, bold: true, color: C.gray });
+  LENS.forEach(([n, d], i) => {
+    const y = 3.15 + i * 0.47;
+    t(s, n, { x: X0, y, w: 2.05, h: 0.34, fontSize: 13.5, bold: true });
+    t(s, d, { x: X0 + 2.1, y: y + 0.02, w: lw - 2.1, h: 0.34, fontSize: 12, color: C.sub });
+    if (i < LENS.length - 1) hline(s, y + 0.42, X0, lw);
+  });
+  t(s, "9/30 멘토링에서 들은 실제 심사위원 유형입니다. 실존 인물을 흉내 내지 않고 역할만 줍니다. 3개 회사 모델에 두 관점씩.",
+    { x: X0, y: 6.0, w: lw, h: 0.5, fontSize: 11, color: C.gray, lineSpacingMultiple: 1.15 });
+  const rx = 6.75, rw = R - rx;
+  t(s, "어떻게 심사하나", { x: rx, y: 2.75, w: rw, h: 0.3, fontSize: 13, bold: true, color: C.gray });
+  const STEPS = [
+    ["같은 질문", "AI", "지표마다 점검 질문을 3개까지 만들어 여섯 관점에 똑같이 줍니다"],
+    ["따로 판정", "AI", "서로 모른 채 충족·부족·누락을 고르고, 초안 문장을 그대로 인용합니다"],
+    ["걸러 내기", "코드", "초안에 없는 인용은 버리고, 그 관점에만 한 번 다시 묻습니다"],
+    ["세기", "코드", `여섯 중 ${GAPK}명 이상 부족·누락이면 고칠 곳, ${CLO}~${CHI}명이면 판단할 곳\n점수는 충족 1·부족 0.5·누락 0 × 배점, 최고·최저를 빼고 평균`],
+  ];
+  STEPS.forEach(([h, who, d], i) => {
+    const y = 3.12 + i * 0.7;
+    t(s, String(i + 1).padStart(2, "0"), { x: rx, y, w: 0.5, h: 0.3, fontSize: 15, bold: true, color: C.blue });
+    t(s, h, { x: rx + 0.55, y, w: 1.3, h: 0.3, fontSize: 14, bold: true });
+    t(s, who, { x: rx + 1.85, y: y + 0.03, w: 0.6, h: 0.26, fontSize: 10.5, bold: true, color: who === "코드" ? C.ink : C.blueInk });
+    t(s, d, { x: rx + 0.55, y: y + 0.33, w: rw - 0.55, h: i === 3 ? 0.5 : 0.28, fontSize: 11.5, color: C.sub, lineSpacingMultiple: 1.1 });
+  });
+  box(s, rx, 6.22, rw, 0.6, { fill: C.bg2, lineColor: C.bg2 });
+  t(s, [
+    { text: "실제 예  ", options: { bold: true, color: C.blueInk } },
+    { text: "「AI 활용 계획이 연구 과정 시나리오로 제시됐는가」 충족 4 · 부족 2(세부 전문형, 행정·관리형) → 판단할 곳", options: { color: C.ink } },
+  ], { x: rx + 0.18, y: 6.27, w: rw - 0.36, h: 0.5, fontSize: 11.5, lineSpacingMultiple: 1.1, valign: "middle" });
+  s.addNotes("[30초] 관점 여섯 개는 어제 멘토링에서 들은 실제 심사위원 유형입니다. 기술을 꼼꼼히 따지는 사람, 큰 그림을 보는 사람, 자기 전문 하나를 파는 사람, 시장을 보는 사람, 행정, 사업 취지. 실존 인물이 아니라 역할만 줍니다. 여섯 관점은 같은 질문을 서로 모른 채 받고, 충족이라고 하려면 초안 문장을 그대로 인용해야 합니다. 그다음은 코드입니다. 인용이 초안에 없으면 버리고, 여섯 중 다섯 이상이 부족이면 고칠 곳, 둘에서 넷이면 판단할 곳입니다. 실제로 활용 시나리오 항목은 넷이 충족, 둘이 부족이라 판단할 곳으로 넘어갔습니다.");
 }
 
 // 7. 신뢰
@@ -251,7 +297,7 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
     { text: "check_quote(정밀도 95% 달성)", options: { bold: true, breakLine: true } }, { text: "→ 거짓(원문에 없음)", options: { color: C.blueInk, bold: true, breakLine: true } },
     { text: "search_prior_art(grant proposal review)", options: { bold: true, breakLine: true } }, { text: "→ 논문 3편", options: { color: C.blueInk, bold: true } },
   ], { x: rx + 0.3, y: 3.5, w: rw - 0.6, h: 2.8, fontSize: 13.5, lineSpacingMultiple: 1.35 });
-  s.addNotes("[20초] 검사 도구 두 개를 MCP로 감쌌습니다. 다른 AI 비서인 Codex에 붙여서 실제로 불러 봤고, 원문에 있는 인용은 참, 없는 인용은 거짓이 나왔습니다. 도구로 감싼 이유는 어젯밤 실험 도중에 OpenAlex가 멈췄을 때 뒤에서 Crossref로 자동으로 바뀌었기 때문입니다.");
+  s.addNotes("[15초] 검사 도구 두 개를 MCP로 감쌌습니다. 다른 AI 비서인 Codex에 붙여 실제로 불러 보니, 원문에 있는 인용은 참, 없는 인용은 거짓이 나왔습니다. 학술 DB가 멈추면 도구 뒤에서 다른 DB로 넘어갑니다.");
 }
 
 // 9. 측정

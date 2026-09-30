@@ -22,7 +22,7 @@ from rfp_to_fit.domain.model import FindingKind  # noqa: E402
 from rfp_to_fit.domain.privacy import mask_pii  # noqa: E402
 from rfp_to_fit.domain.quotes import context  # noqa: E402
 from html import escape as html_escape  # noqa: E402
-from rfp_to_fit.infrastructure.wiring import actual_models, make_llms, personas_with_models, prior_search  # noqa: E402
+from rfp_to_fit.infrastructure.wiring import actual_models, examiners, make_llms, personas_with_models, prior_search  # noqa: E402
 
 DATA = ROOT / "data"
 st.set_page_config(page_title="RFP-to-Fit · 평가위원의 눈으로 빈칸 찾기", page_icon="🔎", layout="wide")
@@ -225,13 +225,14 @@ with tab_run:
                        "선행 탐색": lambda r: f"② 선행 탐색(MCP → OpenAlex) 검색어 {r.get('queries')} → 선행연구 {r.get('n')}편을 평가위원 참고 자료로",
                        "독립 채점": lambda r: f"③ 판정 {r.get('n')}개 수신 · 인용 실재 검사 탈락 {r.get('invalid')}건",
                        "재질의": lambda r: f"↺ 가짜 인용 {r.get('asked')}건을 그 평가위원에게 다시 물음 → 원문 인용으로 충족 {r.get('cited')}건 · 부족/누락으로 정정 {r.get('downgraded')}건 · 여전히 무효 {r.get('still')}건",
+                       "교차 신문": lambda r: f"⚖ 교차 신문 — 「충족」 근거 {r.get('examined')}건을 다른 회사 모델이 반대 심문 → 근거 아님 {r.get('rejected')}건을 「부족」으로",
                        "집계": lambda r: f"④ 근거 충족도 {r.get('expected')} / {r.get('total')}(최고·최저 제외 평균) → 결핍마다 보완 위치 지정",
                        "보완 지정": lambda r: f"⑤ 보완 지정 {r.get('n')}개 완료"}
                 msg = fmt[name](rec) if name in fmt else name
                 st.write(msg)
 
             run = run_graph(sub, draft, personas, gemini, llm_for, on_step=on_step, items=cached_rubric(rubric_key, sub),
-                            prior_search=None if secure else prior_search())
+                            prior_search=None if secure else prior_search(), examiner_for=examiners(secure))
             used = actual_models(personas, llm_for)
             run.trace.append({"step": "실제 판정 모델", **used})
             status.update(label=f"완료 · {time.time() - t0:.0f}초", state="complete", expanded=False)

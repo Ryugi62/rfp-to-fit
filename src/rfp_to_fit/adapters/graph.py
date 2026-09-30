@@ -10,7 +10,7 @@ from langgraph.graph import END, StateGraph
 from ..application.extract import Extraction
 from ..application.pipeline import ReviewRun
 from ..application.prior_art import as_context, find_prior_art
-from ..application.review import build_rubric, recheck, remedy, review_all
+from ..application.review import build_rubric, cross_examine, recheck, remedy, review_all
 from ..domain.aggregate import build_fit_table, effective_label
 
 
@@ -26,7 +26,7 @@ class S(TypedDict, total=False):
 
 
 def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Callable | None = None, items=None,
-                prior_search=None):
+                prior_search=None, examiner_for=None):
     t0 = time.time()
     trace: list[dict] = []
 
@@ -63,8 +63,17 @@ def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Cal
         step("독립 채점", n=len(vs), reviewers=len({v.reviewer_id for v in vs}), of=len(personas), invalid=bad, failed=failed)
         return {"verdicts": vs, "stances": stances, "failed": failed, "rechecked": 0}
 
+    after_check = "cross" if examiner_for else "aggregate"
+
     def route(s: S):
-        return "recheck" if s.get("rechecked", 0) == 0 and any(invalid(v) for v in s["verdicts"]) else "aggregate"
+        return "recheck" if s.get("rechecked", 0) == 0 and any(invalid(v) for v in s["verdicts"]) else after_check
+
+    def n_cross(s: S):
+        from ..domain.model import VerdictLabel
+        valid_met = lambda v: v.label == VerdictLabel.MET and not invalid(v)  # noqa: E731
+        vs, stat = cross_examine(personas, s["items"], s["verdicts"], examiner_for, valid_met)
+        step("교차 신문", **stat)
+        return {"verdicts": vs}
 
     def n_recheck(s: S):
         bad_keys = {(v.reviewer_id, v.item_id) for v in s["verdicts"] if invalid(v)}
@@ -87,21 +96,25 @@ def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Cal
         return {"remedies": rem}
 
     g = StateGraph(S)
-    for name, fn in [("rubric", n_rubric), ("prior", n_prior), ("review", n_review), ("recheck", n_recheck),
-                     ("aggregate", n_aggregate), ("remedy", n_remedy)]:
+    nodes = [("rubric", n_rubric), ("prior", n_prior), ("review", n_review), ("recheck", n_recheck),
+             ("aggregate", n_aggregate), ("remedy", n_remedy)] + ([("cross", n_cross)] if examiner_for else [])
+    for name, fn in nodes:
         g.add_node(name, fn)
     g.set_entry_point("rubric")
     g.add_edge("rubric", "prior")
     g.add_edge("prior", "review")
-    g.add_conditional_edges("review", route, {"recheck": "recheck", "aggregate": "aggregate"})
-    g.add_edge("recheck", "aggregate")
+    g.add_conditional_edges("review", route, {"recheck": "recheck", after_check: after_check})
+    g.add_edge("recheck", after_check)
+    if examiner_for:
+        g.add_edge("cross", "aggregate")
     g.add_edge("aggregate", "remedy")
     g.add_edge("remedy", END)
     return g.compile(), trace
 
 
-def run_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step=None, items=None, prior_search=None) -> ReviewRun:
-    app, trace = build_graph(ex, draft, personas, llm, llm_for, on_step, items, prior_search)
+def run_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step=None, items=None, prior_search=None,
+              examiner_for=None) -> ReviewRun:
+    app, trace = build_graph(ex, draft, personas, llm, llm_for, on_step, items, prior_search, examiner_for)
     s = app.invoke({})
     return ReviewRun(ex.requirements, ex.criteria, s["items"], personas, s["verdicts"], s["table"], s["remedies"], trace,
                      s.get("prior", []), s.get("stances", []), s.get("failed", []))

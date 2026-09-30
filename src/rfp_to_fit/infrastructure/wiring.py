@@ -19,6 +19,10 @@ GEMINI_POOL = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-li
 VENDOR = {"P1": "openai", "P2": "gemini", "P3": "solar", "P4": "openai", "P5": "solar", "P6": "gemini"}
 
 
+def _gemini():
+    return GeminiLLM(model=GEMINI_POOL[0], temperature=0.0, pool=GEMINI_POOL)
+
+
 def _llm(vendor: str):
     if vendor == "openai":
         return FallbackLLM(OpenAILLM("gpt-5.4-mini"), SolarLLM(temperature=0.0))
@@ -38,6 +42,17 @@ def personas_with_models(main=None, _unused=None, secure: bool = False):
     llms = {p.id: (SolarLLM(temperature=0.0) if secure else _llm(VENDOR[p.id])) for p in DEFAULT_PERSONAS}
     ps = [replace(p, model=llms[p.id].name) for p in DEFAULT_PERSONAS]
     return ps, (lambda p: llms[p.id])
+
+
+def examiners(secure: bool = False):
+    """반대 심문은 그 관점과 다른 회사 모델이 맡는다: OpenAI 관점 → Solar, Gemini·Solar 관점 → OpenAI gpt-4.1-mini."""
+    if secure:
+        solar = SolarLLM(temperature=0.0)
+        return lambda p: solar
+    ex = {"openai": FallbackLLM(SolarLLM(temperature=0.0), _gemini()),
+          "gemini": FallbackLLM(OpenAILLM("gpt-4.1-mini"), SolarLLM(temperature=0.0)),
+          "solar": FallbackLLM(OpenAILLM("gpt-4.1-mini"), _gemini())}
+    return lambda p: ex[VENDOR.get(p.id, "solar")]
 
 
 def actual_models(personas, llm_for) -> dict[str, str]:

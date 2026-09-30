@@ -251,3 +251,54 @@ def recheck(personas: list[ReviewerPersona], criteria, items: list[CheckItem], v
             except Exception:
                 continue
     return [fixed.get((v.reviewer_id, v.item_id), v) for v in verdicts]
+
+
+# ---------- 교차 신문(다른 회사 모델이 「충족」 근거를 반대 심문) ----------
+CROSS_SYSTEM = (
+    "너는 반대 심문을 맡은 검토자다. 다른 평가자가 「충족」이라며 댄 인용이 질문에 실제로 답하는 근거인지만 따진다. "
+    "인용이 질문과 무관하거나, 부정문(「~없다」「~않는다」)이거나, 조건·계획만 말하고 질문이 요구한 구체성이 없으면 근거가 아니다. JSON만 출력한다."
+)
+CROSS_PROMPT = """아래 (질문, 인용) 쌍마다 인용이 그 질문의 근거가 되는지 판정하라.
+**명백히 근거가 아닐 때만** supports=false로 하고, why는 반드시 다음 중 하나: 무관(질문과 다른 내용) | 부정(「없다·않는다」처럼 반대를 말함) | 빈말(대상·수치·방법 없이 선언만).
+조금이라도 질문에 답하면 supports=true. 애매하면 true.
+
+{pairs}
+
+출력: {{"results":[{{"item_id":"","supports":true,"why":"","reason":""}}]}}"""
+
+
+def cross_examine(personas: list[ReviewerPersona], items: list[CheckItem], verdicts: list[Verdict], examiner_for,
+                  is_valid_met) -> tuple[list[Verdict], dict]:
+    """관점마다 「충족」(인용 검사 통과) 판정을 모아, 그 관점과 다른 회사 모델(examiner_for(persona))에게 한 번에 반대 심문.
+    근거가 아니라고 하면 「부족」으로 내린다(코드가 적용). 반환 (새 판정, 통계)."""
+    by_item = {i.id: i for i in items}
+    targets: dict[str, list[Verdict]] = {}
+    for v in verdicts:
+        if is_valid_met(v):
+            targets.setdefault(v.reviewer_id, []).append(v)
+    pmap = {p.id: p for p in personas}
+
+    def ask(pid: str, vs: list[Verdict]) -> dict[str, str]:
+        pairs = "\n".join(f"- item_id={v.item_id} | 질문: {by_item[v.item_id].question} | 인용: 「{v.quote}」" for v in vs)
+        data = examiner_for(pmap[pid]).complete_json(CROSS_SYSTEM, CROSS_PROMPT.format(pairs=pairs))
+        return {r["item_id"]: f'{r.get("why", "")}: {r.get("reason", "")}'.strip(": ")
+                for r in rows_of(data, "results")
+                if r.get("supports") is False and r.get("item_id") and str(r.get("why", "")).strip() in ("무관", "부정", "빈말")}
+
+    rejected: dict[str, dict[str, str]] = {}
+    with ThreadPoolExecutor(max_workers=max(1, len(targets))) as ex:
+        futs = {pid: ex.submit(ask, pid, vs) for pid, vs in targets.items()}
+        for pid, fut in futs.items():
+            try:
+                rejected[pid] = fut.result()
+            except Exception:
+                rejected[pid] = {}
+    out, n = [], 0
+    for v in verdicts:
+        why = rejected.get(v.reviewer_id, {}).get(v.item_id)
+        if why and is_valid_met(v):
+            out.append(Verdict(v.reviewer_id, v.item_id, VerdictLabel.WEAK, v.quote, f"[교차 신문 — {why}] " + v.reason))
+            n += 1
+        else:
+            out.append(v)
+    return out, {"examined": sum(len(x) for x in targets.values()), "rejected": n}

@@ -29,3 +29,20 @@ def test_graph_runs_recheck_loop_then_aggregates():
     assert steps == ["점검 항목", "독립 채점", "재질의", "집계", "보완 지정"]
     assert run.table.rows[0].findings[0].kind == FindingKind.MET
     assert run.trace[2]["fixed"] == 3
+
+
+def test_graph_with_cross_examination_step():
+    class Ex:
+        name = "ex"
+
+        def complete_json(self, s, p):
+            return {"results": [{"item_id": "C1-1", "supports": False, "why": "무관", "reason": "다른 내용"}]}
+
+    ex = Extraction([], [Criterion("C1", "실현가능성", 25, "d", Evidence("rfp", 1, "q"))])
+    ps = [ReviewerPersona(f"P{i}", f"n{i}", "l") for i in range(3)]
+    llm = Fake()
+    run = run_graph(ex, DRAFT, ps, llm, lambda p: llm, items=[CheckItem("C1-1", "C1", "정확도 목표가 있는가")],
+                    examiner_for=lambda p: Ex())
+    steps = [t["step"] for t in run.trace]
+    assert steps == ["점검 항목", "독립 채점", "재질의", "교차 신문", "집계", "보완 지정"]
+    assert run.trace[3]["rejected"] == 3

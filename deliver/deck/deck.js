@@ -304,11 +304,11 @@ const VTXT = VENDORS.map((v) => `${vlabel(v)} ${vcount[v]}명`).join(" · ");
   bigNum(s, P.detect, `근거 블록을 하나씩 지운 초안 ${P.n}개 중 짚은 수\n짚은 곳의 정확도 ${P.precision}`,
     rx, 3.2, rw, { size: 44, gap: 0.95, lSize: 12.5, color: C.blue });
   if (P.ready) {
-    const v1 = P.v1 && P.v1.length ? `첫 초안 세트는 ${Math.min(...P.v1)}~${Math.max(...P.v1)}/${P.n} — 결과를 본 뒤 블록을 다시 설계한 두 번째 세트입니다(사전 등록 아님). ` : "";
-    t(s, `${v1}${P.higher ? `근거 충족도는 지운 초안 ${P.n}개 중 ${P.lower}개만 원본(${P.base})보다 낮았습니다 — 총점이 아니라 「짚은 곳」으로 판정합니다.` : `지운 초안의 점수는 원본 ${P.base}점보다 ${P.drop_min}~${P.drop_max}점 낮았습니다.`}`,
+    const v1 = P.v1 && P.v1.length ? `첫 초안 세트 ${Math.min(...P.v1)}~${Math.max(...P.v1)}/${P.n} → 블록 재설계 후 결과(사전 등록 아님). ` : "";
+    t(s, `${v1}${P.higher ? `지운 초안 ${P.n}개 중 ${P.lower}개만 근거 충족도가 원본(${P.base})보다 낮음 — 판정은 총점이 아니라 「짚은 곳」.` : `지운 초안의 점수는 원본 ${P.base}점보다 ${P.drop_min}~${P.drop_max}점 낮았습니다.`}`,
       { x: rx, y: 4.85, w: rw, h: 0.75, fontSize: 12, color: C.sub, lineSpacingMultiple: 1.15 });
   }
-  t(s, `③ 1건 채점 ${B.seconds}초 — 평가위원 ${B.reviewers}/${B.of}명 응답 · 선행연구 탐색 포함(공고 파싱 제외)`, { x: rx, y: 5.8, w: rw, h: 0.55, fontSize: 12, bold: true, color: C.ink, lineSpacingMultiple: 1.15 });
+  t(s, `③ 1건 채점 ${B.seconds}초 — 평가위원 ${B.reviewers}/${B.of}명 응답 · 선행연구 탐색 포함(공고 파싱 제외)`, { x: rx, y: 5.95, w: rw, h: 0.55, fontSize: 12, bold: true, color: C.ink, lineSpacingMultiple: 1.15 });
   src(s, `정답표: 다른 모델(Claude)이 쪽마다 판독 · 파싱 주 엔진 ${[...new Set(ex.map((e) => e.engine))].join(", ")} · 추출 수는 정답보다 많음(${ex.map((e) => e.n_extracted).join("·")}개 vs ${ex.map((e) => e.n_gold).join("·")}개) · 시연은 저장된 파싱 결과`);
   s.addNotes(`[25초] 정확도는 숫자로 보여 드립니다. 정답표 대비 요건을 놓치지 않은 비율이 ${ex.map((e) => `${nm(e)} ${e.recall}%`).join(", ")}입니다. 가장 약한 곳도 그대로 둡니다. 기획서에서 근거 블록을 일부러 하나씩 지운 초안 ${P.n}개 중 ${P.detect}를 짚었고, 지운 초안은 점수도 내려갔습니다.`);
 }

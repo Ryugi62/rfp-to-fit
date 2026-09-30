@@ -69,7 +69,7 @@ def main():
     pad = max(0.0, cur + 0.8 - video_len)
 
     raw = str(D / "raw.webm")
-    label = f"실제 {real:.0f}초 · {speed:.0f}배속"
+    label = f"실제 {real:.0f}초 · {speed:.0f}배속" if speed >= 1.5 else f"실제 대기 {real:.0f}초(편집 없음)"
     vf = (f"[0:v]trim=0:{a_end},setpts=PTS-STARTPTS[a];"
           f"[0:v]trim={a_end}:{ev['done']},setpts=(PTS-STARTPTS)/{speed},"
           f"drawtext=fontfile={FONT}:text='{label}':fontsize=30:fontcolor=white:box=1:boxcolor=0x191F28CC:boxborderw=14:"

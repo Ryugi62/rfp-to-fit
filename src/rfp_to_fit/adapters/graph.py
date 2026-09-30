@@ -67,10 +67,13 @@ def build_graph(ex: Extraction, draft: str, personas, llm, llm_for, on_step: Cal
         return "recheck" if s.get("rechecked", 0) == 0 and any(invalid(v) for v in s["verdicts"]) else "aggregate"
 
     def n_recheck(s: S):
-        before = sum(1 for v in s["verdicts"] if invalid(v))
+        bad_keys = {(v.reviewer_id, v.item_id) for v in s["verdicts"] if invalid(v)}
         vs = recheck(personas, ex.criteria, s["items"], s["verdicts"], draft, llm_for, invalid)
-        after = sum(1 for v in vs if invalid(v))
-        step("재질의", asked=before, fixed=before - after)
+        redone = [v for v in vs if (v.reviewer_id, v.item_id) in bad_keys]
+        cited = sum(1 for v in redone if not invalid(v) and v.label.value == "충족")
+        still = sum(1 for v in redone if invalid(v))
+        step("재질의", asked=len(bad_keys), cited=cited, downgraded=len(redone) - cited - still, still=still,
+             fixed=len(bad_keys) - still)
         return {"verdicts": vs, "rechecked": 1}
 
     def n_aggregate(s: S):

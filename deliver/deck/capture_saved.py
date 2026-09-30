@@ -9,8 +9,12 @@ OUT = Path(__file__).resolve().parent / "shots"; OUT.mkdir(exist_ok=True)
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1400, "height": 1600}, device_scale_factor=2)
     pg.goto(URL); pg.get_by_role("tab").nth(1).wait_for(timeout=90000); time.sleep(3)
+    top = pg.get_by_text("1. 공고(RFP)", exact=False).first.bounding_box()
+    btn = pg.get_by_role("button", name="평가위원", exact=False).first.bounding_box()
+    pg.screenshot(path=str(OUT / "input.png"), clip={"x": btn["x"] - 10, "y": top["y"] - 16, "width": btn["width"] + 20,
+                                                    "height": btn["y"] + btn["height"] - top["y"] + 32})
     pg.get_by_role("tab").nth(1).click(); time.sleep(4)
-    h = pg.get_by_text("이 대회의 공고와 본선 심사표로", exact=False).first.bounding_box()
+    h = pg.get_by_text("점검 항목별로 무엇이 바뀌었나", exact=False).first.bounding_box()  # 점수 줄(포화)은 빼고 항목 표만
     end = pg.get_by_text("보완 = 기획서에", exact=False).first.bounding_box()
     btab = pg.get_by_role("tab").nth(0).bounding_box()
     x = btab["x"] - 10; w = 1400 - 2 * x

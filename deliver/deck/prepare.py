@@ -26,7 +26,12 @@ REPO_URL = "https://github.com/Ryugi62/rfp-to-fit"
 RID = "nais-hackathon-2026"
 
 
+RUNS_REF = os.environ.get("RUNS_REF")  # 예: RUNS_REF=HEAD → data/runs를 그 커밋 기준으로 읽는다(작업 트리 실행이 깨졌을 때의 임시 빌드)
+
+
 def load(p: str):
+    if RUNS_REF and p.startswith("data/runs/"):
+        return json.loads(subprocess.run(["git", "-C", str(ROOT), "show", f"{RUNS_REF}:{p}"], capture_output=True, text=True, check=True).stdout)
     return json.loads((ROOT / p).read_text())
 
 
@@ -62,10 +67,28 @@ def run_numbers(run: dict) -> dict:
         "n_gaps": len(kinds.get("합의 결핍", [])),
         "n_contested": len(kinds.get("논쟁 지점", [])),
         "mcp_via": trace.get("선행 탐색", {}).get("via", ""),
-        "personas": [{"name": p["name"], "model": p["model"]} for p in run["personas"]],
+        "personas": [{"id": p["id"], "name": p["name"], "model": p["model"], "vendor": vendor(p["model"])} for p in run["personas"]],
         "answered": sorted({v["reviewer_id"] for v in run["verdicts"]}),
         "reviewers": review.get("reviewers", len({v["reviewer_id"] for v in run["verdicts"]})),
+        "of": review.get("of", len(run["personas"])),
+        "failed": review.get("failed", run.get("failed", [])) or [],
+        "cited": recheck.get("cited"),
+        "downgraded": recheck.get("downgraded"),
+        "still": recheck.get("still"),
+        "stances": [{"id": st.get("reviewer_id"), "decision": st.get("decision"), "point": st.get("key_point", "")}
+                    for st in run.get("stances", []) if isinstance(st, dict)],
     }
+
+
+def vendor(model: str) -> str:
+    m = (model or "").lower()
+    if "gpt" in m or "openai" in m:
+        return "OpenAI"
+    if "gemini" in m:
+        return "Google Gemini"
+    if "solar" in m or "upstage" in m:
+        return "Upstage Solar"
+    return model
 
 
 def git_facts() -> dict:
@@ -107,7 +130,8 @@ def qr(url: str, name: str) -> str:
 
 def main():
     OUT.mkdir(exist_ok=True)
-    ext = {e["id"]: e for e in load("data/eval/extract-gemini.json")}
+    ext_file = "data/eval/extract-openai.json" if (ROOT / "data/eval/extract-openai.json").exists() else "data/eval/extract-gemini.json"
+    ext = {e["id"]: e for e in load(ext_file)}
     gold = {k: load(f"data/gold/{k}.json") for k in ext}
     pages = {k: len(pypdfium2.PdfDocument(str(ROOT / f"data/rfp/{k}.pdf"))) for k in ext}
     extract = []
@@ -115,7 +139,7 @@ def main():
         extract.append({"id": k, "agency": gold[k]["agency"].split(" ")[0].split("/")[0],
                         "recall": pct(e["recall"]), "n_gold": e["n_gold"],
                         "hit": e["n_gold"] - len(e["missed"]), "pages": pages[k], "model": e["model"],
-                        "seconds": e["seconds"], "n_extracted": e["n_extracted"],
+                        "seconds": e["seconds"], "n_extracted": e["n_extracted"], "engine": e["model"].split(" ")[-1],
                         "missed_form": sum("기획서 항목" in m for m in e["missed"]),
                         "crit_agree": pct(e.get("criteria_agreement", 0))})
     motir = gold["motir-industrial-cluster-rnd-2026"]
@@ -139,7 +163,8 @@ def main():
         p = json.loads(planted_path.read_text())
         totals = [r["total"] for r in p["rows"]]
         planted.update({"v1": v1, "base": p["base_total"], "drop_min": round(p["base_total"] - max(totals), 1),
-                        "drop_max": round(p["base_total"] - min(totals), 1)})
+                        "drop_max": round(p["base_total"] - min(totals), 1),
+                        "lower": sum(t < p["base_total"] for t in totals), "higher": sum(t > p["base_total"] for t in totals)})
     before = run_numbers(load(f"data/runs/{RID}--original.json"))
     after = run_numbers(load(f"data/runs/{RID}--after.json"))
     tests = sum(l.lstrip().startswith("def test_") for f in (ROOT / "tests").glob("test_*.py")
@@ -149,6 +174,7 @@ def main():
         "motir": {"pages": pages["motir-industrial-cluster-rnd-2026"], "n_req": len(motir["requirements"]),
                   "tables": len(tracks) or PENDING},
         "extract": extract,
+        "extract_file": ext_file,
         "planted": planted,
         "before": before,
         "after": after,
@@ -160,9 +186,13 @@ def main():
         "qr_live": qr(LIVE_URL, "live"),
         "qr_repo": qr(REPO_URL, "repo"),
     }
+    broken = [k for k, r in (("original", before), ("after", after)) if r["reviewers"] == 0 or r["n_items"] == 0]
+    if broken:
+        sys.exit(f"STOP: {broken} 실행이 비어 있음(점검 질문 {before['n_items']}·{after['n_items']}개, 응답 {before['reviewers']}·{after['reviewers']}명) — "
+                 "data/cache/*.본선.rubric.json이 비었는지 보고 run_review를 다시 돌린 뒤 빌드. 덱 파일은 덮어쓰지 않았음")
     for k, r in (("original", before), ("after", after)):
-        if r["reviewers"] < len(r["personas"]):
-            print(f"WARN: {k} 실행에서 평가위원 {len(r['personas'])}명 중 {r['reviewers']}명만 판정 — 덱의 「5명 독립 채점」과 어긋남. 재실행 필요", file=sys.stderr)
+        if r["reviewers"] < r["of"]:
+            print(f"WARN: {k} 실행 응답 {r['reviewers']}/{r['of']}(failed={r['failed']}) — 덱 7·9장 각주에 자동 표기됨. 전원 응답이 목표면 재실행", file=sys.stderr)
     if planted["ready"] is False:
         print("WARN: planted.json stage≠예선 → 8장 「측정 중」", file=sys.stderr)
     (OUT / "numbers.json").write_text(json.dumps(nums, ensure_ascii=False, indent=1))

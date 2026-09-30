@@ -1,5 +1,5 @@
 """RFP-to-Fit 화면 — streamlit run src/rfp_to_fit/infrastructure/app.py
-한 화면 한 메시지: 「평가위원 5명이 모두 깎는 곳」을 먼저, 근거(쪽·인용)는 펼치면 보인다.
+한 화면 한 메시지: 「평가위원 모두가 깎는 곳」을 먼저, 근거(쪽·인용)는 펼치면 보인다.
 초안 원문은 세션 메모리에서만 처리하고 디스크·로그에 남기지 않는다(SPEC S6)."""
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ def cached_rubric(key, sub):
 
 
 def accuracy_panel():
-    p = DATA / "eval" / "extract-gemini.json"
+    p = DATA / "eval" / "extract-openai.json"
     if not p.exists():
         return
     rows = json.loads(p.read_text())
@@ -95,12 +95,12 @@ def accuracy_panel():
 # ---------------- 머리 ----------------
 st.markdown('<div class="sub">팀 루미아 · 2026 NAIS AI 해커톤</div>', unsafe_allow_html=True)
 st.markdown("## 평가위원의 눈으로, 제출 전에 빈칸을 먼저.")
-st.markdown('<div class="sub">공고의 <b>실제 심사표</b>로 관점이 다른 가상 평가위원 5명이 초안을 <b>따로</b> 채점합니다. '
+st.markdown('<div class="sub">공고의 <b>실제 심사표</b>로 실제 심사위원 유형 6가지(기술 타당성·기술 큰그림·세부 전문·사업성·행정·사업 취지)의 가상 평가위원이 초안을 <b>따로</b> 채점합니다. '
             '모두가 깎는 곳(합의 결핍)과 의견이 갈리는 곳(논쟁 지점)을 나누고, 무엇을 어디에 보완할지 지정합니다. 문장은 대신 쓰지 않습니다.</div>',
             unsafe_allow_html=True)
 st.write("")
 
-tab_run, tab_ba, tab_trust = st.tabs(["① 실행", "② 우리 기획서 전·후", "③ 신뢰 장치·정확도"])
+tab_run, tab_ba, tab_trust = st.tabs(["① 실행", "② 우리 기획서 먼저 채점", "③ 신뢰 장치·정확도"])
 
 # ---------------- ① 실행 ----------------
 with tab_run:
@@ -157,7 +157,7 @@ with tab_run:
                     + " · ".join(f"{c.name} {c.points:g}" for c in crits) + ")</div>", unsafe_allow_html=True)
 
     rubric_key = f"{rid}.{stage or 'all'}" if (src == "예시 공고" and rid) else None
-    go = st.button("평가위원 5명에게 보내기", type="primary", disabled=not (ex and draft.strip()), use_container_width=True)
+    go = st.button("평가위원 6명에게 보내기", type="primary", disabled=not (ex and draft.strip()), use_container_width=True)
     if go:
         gemini, solar = llms()
         personas, llm_for = personas_with_models(gemini, solar)
@@ -167,11 +167,11 @@ with tab_run:
             st.write("① 공고 심사표 → 점검 질문으로 쪼개기")
 
             def on_step(name, rec):
-                fmt = {"점검 항목": lambda r: f"② 점검 질문 {r.get('n')}개 → 평가위원 5명에게 **따로** 보냄(서로의 답을 모름)",
+                fmt = {"점검 항목": lambda r: f"② 점검 질문 {r.get('n')}개 → 평가위원 6명에게 **따로** 보냄(서로의 답을 모름, 3개 회사 모델)",
                        "선행 탐색": lambda r: f"② 선행 탐색(MCP → OpenAlex) 검색어 {r.get('queries')} → 선행연구 {r.get('n')}편을 평가위원 참고 자료로",
                        "독립 채점": lambda r: f"③ 판정 {r.get('n')}개 수신 · 인용 실재 검사 탈락 {r.get('invalid')}건",
-                       "재질의": lambda r: f"↺ 탈락 판정 {r.get('asked')}건을 그 평가위원에게 다시 물음 → {r.get('fixed')}건 원문 인용으로 교정",
-                       "집계": lambda r: f"④ 예상 점수 {r.get('expected')} / {r.get('total')} → 결핍마다 보완 위치 지정",
+                       "재질의": lambda r: f"↺ 가짜 인용 {r.get('asked')}건을 그 평가위원에게 다시 물음 → 원문 인용으로 충족 {r.get('cited')}건 · 부족/누락으로 정정 {r.get('downgraded')}건 · 여전히 무효 {r.get('still')}건",
+                       "집계": lambda r: f"④ 근거 충족도 {r.get('expected')} / {r.get('total')}(최고·최저 제외 평균) → 결핍마다 보완 위치 지정",
                        "보완 지정": lambda r: f"⑤ 보완 지정 {r.get('n')}개 완료"}
                 msg = fmt[name](rec) if name in fmt else name
                 st.write(msg)
@@ -201,9 +201,22 @@ with tab_run:
             st.markdown('<div class="sub">모두가 깎는 곳</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="big">{len(gaps)}곳</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="sub">논쟁 지점 {len(cons)} · 확인 불가 {len(unk)} · '
-                        f'예상 점수 <b>{t.expected_total:.1f}</b> / {t.total_points:g}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="muted">가짜 인용으로 「충족」이라 한 판정 {demoted}건을 자동 강등했습니다(인용 실재 검사).</div>',
-                        unsafe_allow_html=True)
+                        f'근거 충족도 <b>{t.expected_total:.1f}</b> / {t.total_points:g} <span class="muted">(점수 예측이 아니라 지표별 근거가 초안에 있는 정도)</span></div>', unsafe_allow_html=True)
+            rc = next((x for x in run.trace if x.get("step") == "재질의"), None)
+            ind = next((x for x in run.trace if x.get("step") == "독립 채점"), {})
+            msg = (f"가짜 인용 {rc['asked']}건 → 그 평가위원에게 재질의" if rc else "가짜 인용 0건") + \
+                  f" · 최종 강등 {demoted}건 · 응답 {ind.get('reviewers', len(run.personas))}/{len(run.personas)}명"
+            st.markdown(f'<div class="muted">{msg}</div>', unsafe_allow_html=True)
+            if run.failed:
+                st.warning(f"응답하지 못한 평가위원: {', '.join(pname.get(x, x) for x in run.failed)} — 나머지로 집계했습니다.")
+            if run.stances:
+                cnt = {d: sum(1 for x in run.stances if x.decision == d) for d in ("선정", "보류", "탈락")}
+                st.markdown(f'<div style="margin-top:14px" class="sub">심사위원의 마음(항목 점수와 별개인 전체 인상)</div>'
+                            f'<div style="font-size:22px;font-weight:800">선정 {cnt["선정"]} · 보류 {cnt["보류"]} · 탈락 {cnt["탈락"]}</div>',
+                            unsafe_allow_html=True)
+                for x in run.stances:
+                    st.markdown(f'<div class="muted">· <b>{pname.get(x.reviewer_id, x.reviewer_id)}</b> {x.decision} — {x.key_point}</div>',
+                                unsafe_allow_html=True)
         with b:
             import pandas as pd
             df = pd.DataFrame({crit[r.criterion.id].name + f" ({r.criterion.points:g})":
@@ -237,7 +250,7 @@ with tab_run:
             for f in gaps or []:
                 finding_card(f)
             if not gaps:
-                st.success("5명 모두가 깎는 곳은 없습니다.")
+                st.success("모두가 깎는 곳은 없습니다.")
         with c2:
             st.markdown("### 판단할 곳 — 논쟁 지점")
             for f in cons or []:
@@ -265,40 +278,39 @@ with tab_run:
 # ---------------- ② 전·후 ----------------
 with tab_ba:
     before, after = DATA / "runs" / "nais-hackathon-2026--original.json", DATA / "runs" / "nais-hackathon-2026--after.json"
-    st.markdown("### 이 대회의 공고와 본선 심사표로 우리 예선 기획서를 채점했습니다")
-    st.markdown('<div class="sub">심사표: 적합성 10 · 활용성 20 · 혁신성 25 · 실현가능성 25 · 확장성 20 (공고 p.3) — 같은 점검 질문으로 전·후를 비교합니다.</div>',
+    st.markdown("### 이 대회의 공고와 본선 심사표로 우리 예선 기획서를 먼저 채점했습니다")
+    st.markdown('<div class="sub">심사표: 적합성 10 · 활용성 20 · 혁신성 25 · 실현가능성 25 · 확장성 20 (공고 p.3). '
+                '항목 근거는 거의 다 채워져 있었지만, 평가위원 절반이 「보류」였습니다 — 결정 포인트가 우리가 오늘 준비할 것을 알려 줬습니다.</div>',
                 unsafe_allow_html=True)
     if before.exists():
         rb = run_from_dict(json.loads(before.read_text()))
-        ra = run_from_dict(json.loads(after.read_text())) if after.exists() else None
-        cols = st.columns(3 if ra else 2)
-        cols[0].metric("예선 기획서(전)", f"{rb.table.expected_total:.1f}점", f"합의 결핍 {len(rb.table.findings(FindingKind.CONSENSUS_GAP))}곳",
-                       delta_color="off")
-        if ra:
-            cols[1].metric("보완 후", f"{ra.table.expected_total:.1f}점",
-                           f"{ra.table.expected_total - rb.table.expected_total:+.1f}점")
-        items_b = {i.id: i for i in rb.items}
-        cols[-1].markdown("**전: 합의 결핍**<br>" + "<br>".join(f"· {items_b[f.item_id].question}"
-                                                            for f in rb.table.findings(FindingKind.CONSENSUS_GAP)), unsafe_allow_html=True)
-        if ra:
-            st.markdown("#### 점검 항목별로 무엇이 바뀌었나")
-            fa = {f.item_id: f for r in ra.table.rows for f in r.findings}
-            crit_b = {c.id: c for c in rb.criteria}
-            rows = []
-            for r in rb.table.rows:
-                for f in r.findings:
-                    a2 = fa.get(f.item_id)
-                    rows.append({"지표": f"{r.criterion.name} ({r.criterion.points:g})", "점검 질문": items_b[f.item_id].question,
-                                 "전": f"{f.kind.value} ({round(f.gap_ratio * 5)}/5 감점)",
-                                 "후": f"{a2.kind.value} ({round(a2.gap_ratio * 5)}/5 감점)" if a2 else "-"})
-            import pandas as pd
-            df = pd.DataFrame(rows)
-            changed = df[df["전"] != df["후"]]
-            st.dataframe(changed if len(changed) else df, use_container_width=True, hide_index=True)
-            st.markdown('<div class="muted">보완 = 기획서에 「본선 구현 결과」 절(서비스 흐름도·UI 구성·저장소·측정 결과)을 사람이 직접 추가. '
-                        '에이전트는 위치와 근거 종류만 지정했고 문장은 쓰지 않았습니다.</div>', unsafe_allow_html=True)
+        pn = {p.id: p.name for p in rb.personas}
+        cnt = {d: sum(1 for x in rb.stances if x.decision == d) for d in ("선정", "보류", "탈락")}
+        c1, c2 = st.columns([1, 2])
+        c1.markdown('<div class="sub">예선 기획서에 대한 심사위원의 마음</div>'
+                    f'<div class="big">선정 {cnt["선정"]} · 보류 {cnt["보류"]}</div>'
+                    f'<div class="muted">근거 충족도 {rb.table.expected_total:.1f} / {rb.table.total_points:g} · 합의 결핍 '
+                    f'{len(rb.table.findings(FindingKind.CONSENSUS_GAP))} · 논쟁 {len(rb.table.findings(FindingKind.CONTESTED))}</div>',
+                    unsafe_allow_html=True)
+        with c2:
+            for x in sorted(rb.stances, key=lambda x: x.decision != "보류"):
+                pill = "con" if x.decision == "보류" else ("gap" if x.decision == "탈락" else "ok")
+                st.markdown(f'<div class="card"><span class="pill {pill}">{x.decision}</span><b>{pn.get(x.reviewer_id)}</b>'
+                            f'<div style="margin-top:6px">{x.key_point}</div></div>', unsafe_allow_html=True)
+        st.markdown("#### 그래서 오늘 목표치 대신 실측치를 가져왔습니다")
+        ev = DATA / "eval"
+        rows = []
+        if (ev / "extract-openai.json").exists():
+            for r in json.loads((ev / "extract-openai.json").read_text()):
+                rows.append({"측정": f"공고 파싱 — {EXAMPLES.get(r['id'], r['id'])}", "결과": f"요건 재현율 {r['recall'] * 100:.0f}% · 지표 일치 {r['criteria_agreement'] * 100:.0f}% · {r['seconds']:.0f}초"})
+        if (ev / "planted.json").exists():
+            pl = json.loads((ev / "planted.json").read_text())
+            rows.append({"측정": f"결함 주입 실험(지표별 블록 삭제 초안 {pl['n']}개)",
+                         "결과": f"탐지 {sum(x['detected'] for x in pl['rows'])}/{pl['n']} · 정밀도 {pl['precision'] * 100:.0f}%"})
+        import pandas as pd
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
     else:
-        st.info("전·후 실행 기록이 아직 없습니다.")
+        st.info("실행 기록이 아직 없습니다.")
 
 # ---------------- ③ 신뢰 ----------------
 with tab_trust:
@@ -306,7 +318,7 @@ with tab_trust:
     st.markdown("""
 - **인용 실재 검사(결정론)**: 평가위원이 「충족」이라 하면 초안에서 그대로 복사한 인용을 내야 하고, 코드가 원문과 글자 단위로 대조합니다. 없으면 그 판정은 버립니다(강등).
 - **공고 인용 검사**: 요건·지표도 공고 쪽 번호와 원문 인용을 달아야 하고, 그 쪽에 없으면 버립니다.
-- **독립 채점 + 모델 다양성**: 평가위원 5명은 서로의 답을 보지 않고, Google Gemini 3명 · Upstage Solar(국산) 2명으로 나눠 한 회사 모델의 치우침이 「합의」로 굳지 않게 합니다.
+- **독립 채점 + 모델 다양성**: 평가위원 6명은 서로의 답을 보지 않고, OpenAI · Google Gemini · Upstage Solar(국산) 3개 회사 모델에 2명씩 나눠 한 회사 모델의 치우침이 「합의」로 굳지 않게 합니다. 실제 심사처럼 최고점·최저점을 빼고 평균합니다.
 - **문장 미생성**: 보완은 「무엇을·어디에」만 지정합니다. 최종 판단과 작성은 연구자가 합니다.
 - **초안 비저장**: 초안은 세션 메모리에서만 처리합니다.
 """)
@@ -315,5 +327,5 @@ with tab_trust:
     if p.exists():
         d = json.loads(p.read_text())
         st.markdown(f"**결함 주입 실험** — 우리 기획서에서 지표별 블록을 하나씩 지운 초안 {d['n']}개: "
-                    f"지운 곳 탐지율 **{d['detect_rate'] * 100:.0f}%**")
+                    f"지운 곳 탐지율 **{d['detect_rate'] * 100:.0f}%** · 정밀도 **{(d.get('precision') or 0) * 100:.0f}%**")
     st.markdown("**사용 모델·라이브러리·데이터 출처**는 저장소 README 표에 모두 적었습니다.")

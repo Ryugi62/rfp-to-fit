@@ -102,3 +102,13 @@ def test_trimmed_mean_drops_max_and_min_from_five_or_more():
     assert trimmed_mean([10, 20, 20, 20, 100]) == 20
     assert trimmed_mean([10, 20]) == 15
     assert trimmed_mean([]) == 0.0
+
+
+def test_split_tables_cuts_mixed_stage_at_100_points():
+    from rfp_to_fit.application.extract import split_tables
+    ev = Evidence("rfp", 1, "q")
+    cs = [Criterion(f"C{i}", n, p, "d", ev, "단일") for i, (n, p) in
+          enumerate([("협업성", 15), ("기술성", 30), ("사업성", 40), ("파급성", 15), ("구체성", 30), ("계획", 50), ("효과", 20)])]
+    out = split_tables(cs)
+    assert [c.stage for c in out] == ["단일·표1"] * 4 + ["단일·표2"] * 3
+    assert split_tables(cs[:4])[0].stage == "단일"

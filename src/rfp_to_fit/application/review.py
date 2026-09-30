@@ -41,7 +41,19 @@ def _flatten_items(data) -> list[tuple[str, str]]:
     return out
 
 
-def build_rubric(criteria: list[Criterion], llm: LLM, guide: str = "") -> list[CheckItem]:
+def build_rubric(criteria: list[Criterion], llm: LLM, guide: str = "", _tries: int = 3) -> list[CheckItem]:
+    """점검 질문이 0개면 다시 묻고(최대 3회), 끝내 0개면 예외 — 빈 질문으로 채점하는 일을 막는다."""
+    for attempt in range(_tries):
+        try:
+            items = _build_rubric_once(criteria, llm, guide)
+        except Exception:
+            items = []
+        if items:
+            return items
+    raise RuntimeError("점검 질문 생성 실패(0개)")
+
+
+def _build_rubric_once(criteria: list[Criterion], llm: LLM, guide: str = "") -> list[CheckItem]:
     listing = "\n".join(f"- {c.id} {c.name}({c.points:g}점): {c.description}" for c in criteria)
     data = llm.complete_json(RUBRIC_SYSTEM, RUBRIC_PROMPT.format(criteria=listing, guide=guide or "(없음)"))
     ids = {c.id for c in criteria}

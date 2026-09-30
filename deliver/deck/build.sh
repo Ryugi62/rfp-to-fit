@@ -9,7 +9,7 @@ NAME="RFP-to-Fit_루미아"
 PY="uv run --no-project --with pypdfium2 --with pillow --with qrcode python"
 cd "$D"
 [ -d node_modules/pptxgenjs ] || npm install --silent
-$PY prepare.py > /dev/null   # WARN 줄은 stderr로 보인다
+$PY prepare.py > /dev/null || exit 1   # WARN·STOP 줄은 stderr로 보인다
 node deck.js "$D/$NAME.pptx"
 rm -f "$D/$NAME.pdf"
 "$SOFFICE" --headless --convert-to pdf --outdir "$D" "$D/$NAME.pptx" > /dev/null 2>&1

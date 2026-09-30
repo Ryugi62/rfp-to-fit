@@ -19,7 +19,7 @@ PROMPT = """아래는 공고문을 쪽 단위로 표시한 텍스트다. [p.N] �
    - 신청 자격·기관 요건·참여 제한(각각 한 행), 접수 방법·시스템, 마감·기간·일정, 제출서류(서류 하나당 한 행, 번호 목록이면 번호마다),
      작성 항목·분량·서식 규정(계획서·기획서 항목마다 한 행), 지원 한도·부담 비율·간접비, 선정 제외·감점 조건(예: 몇 점 미만 제외), 사전조치·위험관리 등 반드시 써야 하는 내용.
    - category는 자격|제출서류|기간|형식|제한|기타 중 하나.
-2) criteria: 평가항목(심사기준) 표의 대항목 행. name은 표 맨 왼쪽 항목명 열의 2~8자 짧은 이름(예: 적합성·혁신성·연구역량) 그대로 — 설명 문구(「~의 명확성 및 ~」)를 name에 넣지 말고 description에 넣는다. points(배점 숫자), description(원문 설명), stage(예선|본선|서면|발표|단일, 과제 유형이 여러 개면 유형 이름).
+2) criteria: 평가항목(심사기준) 표의 대항목 행. name은 표 맨 왼쪽 항목명 열의 2~8자 짧은 이름(예: 적합성·혁신성·연구역량) 그대로 — 설명 문구(「~의 명확성 및 ~」)를 name에 넣지 말고 description에 넣는다. points(배점 숫자), description(원문 설명), stage. stage 규칙: 평가 단계가 나뉘면 예선|본선|서면|발표, **평가표가 과제 유형(트랙·분야)별로 따로 있으면 그 유형 이름**(예: 「공동비즈니스형」), 평가표가 하나뿐이면 단일. 한 stage 안의 배점 합은 그 표의 총점과 같아야 한다.
    [표] 아래 행 단위 표가 있으면 그것을 우선 읽는다.
 
 출력 형식:
@@ -91,6 +91,26 @@ def _dedupe(rows: list[dict], key) -> list[dict]:
     return out
 
 
+def split_tables(crits: list[Criterion], total: float = 100.0) -> list[Criterion]:
+    """한 단계에 평가표 여러 개가 섞여 배점 합이 100을 넘으면, 문서 순서대로 합이 100이 되는 곳에서 끊어 「표1·표2」로 나눈다."""
+    from dataclasses import replace
+    out: list[Criterion] = []
+    for stage in dict.fromkeys(c.stage for c in crits):
+        group = [c for c in crits if c.stage == stage]
+        if sum(c.points for c in group) <= total + 1e-6:
+            out += group
+            continue
+        n, acc, buf = 1, 0.0, []
+        for c in group:
+            buf.append(c)
+            acc += c.points
+            if abs(acc - total) < 1e-6:
+                out += [replace(x, stage=f"{stage}·표{n}") for x in buf]
+                n, acc, buf = n + 1, 0.0, []
+        out += [replace(x, stage=f"{stage}·표{n}") for x in buf]
+    return out
+
+
 def extract_rfp(doc: Document, llm: LLM, extra_criteria: list[Criterion] | None = None) -> Extraction:
     """쪽 묶음(3쪽)마다 병렬로 뽑아 합친다 — 긴 공고에서 뒤쪽 요건이 빠지는 문제를 막는다."""
     from concurrent.futures import ThreadPoolExecutor
@@ -121,4 +141,4 @@ def extract_rfp(doc: Document, llm: LLM, extra_criteria: list[Criterion] | None 
                                Evidence(doc.id, page, c.get("quote", "")), c.get("stage", "단일") or "단일"))
     for c in extra_criteria or []:
         crits.append(Criterion(f"C{len(crits) + 1}", c.name, c.points, c.description, c.evidence, c.stage))
-    return Extraction(reqs, crits, dropped)
+    return Extraction(reqs, split_tables(crits), dropped)

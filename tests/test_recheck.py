@@ -29,3 +29,23 @@ def test_recheck_only_asks_invalid_and_replaces_them():
     assert "P2" not in llm.prompts[0]                  # 다른 평가위원 답은 안 보여줌
     assert out[0].quote == "요건 추출 재현율 90% 이상" and out[0].reason.startswith("[재질의]")
     assert out[1] is vs[1]
+
+
+def test_build_rubric_retries_then_raises_on_empty():
+    import pytest
+    from rfp_to_fit.application.review import build_rubric
+
+    class Flaky:
+        name = "f"
+
+        def __init__(self, answers):
+            self.answers = answers
+
+        def complete_json(self, s, p):
+            return self.answers.pop(0)
+
+    crit = [Criterion("C1", "실현가능성", 25, "d", Evidence("rfp", 1, "q"))]
+    ok = build_rubric(crit, Flaky([{"items": []}, {"items": [{"criterion_id": "C1", "question": "q"}]}]))
+    assert [i.id for i in ok] == ["C1-1"]
+    with pytest.raises(RuntimeError):
+        build_rubric(crit, Flaky([{"items": []}] * 3))

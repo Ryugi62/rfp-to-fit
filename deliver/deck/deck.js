@@ -180,7 +180,7 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
 {
   const s = pres.addSlide(); s.background = { color: C.white };
   eyebrow(s, "AI 구성");
-  title(s, "AI는 증거만 내고,\n**판정은 코드**가 합니다");
+  title(s, "AI가 판단하면,\n**코드**가 근거를 검사합니다");
   const nodes = [["점검 질문", MAIN, "A"], ["선행 탐색", "MCP", "A"], ["관점 6개 채점", "3사 모델", "A"], ["인용 확인", "코드", "R"],
     ["다시 묻기", "없는 인용만", "A"], ["합의 집계", "코드", "R"], ["보완 위치", MAIN, "A"]];
   const bw = 1.47, gap = (W - 7 * bw) / 6, y = 3.2, bh = 1.05;
@@ -203,7 +203,7 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
     t(s, d, { x: X0 + 3.8, y: yy + 0.02, w: W - 3.8, h: 0.34, fontSize: 13, color: C.sub });
     if (i < 2) hline(s, yy + 0.5);
   });
-  s.addNotes("[20초] 핵심은 AI를 판사로 쓰지 않는다는 겁니다. AI는 증인처럼 근거 문장만 내고, 판정은 코드가 합니다. 한 회사 모델이 막히면 다른 모델로 넘어가고, 실패는 숨기지 않고 화면에 띄웁니다.");
+  s.addNotes("[20초] AI의 말을 그대로 믿지 않습니다. 충족인지 부족인지는 AI가 판단하지만, 그 근거로 댄 문장이 초안에 글자 그대로 있는지는 코드가 대조하고, 없으면 그 판단을 버립니다. 여섯 판단을 세는 것도 코드입니다. 모델이 막히면 다른 모델로 넘어가고, 실패는 화면에 띄웁니다.");
 }
 
 // 6-2. 관점 6개와 심사 방식

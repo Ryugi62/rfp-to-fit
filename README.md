@@ -29,7 +29,7 @@ uv run streamlit run src/rfp_to_fit/infrastructure/app.py
 - **테스트**: `uv run pytest` 99개. 레이어 규칙도 테스트가 검사한다(`tests/test_architecture.py`: domain·application은 표준 라이브러리와 안쪽 레이어만 import).
 - **화면 실측**: `scripts/responsive.py`(5화면 × 390·1280 가로 넘침·잘림), `scripts/e2e_mobile.py`·`scripts/e2e_verify.py`·`scripts/e2e_link.py`(실제 브라우저로 끝까지).
 
-## 구조 — LLM은 증인, 판정은 코드 (LangGraph 상태 그래프)
+## 구조 — AI가 판단하고, 코드가 근거를 검사한다 (LangGraph 상태 그래프)
 ```
 [링크] fetch: 공지 HTML → 첨부 점수화(공고문↑ 서식·신청서↓) → 내려받기(스크립트 POST 포함) → 형식 판별(매직 바이트: PDF/HWPX/HWP5)
 [파싱] gpt-4.1: 3쪽(구간) 묶음 병렬 → 요건·심사표(쪽·원문 인용) → 규칙: 인용 낱말 85%가 그 쪽에 있어야 채택 · 배점 합 100 초과면 표 분리

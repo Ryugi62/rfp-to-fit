@@ -193,8 +193,8 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
   });
   t(s, "LangGraph 상태 그래프", { x: X0, y: y - 0.45, w: 4, h: 0.3, fontSize: 12, bold: true, color: C.gray });
   const facts = [
-    ["실패해도 숨기지 않습니다", "관점 호출이 실패하면 다시 시도하고, 그래도 안 되면 응답 수를 화면에 띄웁니다"],
-    ["한 회사가 막혀도 돕니다", "모델마다 대체 모델이 있어 한도나 장애 때 자동으로 넘어갑니다"],
+    ["막혀도, 실패해도 돕니다", "모델마다 대체 모델이 있고, 실패한 관점 수는 숨기지 않고 화면에 띄웁니다"],
+    ["다른 AI도 씁니다", "검사 도구를 MCP로 감싸 다른 AI 비서(Codex)에서 실제로 불러 봤습니다"],
     ["조각 검색 대신 원문 전체", "문서를 잘라 찾지 않고 통째로 넣은 뒤, 인용으로 맞춰 봅니다"],
   ];
   facts.forEach(([h, d], i) => {
@@ -203,7 +203,7 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
     t(s, d, { x: X0 + 3.8, y: yy + 0.02, w: W - 3.8, h: 0.34, fontSize: 13, color: C.sub });
     if (i < 2) hline(s, yy + 0.5);
   });
-  s.addNotes("[20초] AI의 말을 그대로 믿지 않습니다. 충족인지 부족인지는 AI가 판단하지만, 그 근거로 댄 문장이 초안에 글자 그대로 있는지는 코드가 대조하고, 없으면 그 판단을 버립니다. 여섯 판단을 세는 것도 코드입니다. 모델이 막히면 다른 모델로 넘어가고, 실패는 화면에 띄웁니다.");
+  s.addNotes("[20초] AI의 말을 그대로 믿지 않습니다. 충족인지 부족인지는 AI가 판단하지만, 근거로 댄 문장이 초안에 글자 그대로 있는지는 코드가 대조하고, 없으면 그 판단을 버립니다. 판단을 세는 것도 코드입니다. 이 검사 도구는 MCP로 감싸 다른 AI에서도 불러 봤습니다.");
 }
 
 // 6-2. 관점 6개와 심사 방식
@@ -280,26 +280,6 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
   s.addNotes("[25초] 심사에는 정답이 없어서, 저희는 맞힌다고 말하지 않습니다. 대신 확인할 수 있게 했습니다. 모든 지적에 출처가 붙고, 초안에 없는 문장은 버리고, 관점이 갈리면 사람에게 넘기고, 잰 것만 숫자로 말합니다. 지적마다 원문 보기와 맞음·틀림 버튼이 있어서 여러분이 직접 확인하실 수 있습니다.");
 }
 
-// 8. MCP
-{
-  const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "MCP 도구");
-  title(s, "같은 검사 도구를,\n**다른 AI 비서**도 씁니다");
-  const lw = 6.2;
-  numRow(s, "01", "search_prior_art", "학술 DB에서 선행연구를 찾습니다. OpenAlex가 막히면 Crossref로 넘어갑니다", X0, 2.95, lw, { hSize: 18, dSize: 12.5 });
-  numRow(s, "02", "check_quote", "인용이 원문에 있는지 참, 거짓으로 답합니다", X0, 4.05, lw, { hSize: 18, dSize: 12.5 });
-  numRow(s, "03", "왜 도구로 감쌌나", "어젯밤 실험 도중 OpenAlex가 멈췄을 때, 도구 뒤에서 자동으로 바뀌었습니다. 국내 DB도 같은 자리에 꽂으면 됩니다", X0, 5.15, lw, { hSize: 18, dSize: 12.5 });
-  const rx = 7.55, rw = R - rx;
-  box(s, rx, 2.85, rw, 3.6, { fill: C.bg2, lineColor: C.bg2 });
-  t(s, "Codex에 붙여서 실제로 호출해 봤습니다", { x: rx + 0.3, y: 3.05, w: rw - 0.6, h: 0.3, fontSize: 13, bold: true, color: C.blue });
-  t(s, [
-    { text: "check_quote(재현율 90% 이상)", options: { bold: true, breakLine: true } }, { text: "→ 참", options: { color: C.blueInk, bold: true, breakLine: true } },
-    { text: "check_quote(정밀도 95% 달성)", options: { bold: true, breakLine: true } }, { text: "→ 거짓(원문에 없음)", options: { color: C.blueInk, bold: true, breakLine: true } },
-    { text: "search_prior_art(grant proposal review)", options: { bold: true, breakLine: true } }, { text: "→ 논문 3편", options: { color: C.blueInk, bold: true } },
-  ], { x: rx + 0.3, y: 3.5, w: rw - 0.6, h: 2.8, fontSize: 13.5, lineSpacingMultiple: 1.35 });
-  s.addNotes("[15초] 검사 도구 두 개를 MCP로 감쌌습니다. 다른 AI 비서인 Codex에 붙여 실제로 불러 보니, 원문에 있는 인용은 참, 없는 인용은 거짓이 나왔습니다. 학술 DB가 멈추면 도구 뒤에서 다른 DB로 넘어갑니다.");
-}
-
 // 9. 측정
 {
   const s = pres.addSlide(); s.background = { color: C.white };
@@ -332,31 +312,6 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
   t(s, `처음 보는 공고에서 뽑은 요건 51개를 원문과 대조해 보니, 지어낸 요건은 0개였습니다`, { x: X0, y: 6.3, w: W, h: 0.35, fontSize: 14, bold: true });
   src(s, "정답표와 대조 감사는 파이프라인과 다른 회사 모델(Claude)이 작성, 사람 검수는 아님  ·  data/eval, data/holdout 공개");
   s.addNotes(`[30초] 예시에만 맞춘 게 아닌지 보려고, 개발에 안 쓴 과기정통부 공고 두 건을 링크로 가져와 정답표를 먼저 고정하고 쟀습니다. ${hb.map((r) => pct0(r.recall) + "%").join("와 ")}였고 심사표 배점은 다섯 건 모두 맞혔습니다. 오른쪽은 관점을 나눈 효과입니다. 관점 하나는 안 지운 곳을 ${single.fp}곳 잘못 짚었고, 여섯으로 나누니 0이었습니다. 회사 모델을 섞는 효과는 이번엔 보이지 않았다고 그대로 말씀드립니다.`);
-}
-
-// 10. 우리 먼저
-{
-  const s = pres.addSlide(); s.background = { color: C.white };
-  eyebrow(s, "우리 먼저");
-  title(s, "이 대회 심사표로,\n**저희 기획서**부터 검사했습니다");
-  const answer = {
-    "세부 전문형": "구조의 차별점과 관점 수 실험을 준비했습니다",
-    "기술 타당성 검증형": "처음 보는 공고로 잰 숫자를 준비했습니다",
-    "사업성·시장형": "첫 실증 대상을 전문기관 사전검토로 정했습니다",
-    "행정·관리형": "계획 대신 구현 결과와 커밋 기록을 가져왔습니다",
-  };
-  t(s, "관점별로 가장 걸린 점", { x: X0, y: 2.85, w: 5.8, h: 0.3, fontSize: 13, bold: true, color: C.gray });
-  t(s, "그래서 오늘", { x: 7.35, y: 2.85, w: 5, h: 0.3, fontSize: 13, bold: true, color: C.gray });
-  nsel.slice(0, 3).forEach((x, i) => {
-    const y = 3.3 + i * 1.0, nmx = pn[x.id] || x.id;
-    t(s, nmx, { x: X0, y, w: 5.8, h: 0.3, fontSize: 12, bold: true, color: C.blue });
-    t(s, x.point, { x: X0, y: y + 0.32, w: 5.8, h: 0.4, fontSize: 15, bold: true });
-    arrow(s, X0 + 6.0, y + 0.5, 7.2, y + 0.5, C.gray);
-    t(s, answer[nmx] || "", { x: 7.35, y: y + 0.32, w: R - 7.35, h: 0.4, fontSize: 15, color: C.ink });
-    if (i < 2) hline(s, y + 0.88);
-  });
-  t(s, "결과를 맞히려던 게 아니라, 발표 전에 받을 질문을 먼저 받아 본 것입니다.", { x: X0, y: 6.45, w: W, h: 0.35, fontSize: 13, color: C.sub });
-  s.addNotes("[20초] 이 대회 심사표로 저희 기획서부터 검사했습니다. 세 관점이 걸리는 점을 냈습니다. 차별성의 근거, 구매 주체, 구현 계획. 그래서 오늘은 구조의 차별점과 실험, 첫 실증 대상, 그리고 계획 대신 구현 결과를 가져왔습니다.");
 }
 
 // 11. 확장
@@ -396,6 +351,51 @@ const rmax = Math.max(...exs.map((e) => e.recall), ...hb.map((r) => pct0(r.recal
     t(s, url, { x: x + 0.2, y: y + 2.38, w: 1.7, h: 1.0, fontSize: 9.5, color: C.gray, lineSpacingMultiple: 1.15, fit: "none" });
   });
   s.addNotes("[10초] 제출 전에, 빈칸부터. 화면의 주소에서 지금 직접 해 보실 수 있습니다. 감사합니다.");
+}
+
+// 8. MCP
+{
+  const s = pres.addSlide(); s.background = { color: C.white };
+  eyebrow(s, "부록 · MCP 도구");
+  title(s, "같은 검사 도구를,\n**다른 AI 비서**도 씁니다");
+  const lw = 6.2;
+  numRow(s, "01", "search_prior_art", "학술 DB에서 선행연구를 찾습니다. OpenAlex가 막히면 Crossref로 넘어갑니다", X0, 2.95, lw, { hSize: 18, dSize: 12.5 });
+  numRow(s, "02", "check_quote", "인용이 원문에 있는지 참, 거짓으로 답합니다", X0, 4.05, lw, { hSize: 18, dSize: 12.5 });
+  numRow(s, "03", "왜 도구로 감쌌나", "어젯밤 실험 도중 OpenAlex가 멈췄을 때, 도구 뒤에서 자동으로 바뀌었습니다. 국내 DB도 같은 자리에 꽂으면 됩니다", X0, 5.15, lw, { hSize: 18, dSize: 12.5 });
+  const rx = 7.55, rw = R - rx;
+  box(s, rx, 2.85, rw, 3.6, { fill: C.bg2, lineColor: C.bg2 });
+  t(s, "Codex에 붙여서 실제로 호출해 봤습니다", { x: rx + 0.3, y: 3.05, w: rw - 0.6, h: 0.3, fontSize: 13, bold: true, color: C.blue });
+  t(s, [
+    { text: "check_quote(재현율 90% 이상)", options: { bold: true, breakLine: true } }, { text: "→ 참", options: { color: C.blueInk, bold: true, breakLine: true } },
+    { text: "check_quote(정밀도 95% 달성)", options: { bold: true, breakLine: true } }, { text: "→ 거짓(원문에 없음)", options: { color: C.blueInk, bold: true, breakLine: true } },
+    { text: "search_prior_art(grant proposal review)", options: { bold: true, breakLine: true } }, { text: "→ 논문 3편", options: { color: C.blueInk, bold: true } },
+  ], { x: rx + 0.3, y: 3.5, w: rw - 0.6, h: 2.8, fontSize: 13.5, lineSpacingMultiple: 1.35 });
+  s.addNotes("[0초] 부록 — 발표하지 않음. 질문이 나오면 띄웁니다.");
+}
+
+// 10. 우리 먼저
+{
+  const s = pres.addSlide(); s.background = { color: C.white };
+  eyebrow(s, "부록 · 우리 기획서부터");
+  title(s, "이 대회 심사표로,\n**저희 기획서**부터 검사했습니다");
+  const answer = {
+    "세부 전문형": "구조의 차별점과 관점 수 실험을 준비했습니다",
+    "기술 타당성 검증형": "처음 보는 공고로 잰 숫자를 준비했습니다",
+    "사업성·시장형": "첫 실증 대상을 전문기관 사전검토로 정했습니다",
+    "행정·관리형": "계획 대신 구현 결과와 커밋 기록을 가져왔습니다",
+  };
+  t(s, "관점별로 가장 걸린 점", { x: X0, y: 2.85, w: 5.8, h: 0.3, fontSize: 13, bold: true, color: C.gray });
+  t(s, "그래서 오늘", { x: 7.35, y: 2.85, w: 5, h: 0.3, fontSize: 13, bold: true, color: C.gray });
+  nsel.slice(0, 3).forEach((x, i) => {
+    const y = 3.3 + i * 1.0, nmx = pn[x.id] || x.id;
+    t(s, nmx, { x: X0, y, w: 5.8, h: 0.3, fontSize: 12, bold: true, color: C.blue });
+    t(s, x.point, { x: X0, y: y + 0.32, w: 5.8, h: 0.4, fontSize: 15, bold: true });
+    arrow(s, X0 + 6.0, y + 0.5, 7.2, y + 0.5, C.gray);
+    t(s, answer[nmx] || "", { x: 7.35, y: y + 0.32, w: R - 7.35, h: 0.4, fontSize: 15, color: C.ink });
+    if (i < 2) hline(s, y + 0.88);
+  });
+  t(s, "결과를 맞히려던 게 아니라, 발표 전에 받을 질문을 먼저 받아 본 것입니다.", { x: X0, y: 6.45, w: W, h: 0.35, fontSize: 13, color: C.sub });
+  s.addNotes("[0초] 부록 — 발표하지 않음. 질문이 나오면 띄웁니다.");
 }
 
 // 13. 부록 — 출처(규정 기재 의무)

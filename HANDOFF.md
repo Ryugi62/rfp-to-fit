@@ -5,7 +5,7 @@
 
 ## 상태 (10/1 01:4x)
 - 라이브: 고정 주소 https://ryugi62.github.io/rfp-to-fit/ → 터널 https://invisible-sail-shame-preliminary.trycloudflare.com (iMac `streamlit` :8501 + `cloudflared`). 터널이 죽으면 주소가 바뀐다 → 아래 「복구」.
-- 발표자료: `deliver/deck/RFP-to-Fit_루미아.pdf`·`.pptx`(14장, 7장 = 관점 6개와 심사 방식, 14장은 부록·발표 안 함). 숫자는 data/ JSON과 pytest 수집 결과에서 빌드. 재빌드 `bash deliver/deck/build.sh`.
+- 발표자료: `deliver/deck/RFP-to-Fit_루미아.pdf`·`.pptx`(발표 11장 + 부록 3장: 12 MCP·13 우리 기획서부터·14 출처, 부록은 질문 때만). 숫자는 data/ JSON과 pytest 수집 결과에서 빌드. 재빌드 `bash deliver/deck/build.sh`.
 - 데모 영상: `deliver/demo/RFP-to-Fit_demo.mp4`(95초, 링크 입력 → 채점(실제 71초, 5배속 표기) → 원문 보기 → ✓ 맞음 → 집계).
 - 대본·질의응답 14: `deliver/발표-대본-노트.md`(덱 노트에서 추출 + 4장 라이브 동선).
 - 스펙·테스트: `SPEC.md`(UC 14·AC 18·UI 수용기준 10) · `uv run pytest` 99개 초록.

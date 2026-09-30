@@ -1,0 +1,36 @@
+{
+ "note": "검증 공고 2건은 개발에 쓰지 않았고 링크 입력으로 수집, 정답표는 측정 전 커밋(430ea7d 21:37)으로 고정. 엔진 gpt-4.1.",
+ "blind": {
+  "msit-national-scientist-2026": {
+   "recall": 0.944,
+   "recall_min": 0.9166666666666666,
+   "recall_max": 0.9722222222222222,
+   "criteria": 1.0,
+   "precision": 0.706,
+   "runs": 3
+  },
+  "msit-rising-star-2026": {
+   "recall": 0.775,
+   "recall_min": 0.7567567567567568,
+   "recall_max": 0.7837837837837838,
+   "criteria": 1.0,
+   "precision": 0.729,
+   "runs": 3
+  }
+ },
+ "after_footnote_rule": {
+  "msit-national-scientist-2026": {
+   "recalls": [
+    0.97,
+    0.92
+   ]
+  },
+  "msit-rising-star-2026": {
+   "recalls": [
+    0.89,
+    0.95
+   ]
+  },
+  "note": "놓친 항목 분석(※주석 조건) 후 일반 규칙 1줄 추가 — 검증 공고를 본 뒤의 수정이므로 블라인드 수치와 구분. 개발용 3건 재측정은 OpenAI 크레딧 소진으로 미완."
+ }
+}

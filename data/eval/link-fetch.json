@@ -1,0 +1,150 @@
+{
+ "n": 13,
+ "ok": 13,
+ "rows": [
+  {
+   "label": "NST 공지(HWP 첨부)",
+   "url": "https://www.nst.re.kr/www/selectBbsNttView.do?key=54&bbsNo=1&nttNo=51734",
+   "ok": true,
+   "seconds": 1.4,
+   "attachments": 3,
+   "chosen": [
+    "2026 국가과학기술연구회 국가과학AI연구센터(NAIS) _AI 해커톤 대회 모집 공고.hwp"
+   ],
+   "pages": 3
+  },
+  {
+   "label": "산업통상부 공지(공고문 2개)",
+   "url": "https://www.motir.go.kr/kor/article/ATCL2826a2625/70794/view",
+   "ok": true,
+   "seconds": 7.5,
+   "attachments": 4,
+   "chosen": [
+    "붙임1. 2026년도 「산업집적지경쟁력강화사업(R&D)」 신규과제 지원 공고문 (1).pdf",
+    "붙임1. 2026년도 「산업집적지경쟁력강화사업(R&D)」 신규과제 지원 공고문 (2).pdf"
+   ],
+   "pages": 53
+  },
+  {
+   "label": "우주항공청 공고 PDF 직링크",
+   "url": "https://research.kau.ac.kr/upfile/2026/03/20260318101946-9198.pdf",
+   "ok": true,
+   "seconds": 2.9,
+   "attachments": 0,
+   "chosen": [
+    "20260318101946-9198.pdf"
+   ],
+   "pages": 19
+  },
+  {
+   "label": "과기정통부 사업공고 3186886",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186886",
+   "ok": true,
+   "seconds": 1.5,
+   "attachments": 2,
+   "chosen": [
+    "2026년 4차 국민생활안전 긴급대응연구(2단계) 기술개발 및 실증 신규과제 선정결과 공고.hwpx"
+   ],
+   "pages": 1
+  },
+  {
+   "label": "과기정통부 사업공고 3186885",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186885",
+   "ok": true,
+   "seconds": 1.6,
+   "attachments": 2,
+   "chosen": [
+    "2026년 3차 국민생활안전 긴급대응연구(2단계) 기술개발 및 실증 신규과제 선정결과 공고.hwpx"
+   ],
+   "pages": 1
+  },
+  {
+   "label": "과기정통부 사업공고 3186884",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186884",
+   "ok": true,
+   "seconds": 0.6,
+   "attachments": 2,
+   "chosen": [
+    "2026년도 한-스웨덴 공동연구사업 신규과제 선정결과 공고_최종.hwpx"
+   ],
+   "pages": 1
+  },
+  {
+   "label": "과기정통부 사업공고 3186883",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186883",
+   "ok": true,
+   "seconds": 0.6,
+   "attachments": 2,
+   "chosen": [
+    "2026년도 한-핀란드 공동연구사업 신규과제 선정결과 공고_최종.hwpx"
+   ],
+   "pages": 1
+  },
+  {
+   "label": "과기정통부 사업공고 3186882",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186882",
+   "ok": true,
+   "seconds": 0.9,
+   "attachments": 2,
+   "chosen": [
+    "[공고문] 2026년도 AI 기반 대학 과학기술 혁신사업 신규과제 공모.hwpx"
+   ],
+   "pages": 2
+  },
+  {
+   "label": "과기정통부 사업공고 3186881",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186881",
+   "ok": true,
+   "seconds": 0.6,
+   "attachments": 4,
+   "chosen": [
+    "2026년 4극3특 과학기술혁신지원 연구단 모집 통합 공고문.hwpx"
+   ],
+   "pages": 2
+  },
+  {
+   "label": "과기정통부 사업공고 3186880",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186880",
+   "ok": true,
+   "seconds": 0.7,
+   "attachments": 2,
+   "chosen": [
+    "[공고문] 2026년도 국가과학자지원사업(리더급 국가과학기술자) 공모.hwpx"
+   ],
+   "pages": 4
+  },
+  {
+   "label": "과기정통부 사업공고 3186879",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186879",
+   "ok": true,
+   "seconds": 0.7,
+   "attachments": 4,
+   "chosen": [
+    "(붙임 1) 2026년도 3차 디지털혁신기술국제공동연구사업 신규지원 대상과제 공고문.hwpx"
+   ],
+   "pages": 9
+  },
+  {
+   "label": "과기정통부 사업공고 3186878",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186878",
+   "ok": true,
+   "seconds": 0.8,
+   "attachments": 2,
+   "chosen": [
+    "[공고문] 2026년도 성장단계별 우수 연구소기업(라이징스타∙스타) 지정 신청 공고.hwpx"
+   ],
+   "pages": 4
+  },
+  {
+   "label": "과기정통부 사업공고 3186877",
+   "url": "https://www.msit.go.kr/bbs/view.do?sCode=user&mId=311&mPid=121&bbsSeqNo=100&nttSeqNo=3186877",
+   "ok": true,
+   "seconds": 0.7,
+   "attachments": 2,
+   "chosen": [
+    "2026년도 미래개척융합과학기술개발사업 신규과제 제4차 공모.hwpx"
+   ],
+   "pages": 9
+  }
+ ]
+}

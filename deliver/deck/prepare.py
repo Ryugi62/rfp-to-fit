@@ -192,6 +192,8 @@ def main():
         "extract_file": ext_file,
         "planted": planted,
         "ablation": ablation,
+        "holdout": load("data/eval/holdout-summary.json") if (ROOT / "data/eval/holdout-summary.json").exists() else None,
+        "links": load("data/eval/link-fetch.json") if (ROOT / "data/eval/link-fetch.json").exists() else None,
         "before": before,
         "after": after,
         "git": git_facts(),
